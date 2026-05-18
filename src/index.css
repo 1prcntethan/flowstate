@@ -12,6 +12,8 @@ body {
   --orange-cream: #F3E5D8;
   --pink: #CE6C81;
   --orange-cream-50: #f3e5d885;
+  --body-text: 'Red Hat Text';
+  --head-text: 'Fustat';
 }
 
 * {

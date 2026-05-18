@@ -1,0 +1,13 @@
+/* NavBar.module.css */
+.nav {
+  position: fixed;
+  bottom: -100%;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0 24px;
+  height: 72px;
+  border-bottom: 1px solid var(--orange-cream-50);
+  background: var(--dark-purple);
+  color: var(--orange-cream);
+}
