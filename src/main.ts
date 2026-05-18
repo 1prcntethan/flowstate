@@ -18,6 +18,10 @@ const createWindow = () => {
     },
   });
 
+  mainWindow.webContents.on('will-navigate', (e) => {
+      e.preventDefault()
+    })
+
   // and load the index.html of the app.
   if (MAIN_WINDOW_VITE_DEV_SERVER_URL) {
     mainWindow.loadURL(MAIN_WINDOW_VITE_DEV_SERVER_URL);
@@ -51,10 +55,9 @@ app.on('window-all-closed', () => {
 });
 
 app.on('activate', () => {
-  // On OS X it's common to re-create a window in the app when the
-  // dock icon is clicked and there are no other windows open.
   if (BrowserWindow.getAllWindows().length === 0) {
     createWindow();
+  
   }
 });
 

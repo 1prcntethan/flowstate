@@ -1,4 +1,6 @@
-type Props = { nav: (p: string) => void }
+import type { Page } from '../App'
+
+type Props = { nav: (p: Page) => void }
 
 export default function Dashboard({ nav }: Props) {
   return (
