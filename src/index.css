@@ -1,8 +1,21 @@
 body {
-  font-family:
-    -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial,
-    sans-serif;
-  margin: auto;
-  max-width: 38rem;
-  padding: 2rem;
+  font-family: Verdana;
+  margin: 0px 0px;
+  background-color: var(--dark-purple);
+  color: white;
+  overflow: hidden; /* no scrollbars on a desktop app */
+
+}
+
+:root {
+  --dark-purple: #170B13;
+  --orange-cream: #F3E5D8;
+  --pink: #CE6C81;
+  --orange-cream-50: #f3e5d885;
+}
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
 }
