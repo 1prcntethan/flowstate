@@ -1,8 +1,8 @@
 import NavBarTop from "../components/NavBarTop";
 import NavBarBottom from "../components/NavBarBottom";
-
+import styles from "./Dashboard.module.css";
 import type { Page } from "../App";
-
+import DashboardStatCard from "../components/DashboardStatCard";
 
 type Props = { nav: (p: Page) => void };
 
@@ -11,7 +11,19 @@ export default function Dashboard({ nav }: Props) {
     <>
       <NavBarTop currentCoins={100} streak={5} userName={"Alexis Ma"} />
       <NavBarBottom />
-      <button onClick={() => nav("presession")}>Start session</button>
+      <div className={styles.dashboardContent}>
+        <button
+          className={styles.startSessionButton}
+          onClick={() => nav("presession")}
+        >
+          Start session
+        </button>
+        <div className={styles.dashboardCards}>
+          <DashboardStatCard statName="Focus Percentage" statValue="98%" />
+          <DashboardStatCard statName="Focus Percentage" statValue="98%" />
+          <DashboardStatCard statName="Focus Percentage" statValue="98%" />
+        </div>
+      </div>
     </>
   );
 }
