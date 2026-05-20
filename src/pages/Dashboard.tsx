@@ -8,7 +8,7 @@ type Props = { nav: (p: Page) => void };
 
 export default function Dashboard({ nav }: Props) {
   return (
-    <>
+    <div className={styles.page}>
       <NavBarTop currentCoins={100} streak={5} userName={"Alexis Ma"} />
       <NavBarBottom />
       <div className={styles.dashboardContent}>
@@ -36,6 +36,6 @@ export default function Dashboard({ nav }: Props) {
           </div>
         </div>
       </div>
-    </>
+    </div>
   );
 }
