@@ -64,3 +64,21 @@
     font-family: var(--heading-text);
     letter-spacing: 0.05em;
 }
+
+.socials {
+    display: flex;
+    flex-direction: row;
+    width: 100%;
+    gap: 30px;
+}
+
+.weeklyLeaderboard {
+    display: flex;
+    flex-direction: column;
+    border: 1px solid var(--orange-cream-50);
+    border-radius: 12px;
+    font-family: var(--body-text);
+    color: var(--orange-cream);
+    width: 50%;
+    padding: 20px;
+}

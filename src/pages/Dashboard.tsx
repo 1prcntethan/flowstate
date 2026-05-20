@@ -35,6 +35,27 @@ export default function Dashboard({ nav }: Props) {
             Session 2
           </div>
         </div>
+        <div className={styles.socials}>
+          <div className={styles.weeklyLeaderboard}>
+            <span>
+              Weekly Leaderboard
+            </span>
+            <ol>
+              <li>
+                Friend 1
+              </li>
+              <li>
+                Friend 2
+              </li>
+              <li>
+                Friend 3
+              </li>
+            </ol>
+          </div>
+          <div className={styles.gacha}>
+            Gacha
+          </div>
+        </div>
       </div>
     </div>
   );
