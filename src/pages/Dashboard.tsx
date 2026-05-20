@@ -23,6 +23,18 @@ export default function Dashboard({ nav }: Props) {
           <DashboardStatCard statName="Hours Studied Today" statValue="4 hrs" />
           <DashboardStatCard statName="Today's Earnings" statValue="+200 coins" />
         </div>
+        <div className={styles.monthlyHeatmap}>
+          Monthly Heatmap
+        </div>
+        <div className={styles.recentSessions}>
+          <span>Recent Sessions</span>
+          <div className={styles.sessionItem}>
+            Session 1
+          </div>
+          <div className={styles.sessionItem}>
+            Session 2
+          </div>
+        </div>
       </div>
     </>
   );

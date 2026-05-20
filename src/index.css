@@ -3,8 +3,6 @@ body {
   margin: 0px 0px;
   background-color: var(--dark-purple);
   color: white;
-  overflow: hidden; /* no scrollbars on a desktop app */
-
 }
 
 :root {

@@ -6,21 +6,21 @@
     display: flex;
     flex-direction: column;
     font-family: var(--body-text);
-    font-size: 16px;
+    font-size: 14px;
     padding: 16px 12px 8px 12px;
     color: var(--orange-cream);
-    height: 125px;
+    height: auto;
 }
 
 .statValue {
     font-size: 20px;
     font-family: var(--heading-text);
-    margin-top: 8px;
+    margin-top: 16px;
     letter-spacing: 0.05em;
 }
 
 .divider {
-    margin-top: 14px;
+    margin-top: 16px;
     width: 100%;
     height: 1px;
     background-color: var(--orange-cream-50);
