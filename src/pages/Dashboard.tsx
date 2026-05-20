@@ -21,40 +21,27 @@ export default function Dashboard({ nav }: Props) {
         <div className={styles.dashboardCards}>
           <DashboardStatCard statName="Focus Percentage" statValue="98%" />
           <DashboardStatCard statName="Hours Studied Today" statValue="4 hrs" />
-          <DashboardStatCard statName="Today's Earnings" statValue="+200 coins" />
+          <DashboardStatCard
+            statName="Today's Earnings"
+            statValue="+200 coins"
+          />
         </div>
-        <div className={styles.monthlyHeatmap}>
-          Monthly Heatmap
-        </div>
+        <div className={styles.monthlyHeatmap}>Monthly Heatmap</div>
         <div className={styles.recentSessions}>
           <span>Recent Sessions</span>
-          <div className={styles.sessionItem}>
-            Session 1
-          </div>
-          <div className={styles.sessionItem}>
-            Session 2
-          </div>
+          <div className={styles.sessionItem}>Session 1</div>
+          <div className={styles.sessionItem}>Session 2</div>
         </div>
         <div className={styles.socials}>
           <div className={styles.weeklyLeaderboard}>
-            <span>
-              Weekly Leaderboard
-            </span>
+            <span>Weekly Leaderboard</span>
             <ol>
-              <li>
-                Friend 1
-              </li>
-              <li>
-                Friend 2
-              </li>
-              <li>
-                Friend 3
-              </li>
+              <li>Friend 1</li>
+              <li>Friend 2</li>
+              <li>Friend 3</li>
             </ol>
           </div>
-          <div className={styles.gacha}>
-            Gacha
-          </div>
+          <div className={styles.gacha}>Gacha</div>
         </div>
       </div>
     </div>
