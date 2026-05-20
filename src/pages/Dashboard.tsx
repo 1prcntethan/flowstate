@@ -35,11 +35,13 @@ export default function Dashboard({ nav }: Props) {
         <div className={styles.socials}>
           <div className={styles.weeklyLeaderboard}>
             <span>Weekly Leaderboard</span>
-            <ol>
-              <li>Friend 1</li>
-              <li>Friend 2</li>
-              <li>Friend 3</li>
-            </ol>
+            <div className={styles.leaderboardList}>
+              <ol>
+                <li>Friend 1</li>
+                <li>Friend 2</li>
+                <li>Friend 3</li>
+              </ol>
+            </div>
           </div>
           <div className={styles.gacha}>Gacha</div>
         </div>
