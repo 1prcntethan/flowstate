@@ -64,7 +64,32 @@
     flex-wrap: wrap;
 }
 
-.chip {
+.chipSubject {
+    display: flex;
+    padding: 6px 24px;
+    background-color: var(--dark-purple);
+    border-radius: 24px;
+    border: 1px solid var(--orange-cream-50);
+    color: var(--orange-cream);
+    font-family: var(--body-text);
+    font-size: 16px;
+    cursor: pointer;
+}
+
+.chipSubjectActive {
+    display: flex;
+    padding: 16px 40px;
+    background-color: var(--pink-30);
+    border-radius: 8px;
+    border: 1px solid var(--pink);
+    color: var(--pink);
+    font-family: var(--body-text);
+    font-size: 16px;
+    cursor: pointer;
+}
+
+
+.chipDuration {
     display: flex;
     padding: 16px 40px;
     background-color: var(--dark-purple);
@@ -76,7 +101,7 @@
     cursor: pointer;
 }
 
-.chipActive {
+.chipDurationActive {
     display: flex;
     padding: 16px 40px;
     background-color: var(--pink-30);
