@@ -1,0 +1,89 @@
+.headerSection {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    padding: 40px 40px 20px 40px;
+    border-bottom: 1px solid var(--orange-cream-50)
+}
+
+.cancelButton {
+    display: flex;
+    flex-direction: row;
+    width: auto;
+    border: none;
+    gap: 5px;
+    background-color: var(--dark-purple);
+    cursor: pointer;
+    font-family: var(--body-text);
+    color: var(--orange-cream-50);
+    font-size: 16px;
+    align-items: center;
+    justify-items: center;
+}
+
+.cancelX {
+    width: 18px;
+    height: 18px;
+    justify-self: center;
+    align-self: center;
+    align-items: center;
+    display: flex;
+}
+
+.title {
+    font-family: var(--heading-text);
+    font-size: 26px;
+    letter-spacing: 0.05em;
+    color: var(--orange-cream);
+    gap: 12px
+}
+
+.formSection {
+    display: flex;
+    flex-direction: column;
+    padding: 20px 40px;
+    gap: 20px;
+}
+
+.field {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.fieldTitle {
+    font-family: var(--body-text);
+    color: var(--orange-cream-50);
+    font-size: 16px;
+}
+
+.chips {
+    display: flex;
+    flex-direction: row;
+    gap: 12px;
+    flex-wrap: wrap;
+}
+
+.chip {
+    display: flex;
+    padding: 16px 40px;
+    background-color: var(--dark-purple);
+    border-radius: 8px;
+    border: 1px solid var(--orange-cream-50);
+    color: var(--orange-cream);
+    font-family: var(--body-text);
+    font-size: 16px;
+    cursor: pointer;
+}
+
+.chipActive {
+    display: flex;
+    padding: 16px 40px;
+    background-color: var(--pink-30);
+    border-radius: 8px;
+    border: 1px solid var(--pink);
+    color: var(--pink);
+    font-family: var(--body-text);
+    font-size: 16px;
+    cursor: pointer;
+}
