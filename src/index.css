@@ -8,8 +8,25 @@ body {
 :root {
   --dark-purple: #170B13;
   --orange-cream: #F3E5D8;
+  --orange-cream-10: rgba(243, 229, 216, 0.1);
+  --orange-cream-20: rgba(243, 229, 216, 0.2);
+  --orange-cream-30: rgba(243, 229, 216, 0.3);
+  --orange-cream-40: rgba(243, 229, 216, 0.4);
+  --orange-cream-50: rgba(243, 229, 216, 0.5);
+  --orange-cream-60: rgba(243, 229, 216, 0.6);
+  --orange-cream-70: rgba(243, 229, 216, 0.7);
+  --orange-cream-80: rgba(243, 229, 216, 0.8);
+  --orange-cream-90: rgba(243, 229, 216, 0.9);
   --pink: #CE6C81;
-  --orange-cream-50: #f3e5d885;
+  --pink-10: rgba(207, 110, 131, 0.1);
+  --pink-20: rgba(207, 110, 131, 0.2);
+  --pink-30: rgba(207, 110, 131, 0.3);
+  --pink-40: rgba(207, 110, 131, 0.4);
+  --pink-50: rgba(207, 110, 131, 0.5);
+  --pink-60: rgba(207, 110, 131, 0.6);
+  --pink-70: rgba(207, 110, 131, 0.7);
+  --pink-80: rgba(207, 110, 131, 0.8);
+  --pink-90: rgba(207, 110, 131, 0.9);
   --body-text: 'Red Hat Text';
   --heading-text: 'Fustat';
 }
