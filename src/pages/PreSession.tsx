@@ -33,7 +33,7 @@ export default function PreSession({ nav }: Props) {
             {["Math", "Science", "CS", "English", "History", "Language", "Add+"].map((s) => (
               <button
                 key={s}
-                className={subject === s ? styles.chipActive : styles.chip}
+                className={subject === s ? styles.chipSubjectActive : styles.chipSubject}
                 onClick={() => setSubject(s)}
               >
                 {s}
@@ -47,7 +47,7 @@ export default function PreSession({ nav }: Props) {
             {[25, 45, 60, 90].map((m) => (
               <button
                 key={m}
-                className={duration === m ? styles.chipActive : styles.chip}
+                className={duration === m ? styles.chipDurationActive : styles.chipDuration}
                 onClick={() => setDuration(m)}
               >
                 {m}m
