@@ -1,114 +1,235 @@
 .headerSection {
-    display: flex;
-    flex-direction: column;
-    gap: 12px;
-    padding: 40px 40px 20px 40px;
-    border-bottom: 1px solid var(--orange-cream-50)
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding: 40px 40px 20px 40px;
+  border-bottom: 1px solid var(--orange-cream-50);
 }
 
 .cancelButton {
-    display: flex;
-    flex-direction: row;
-    width: auto;
-    border: none;
-    gap: 5px;
-    background-color: var(--dark-purple);
-    cursor: pointer;
-    font-family: var(--body-text);
-    color: var(--orange-cream-50);
-    font-size: 16px;
-    align-items: center;
-    justify-items: center;
+  display: flex;
+  flex-direction: row;
+  width: auto;
+  border: none;
+  gap: 5px;
+  background-color: var(--dark-purple);
+  cursor: pointer;
+  font-family: var(--body-text);
+  color: var(--orange-cream-50);
+  font-size: 16px;
+  align-items: center;
+  justify-items: center;
 }
 
 .cancelX {
-    width: 18px;
-    height: 18px;
-    justify-self: center;
-    align-self: center;
-    align-items: center;
-    display: flex;
+  width: 18px;
+  height: 18px;
+  justify-self: center;
+  align-self: center;
+  align-items: center;
+  display: flex;
 }
 
 .title {
-    font-family: var(--heading-text);
-    font-size: 26px;
-    letter-spacing: 0.05em;
-    color: var(--orange-cream);
-    gap: 12px
+  font-family: var(--heading-text);
+  font-size: 26px;
+  letter-spacing: 0.05em;
+  color: var(--orange-cream);
+  gap: 12px;
 }
 
 .formSection {
-    display: flex;
-    flex-direction: column;
-    padding: 20px 40px;
-    gap: 20px;
+  display: flex;
+  flex-direction: column;
+  padding: 20px 40px;
+  gap: 20px;
 }
 
 .field {
-    display: flex;
-    flex-direction: column;
-    gap: 8px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
 }
 
 .fieldTitle {
-    font-family: var(--body-text);
-    color: var(--orange-cream-50);
-    font-size: 16px;
+  font-family: var(--body-text);
+  color: var(--orange-cream-50);
+  font-size: 16px;
 }
 
 .chips {
-    display: flex;
-    flex-direction: row;
-    gap: 12px;
-    flex-wrap: wrap;
+  display: flex;
+  flex-direction: row;
+  gap: 12px;
+  flex-wrap: wrap;
 }
 
 .chipSubject {
-    display: flex;
-    padding: 6px 24px;
-    background-color: var(--dark-purple);
-    border-radius: 24px;
-    border: 1px solid var(--orange-cream-50);
-    color: var(--orange-cream);
-    font-family: var(--body-text);
-    font-size: 16px;
-    cursor: pointer;
+  display: flex;
+  padding: 6px 24px;
+  background-color: var(--dark-purple);
+  border-radius: 24px;
+  border: 1px solid var(--orange-cream-50);
+  color: var(--orange-cream);
+  font-family: var(--body-text);
+  font-size: 16px;
+  cursor: pointer;
 }
 
 .chipSubjectActive {
-    display: flex;
-    padding: 16px 40px;
-    background-color: var(--pink-30);
-    border-radius: 8px;
-    border: 1px solid var(--pink);
-    color: var(--pink);
-    font-family: var(--body-text);
-    font-size: 16px;
-    cursor: pointer;
+  display: flex;
+  padding: 16px 40px;
+  background-color: var(--pink-30);
+  border-radius: 8px;
+  border: 1px solid var(--pink);
+  color: var(--pink);
+  font-family: var(--body-text);
+  font-size: 16px;
+  cursor: pointer;
 }
 
-
 .chipDuration {
-    display: flex;
-    padding: 16px 40px;
-    background-color: var(--dark-purple);
-    border-radius: 8px;
-    border: 1px solid var(--orange-cream-50);
-    color: var(--orange-cream);
-    font-family: var(--body-text);
-    font-size: 16px;
-    cursor: pointer;
+  display: flex;
+  padding: 16px 40px;
+  background-color: var(--dark-purple);
+  border-radius: 8px;
+  border: 1px solid var(--orange-cream-50);
+  color: var(--orange-cream);
+  font-family: var(--body-text);
+  font-size: 16px;
+  cursor: pointer;
 }
 
 .chipDurationActive {
+  display: flex;
+  padding: 16px 40px;
+  background-color: var(--pink-30);
+  border-radius: 8px;
+  border: 1px solid var(--pink);
+  color: var(--pink);
+  font-family: var(--body-text);
+  font-size: 16px;
+  cursor: pointer;
+}
+
+.chipBreak {
+  display: flex;
+  flex-direction: column;
+  padding: 16px 20px;
+  background-color: var(--dark-purple);
+  border-radius: 8px;
+  border: 1px solid var(--orange-cream-50);
+  color: var(--orange-cream);
+  font-family: var(--body-text);
+  font-size: 16px;
+  cursor: pointer;
+  text-align: left;
+  width: calc(50% - 6px)
+}
+
+.chipBreakActive {
+  display: flex;
+  flex-direction: column;
+  padding: 16px 20px;
+  background-color: var(--pink-30);
+  border-radius: 8px;
+  border: 1px solid var(--pink);
+  color: var(--pink);
+  font-family: var(--body-text);
+  font-size: 16px;
+  cursor: pointer;
+  text-align: left;
+  width: calc(50% - 6px);
+}
+
+.breakTitle {
+  font-weight: bold;
+  font-family: var(--body-text);
+  font-size: 18px;
+  margin-bottom: 10px;
+}
+
+.breakText {
+    color: var(--orange-cream-50);
+}
+
+.todoInput {
     display: flex;
-    padding: 16px 40px;
-    background-color: var(--pink-30);
-    border-radius: 8px;
-    border: 1px solid var(--pink);
-    color: var(--pink);
+    flex-direction: row;
+    border: none;
+    height: 40px;
+    padding: 0;
+    background-color: transparent;
+    color: var(--orange-cream);
+    font-family: var(--body-text);
+    font-size: 16px; 
+    gap: 10px;
+}
+
+.todoInput > input {
+    flex: 1;
+    border: none;
+    padding: 6px 12px;
+    background-color: var(--orange-cream-10);
+    color: var(--orange-cream);
     font-family: var(--body-text);
     font-size: 16px;
-    cursor: pointer;
+    border-radius: 8px;   
 }
+
+.todoInput > button {
+    flex: 0;
+    border: none;
+    padding: 12px;
+    background-color: var(--orange-cream-10);
+    color: var(--orange-cream);
+    font-family: var(--body-text);
+    font-size: 16px;
+    border-radius: 8px;   
+}
+
+.todoInput > input::placeholder {
+    color: var(--orange-cream-70);
+}
+
+.todoItem {
+    display: flex;
+    border: 1px solid var(--orange-cream-50);
+    padding: 0;
+    border-radius: 8px;
+    color: var(--orange-cream-50);
+    font-family: var(--body-text);
+    font-size: 16px;
+    height: 40px;
+    align-items: center;
+}
+
+.todoItem > span {
+    padding: 6px 12px;
+    color: var(--orange-cream-50);
+    font-family: var(--body-text);
+    font-size: 16px;
+    flex: 1;
+    display: flex;
+}
+
+.todoItem > button {
+    border: none;
+    padding: 12px;
+    background-color: transparent;
+    color: var(--orange-cream-50);
+    font-family: var(--body-text);
+    font-size: 18px;
+    height: 32px;
+    width: 32px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    margin-right: 3px;
+    border-radius: 8px;
+}
+
+.todoItem > button:hover {
+    background-color: var(--orange-cream-10);
+} 
