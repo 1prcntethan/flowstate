@@ -44,7 +44,7 @@ export default function PreSession({ nav }: Props) {
         <div className={styles.field}>
           <label className={styles.fieldTitle}>DURATION</label>
           <div className={styles.chips}>
-            {[25, 45, 60, 90].map((m) => (
+            {[20, 30, 45, 60, 90].map((m) => (
               <button
                 key={m}
                 className={duration === m ? styles.chipDurationActive : styles.chipDuration}
@@ -56,8 +56,8 @@ export default function PreSession({ nav }: Props) {
           </div>
         </div>
         <div className={styles.field}>
-          <label className={styles.fieldTitle}>Break style</label>
-          <div className={styles.chips}>
+          <label className={styles.fieldTitle}>BREAK STYLE</label>
+          <div className={styles.chipsBreak}>
             <button
               className={breakMode === 'pomodoro' ? styles.chipActive : styles.chip}
               onClick={() => setBreakMode('pomodoro')}
