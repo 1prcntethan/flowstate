@@ -99,7 +99,7 @@ export default function PreSession({ nav, onStart }: Props) {
     todos.length > 0;
 
   return (
-    <div>
+    <div className="page">
       <div className={styles.headerSection}>
         <button
           className={styles.cancelButton}
@@ -262,7 +262,7 @@ export default function PreSession({ nav, onStart }: Props) {
         <div className={styles.field}>
           <div className={styles.toggleRow}>
             <div className={styles.toggleLeft}>
-              <img src="Eye.svg"/>
+              <img className={styles.trackingEye} src="TrackingEye.svg"/>
               <div className={styles.toggleText}>
                 <span className={styles.toggleTitle}>Track my screen</span>
                 <span className={styles.toggleDesc}>Focus tracking + full points?????</span>

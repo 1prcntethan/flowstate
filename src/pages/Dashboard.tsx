@@ -4,11 +4,12 @@ import styles from "./Dashboard.module.css";
 import type { Page } from "../App";
 import DashboardStatCard from "../components/DashboardStatCard";
 
+
 type Props = { nav: (p: Page) => void };
 
 export default function Dashboard({ nav }: Props) {
   return (
-    <div className={styles.page}>
+    <div className="page">
       <NavBarTop currentCoins={100} streak={5} userName={"Alexis Ma"} />
       <NavBarBottom />
       <div className={styles.dashboardContent}>

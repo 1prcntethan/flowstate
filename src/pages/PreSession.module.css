@@ -9,7 +9,7 @@
 .cancelButton {
   display: flex;
   flex-direction: row;
-  width: auto;
+  width: fit-content;
   border: none;
   gap: 5px;
   background-color: var(--dark-purple);
@@ -208,9 +208,7 @@
 }
 
 .todoInput > button {
-    flex: 0;
     border: none;
-    padding: 12px;
     background-color: transparent;
     color: var(--orange-cream);
     font-family: var(--body-text);
@@ -218,6 +216,17 @@
     border: 1px solid var(--orange-cream-50);
     border-radius: 8px;   
     cursor: pointer;
+    padding: 11px;
+    align-items: center;
+    justify-content: center;
+    width: 40px;
+    height: 40px;
+  }
+
+.todoInput > button > img {
+  align-self: center;
+  margin-bottom: 1px;
+  margin-right: 1px;
 }
 
 .todoInput > input::placeholder {
@@ -227,7 +236,7 @@
 .todoItem {
     display: flex;
     border: 1px solid var(--orange-cream-50);
-    padding: 12px;
+    padding: 12px 0 12px 12px;
     gap: 10px;
     border-radius: 8px;
     color: var(--orange-cream-50);
@@ -260,7 +269,7 @@
     justify-content: center;
     cursor: pointer;
     margin-right: 3px; 
-    border-radius: 8px;
+    border-radius: 16px;
 }
 
 .todoItem > button:hover {
@@ -300,6 +309,8 @@
 
 .toggleDesc {
   font-size: 16px;
+  color: var(--orange-cream-50);
+
 }
 
 
@@ -365,4 +376,8 @@
     background-color: var(--pink-30);
     color: var(--pink-50);
     cursor: not-allowed;
+}
+
+.trackingEye {
+  width: 32px;
 }
