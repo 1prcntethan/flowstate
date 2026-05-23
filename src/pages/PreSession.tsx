@@ -93,7 +93,10 @@ export default function PreSession({ nav, onStart }: Props) {
     nav("session");
   };
 
-  const canStart = subject !== "" && getFinalDuration() > 0;
+  const canStart =
+    subject !== "" &&
+    getFinalDuration() > 0 &&
+    todos.length > 0;
 
   return (
     <div>
