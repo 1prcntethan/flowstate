@@ -73,16 +73,16 @@
   color: var(--orange-cream);
   font-family: var(--body-text);
   font-size: 16px;
-  cursor: pointer;
+  cursor: pointer; 
 }
 
 .chipSubjectActive {
   display: flex;
-  padding: 16px 40px;
+  padding: 6px 24px;
   background-color: var(--pink-30);
-  border-radius: 8px;
+  border-radius: 24px;
   border: 1px solid var(--pink);
-  color: var(--pink);
+  color: var(--pink); 
   font-family: var(--body-text);
   font-size: 16px;
   cursor: pointer;
@@ -174,7 +174,8 @@
     color: var(--orange-cream);
     font-family: var(--body-text);
     font-size: 16px;
-    border-radius: 8px;   
+    border-radius: 8px;
+    border: 1px solid var(--orange-cream);
 }
 
 .todoInput > button {
@@ -195,7 +196,8 @@
 .todoItem {
     display: flex;
     border: 1px solid var(--orange-cream-50);
-    padding: 0;
+    padding: 12px;
+    gap: 10px;
     border-radius: 8px;
     color: var(--orange-cream-50);
     font-family: var(--body-text);
@@ -226,10 +228,10 @@
     align-items: center;
     justify-content: center;
     cursor: pointer;
-    margin-right: 3px;
+    margin-right: 3px; 
     border-radius: 8px;
 }
 
 .todoItem > button:hover {
     background-color: var(--orange-cream-10);
-} 
+}

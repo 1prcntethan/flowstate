@@ -1,30 +1,99 @@
-import { useState } from "react";
+import { useState, useRef } from "react";
 import { SessionConfig, TodoItem, BreakMode } from "../types";
 import type { Page } from "../App";
 import styles from "./PreSession.module.css";
 
-type Props = { nav: (p: Page) => void };
+type Props = {
+  nav: (p: Page) => void;
+  onStart: (config: SessionConfig) => void;
+};
 
-export default function PreSession({ nav }: Props) {
-  const [duration, setDuration] = useState("");
-  const [subject, setSubject] = useState(45);
+const DEFAULT_SUBJECTS = [
+  "Math",
+  "Science",
+  "CS",
+  "English",
+  "History",
+  "Language",
+];
+
+export default function PreSession({ nav, onStart }: Props) {
+  const [subject, setSubject] = useState("");
+  const [subjects, setSubjects] = useState<string[]>(DEFAULT_SUBJECTS);
+  const [showSubjectInput, setShowSubjectInput] = useState(false);
+  const [subjectInput, setSubjectInput] = useState("");
+
+  const [duration, setDuration] = useState<number | null>(null);
+  const [customDuration, setCustomDuration] = useState("");
+  const [showCustomDuration, setShowCustomDuration] = useState(false);
+
   const [breakMode, setBreakMode] = useState<BreakMode>("manual");
   const [todos, setTodos] = useState<TodoItem[]>([]);
   const [todoInput, setTodoInput] = useState("");
+  const [trackingEnabled, setTracking] = useState(true);
 
-  console.log("selected duration: ", duration, "selected subject", subject);
-  console.log("break type: ", breakMode);
-  console.log("todos: ", todos);
+  // drag state
+  const dragItem = useRef<number | null>(null);
+  const dragOverItem = useRef<number | null>(null);
 
+  // --- subject ---
+  const addSubject = () => {
+    const trimmed = subjectInput.trim();
+    if (!trimmed || subjects.includes(trimmed)) return;
+    setSubjects([...subjects, trimmed]);
+    setSubject(trimmed);
+    setSubjectInput("");
+    setShowSubjectInput(false);
+  };
+
+  // --- todos ---
   const addTodo = () => {
-    if (!todoInput.trim()) return
-    setTodos([...todos, { id: Date.now().toString(), text: todoInput.trim(), completed: false }])
-    setTodoInput('')
-  }
+    if (!todoInput.trim()) return;
+    setTodos([
+      ...todos,
+      { id: Date.now().toString(), text: todoInput.trim(), completed: false },
+    ]);
+    setTodoInput("");
+  };
 
-  const removeTodo = (id: string) => {
-    setTodos(todos.filter(t => t.id !== id))
-  }
+  const removeTodo = (id: string) => setTodos(todos.filter((t) => t.id !== id));
+
+  // drag and drop
+  const handleDragStart = (index: number) => {
+    dragItem.current = index;
+  };
+  const handleDragEnter = (index: number) => {
+    dragOverItem.current = index;
+  };
+  const handleDragEnd = () => {
+    if (dragItem.current === null || dragOverItem.current === null) return;
+    const updated = [...todos];
+    const dragged = updated.splice(dragItem.current, 1)[0];
+    updated.splice(dragOverItem.current, 0, dragged);
+    setTodos(updated);
+    dragItem.current = null;
+    dragOverItem.current = null;
+  };
+
+  // --- start ---
+  const getFinalDuration = (): number => {
+    if (showCustomDuration) return parseInt(customDuration) || 0;
+    return duration ?? 0;
+  };
+
+  const handleStart = () => {
+    const config: SessionConfig = {
+      subject,
+      durationMinutes: getFinalDuration(),
+      breakMode,
+      todos,
+      trackingEnabled,
+    };
+    onStart(config);
+    nav("session");
+  };
+
+  const canStart = subject !== "" && getFinalDuration() > 0;
 
   return (
     <div>
@@ -38,19 +107,13 @@ export default function PreSession({ nav }: Props) {
         </button>
         <span className={styles.title}>New Session</span>
       </div>
+
       <div className={styles.formSection}>
+        {/* SUBJECT */}
         <div className={styles.field}>
           <label className={styles.fieldTitle}>SUBJECT</label>
           <div className={styles.chips}>
-            {[
-              "Math",
-              "Science",
-              "CS",
-              "English",
-              "History",
-              "Language",
-              "Add+",
-            ].map((s) => (
+            {subjects.map((s) => (
               <button
                 key={s}
                 className={
@@ -61,8 +124,29 @@ export default function PreSession({ nav }: Props) {
                 {s}
               </button>
             ))}
+            <button
+              className={styles.chipSubject}
+              onClick={() => setShowSubjectInput(!showSubjectInput)}
+            >
+              <img src="/AddTaskPlus.svg" alt="+" />
+            </button>
           </div>
+          {showSubjectInput && (
+            <div className={styles.todoInput}>
+              <input
+                autoFocus
+                type="text"
+                placeholder="Subject name..."
+                value={subjectInput}
+                onChange={(e) => setSubjectInput(e.target.value)}
+                onKeyDown={(e) => e.key === "Enter" && addSubject()}
+              />
+              <button onClick={addSubject}>Add</button>
+            </div>
+          )}
         </div>
+
+        {/* DURATION */}
         <div className={styles.field}>
           <label className={styles.fieldTitle}>DURATION</label>
           <div className={styles.chips}>
@@ -70,44 +154,72 @@ export default function PreSession({ nav }: Props) {
               <button
                 key={m}
                 className={
-                  duration === m
+                  duration === m && !showCustomDuration
                     ? styles.chipDurationActive
                     : styles.chipDuration
                 }
-                onClick={() => setDuration(m)}
+                onClick={() => {
+                  setDuration(m);
+                  setShowCustomDuration(false);
+                }}
               >
                 {m}m
               </button>
             ))}
+            <button
+              className={
+                showCustomDuration
+                  ? styles.chipDurationActive
+                  : styles.chipDuration
+              }
+              onClick={() => {
+                setShowCustomDuration(true);
+                setDuration(null);
+              }}
+            >
+              Custom
+            </button>
           </div>
+          {showCustomDuration && (
+            <input
+              autoFocus
+              type="number"
+              placeholder="Minutes..."
+              value={customDuration}
+              onChange={(e) => setCustomDuration(e.target.value)}
+              className={styles.customDurationInput}
+              min={1}
+              max={480}
+            />
+          )}
         </div>
+
+        {/* BREAK STYLE */}
         <div className={styles.field}>
           <label className={styles.fieldTitle}>BREAK STYLE</label>
           <div className={styles.chips}>
-            <button
-              className={
-                breakMode === "pomodoro"
-                  ? styles.chipBreakActive
-                  : styles.chipBreak
-              }
-              onClick={() => setBreakMode("pomodoro")}
-            >
-              <span className={styles.breakTitle}>Pomodoro</span>
-              <span className={styles.breakText}>Auto-break every 25 minutes</span>
-            </button>
-            <button
-              className={
-                breakMode === "manual"
-                  ? styles.chipBreakActive
-                  : styles.chipBreak
-              }
-              onClick={() => setBreakMode("manual")}
-            >
-              <span className={styles.breakTitle}>Manual</span>
-              <span className={styles.breakText}>Take breaks as needed</span>
-            </button>
+            {(["pomodoro", "manual"] as BreakMode[]).map((mode) => (
+              <button
+                key={mode}
+                className={
+                  breakMode === mode ? styles.chipBreakActive : styles.chipBreak
+                }
+                onClick={() => setBreakMode(mode)}
+              >
+                <span className={styles.breakTitle}>
+                  {mode === "pomodoro" ? "Pomodoro" : "Manual"}
+                </span>
+                <span className={styles.breakText}>
+                  {mode === "pomodoro"
+                    ? "Auto-break every 25 minutes"
+                    : "Take breaks as needed"}
+                </span>
+              </button>
+            ))}
           </div>
         </div>
+
+        {/* TODO LIST */}
         <div className={styles.field}>
           <label className={styles.fieldTitle}>TODO LIST</label>
           <div className={styles.todoInput}>
@@ -122,13 +234,47 @@ export default function PreSession({ nav }: Props) {
               <img src="/AddTaskPlus.svg" alt="+" />
             </button>
           </div>
-          {todos.map((t) => (
-            <div key={t.id} className={styles.todoItem}>
+          {todos.map((t, index) => (
+            <div
+              key={t.id}
+              className={styles.todoItem}
+              draggable
+              onDragStart={() => handleDragStart(index)}
+              onDragEnter={() => handleDragEnter(index)}
+              onDragEnd={handleDragEnd}
+              onDragOver={(e) => e.preventDefault()}
+            >
+              <img
+                src="/MoveSelector.svg"
+                alt="drag"
+                style={{ cursor: "grab" }}
+              />
               <span>{t.text}</span>
               <button onClick={() => removeTodo(t.id)}>×</button>
             </div>
           ))}
         </div>
+
+        {/* TRACKING */}
+        <div className={styles.field}>
+          <label>
+            <input
+              type="checkbox"
+              checked={trackingEnabled}
+              onChange={(e) => setTracking(e.target.checked)}
+            />{" "}
+            Track my screen this session
+          </label>
+        </div>
+
+        {/* START */}
+        <button
+          className={styles.startButton}
+          onClick={handleStart}
+          disabled={!canStart}
+        >
+          Start focusing →
+        </button>
       </div>
     </div>
   );
