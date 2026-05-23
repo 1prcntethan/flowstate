@@ -125,10 +125,10 @@ export default function PreSession({ nav, onStart }: Props) {
               </button>
             ))}
             <button
-              className={styles.chipSubject}
+              className={styles.chipSubjectAdd}
               onClick={() => setShowSubjectInput(!showSubjectInput)}
             >
-              <img src="/AddTaskPlus.svg" alt="+" />
+              <img src="/AddSubjectPlus.svg" alt="+" />
             </button>
           </div>
           {showSubjectInput && (
@@ -177,7 +177,7 @@ export default function PreSession({ nav, onStart }: Props) {
                 setDuration(null);
               }}
             >
-              Custom
+              custom
             </button>
           </div>
           {showCustomDuration && (
@@ -257,14 +257,23 @@ export default function PreSession({ nav, onStart }: Props) {
 
         {/* TRACKING */}
         <div className={styles.field}>
-          <label>
-            <input
-              type="checkbox"
-              checked={trackingEnabled}
-              onChange={(e) => setTracking(e.target.checked)}
-            />{" "}
-            Track my screen this session
-          </label>
+          <div className={styles.toggleRow}>
+            <div className={styles.toggleLeft}>
+              <img src="Eye.svg"/>
+              <div className={styles.toggleText}>
+                <span className={styles.toggleTitle}>Track my screen</span>
+                <span className={styles.toggleDesc}>Focus tracking + full points?????</span>
+              </div>
+            </div>
+            <label className={styles.toggle}>
+              <input
+                type="checkbox"
+                checked={trackingEnabled}
+                onChange={(e) => setTracking(e.target.checked)}
+              />
+              <span className={styles.slider} />
+            </label>
+          </div>
         </div>
 
         {/* START */}
