@@ -126,6 +126,21 @@
   cursor: pointer;
 }
 
+.customDurationInput {
+  height: 40px;
+  padding: 6px 12px;
+  background-color: var(--orange-cream-10);
+  color: var(--orange-cream);
+  font-family: var(--body-text);
+  font-size: 16px;
+  border-radius: 8px;
+  border: 1px solid var(--orange-cream-70);
+}
+
+.customDurationInput::placeholder {
+    color: var(--orange-cream-70);
+}
+
 .chipBreak {
   display: flex;
   flex-direction: column;
@@ -189,18 +204,20 @@
     font-family: var(--body-text);
     font-size: 16px;
     border-radius: 8px;
-    border: 1px solid var(--orange-cream);
+    border: 1px solid var(--orange-cream-70);
 }
 
 .todoInput > button {
     flex: 0;
     border: none;
     padding: 12px;
-    background-color: var(--orange-cream-10);
+    background-color: transparent;
     color: var(--orange-cream);
     font-family: var(--body-text);
     font-size: 16px;
+    border: 1px solid var(--orange-cream-50);
     border-radius: 8px;   
+    cursor: pointer;
 }
 
 .todoInput > input::placeholder {
@@ -328,4 +345,24 @@
 
 .toggle input:checked + .slider::before {
   transform: translateX(20px);
+}
+
+.startButton {
+    background-color: var(--pink);
+    color: white;
+    border: none;
+    border-radius: 12px;
+    height: 60px;
+    width: 100%;
+    font-size: 24px;
+    font-family: var(--heading-text);
+    letter-spacing: 0.05em;
+    font-weight: bold;
+    cursor: pointer;
+}
+
+.startButton:disabled {
+    background-color: var(--pink-30);
+    color: var(--pink-50);
+    cursor: not-allowed;
 }
