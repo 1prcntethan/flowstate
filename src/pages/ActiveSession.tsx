@@ -10,7 +10,7 @@ type Props = {
 
 export default function ActiveSession({ nav, config }: Props) {
   return (
-    <div className={styles.page}>
+    <div className="page">
       <h1>Session active</h1>
 
       <div className={styles.debugCard}>
@@ -36,7 +36,7 @@ export default function ActiveSession({ nav, config }: Props) {
         </ul>
       </div>
 
-      <button onClick={() => nav("sessionend")}>End session (test)</button>
+      <button onClick={() => nav("dashboard")}>End session (test)</button>
     </div>
   );
 }
