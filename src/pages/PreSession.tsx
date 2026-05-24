@@ -18,7 +18,7 @@ const DEFAULT_SUBJECTS = [
 ];
 
 export default function PreSession({ nav, onStart }: Props) {
-  const [subject, setSubject] = useState("");
+  const [selectedSubjects, setSelectedSubjects] = useState<string[]>([]);
   const [subjects, setSubjects] = useState<string[]>(DEFAULT_SUBJECTS);
   const [showSubjectInput, setShowSubjectInput] = useState(false);
   const [subjectInput, setSubjectInput] = useState("");
@@ -41,10 +41,16 @@ export default function PreSession({ nav, onStart }: Props) {
     const trimmed = subjectInput.trim();
     if (!trimmed || subjects.includes(trimmed)) return;
     setSubjects([...subjects, trimmed]);
-    setSubject(trimmed);
+    setSelectedSubjects(prev => [...prev, trimmed]);
     setSubjectInput("");
     setShowSubjectInput(false);
   };
+
+  const toggleSubject = (s: string) => {
+    setSelectedSubjects(prev =>
+      prev.includes(s) ? prev.filter(x => x !== s) : [...prev, s]
+    );
+  }
 
   // --- todos ---
   const addTodo = () => {
@@ -83,7 +89,7 @@ export default function PreSession({ nav, onStart }: Props) {
 
   const handleStart = () => {
     const config: SessionConfig = {
-      subject,
+      subject: selectedSubjects.join(", "),
       durationMinutes: getFinalDuration(),
       breakMode,
       todos,
@@ -94,7 +100,7 @@ export default function PreSession({ nav, onStart }: Props) {
   };
 
   const canStart =
-    subject !== "" &&
+    selectedSubjects.length > 0 &&
     getFinalDuration() > 0 &&
     todos.length > 0;
 
@@ -120,9 +126,9 @@ export default function PreSession({ nav, onStart }: Props) {
               <button
                 key={s}
                 className={
-                  subject === s ? styles.chipSubjectActive : styles.chipSubject
+                  selectedSubjects.includes(s) ? styles.chipSubjectActive : styles.chipSubject
                 }
-                onClick={() => setSubject(s)}
+                onClick={() => toggleSubject(s)}
               >
                 {s}
               </button>
