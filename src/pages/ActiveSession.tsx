@@ -41,16 +41,24 @@ export default function ActiveSession({ nav, config }: Props) {
   const [todos, setTodos] = useState(config.todos);
   const [trackingPaused, setTrackingPaused] = useState(false);
   const [onBreak, setOnBreak] = useState(false);
+  const [scrolled, setScrolled] = useState(false);
+  const scrollRef = useRef<HTMLDivElement>(null);
 
-  // Mock captures — will be replaced with real classifier output
   const [captures, setCaptures] = useState<CaptureEntry[]>([
     { id: "1", label: "on_task", text: `${config.subject} PDF: Chapter 5` },
     { id: "2", label: "on_task", text: `${config.subject} PDF: Chapter 5` },
     { id: "3", label: "off_task", text: "YouTube video feed" },
     { id: "4", label: "on_task", text: `${config.subject} PDF: Chapter 5` },
+    { id: "5", label: "on_task", text: `${config.subject} PDF: Chapter 5` },
+    { id: "6", label: "on_task", text: `${config.subject} PDF: Chapter 5` },
+    { id: "7", label: "on_task", text: `${config.subject} PDF: Chapter 5` },
+    { id: "8", label: "on_task", text: `${config.subject} PDF: Chapter 5` },
+    { id: "9", label: "off_task", text: "YouTube video feed" },
+    { id: "10", label: "on_task", text: `${config.subject} PDF: Chapter 5` },
+    { id: "11", label: "on_task", text: `${config.subject} PDF: Chapter 5` },
+    { id: "12", label: "off_task", text: "YouTube video feed" },
   ]);
 
-  // Countdown timer
   useEffect(() => {
     if (onBreak) return;
     if (timeLeft <= 0) {
@@ -60,6 +68,11 @@ export default function ActiveSession({ nav, config }: Props) {
     const tick = setInterval(() => setTimeLeft((t) => t - 1), 1000);
     return () => clearInterval(tick);
   }, [timeLeft, onBreak]);
+
+  const handleScroll = () => {
+    if (!scrollRef.current) return;
+    setScrolled(scrollRef.current.scrollTop > 100);
+  };
 
   // Focus score derived from captures
   const onTaskCount = captures.filter(
@@ -95,7 +108,16 @@ export default function ActiveSession({ nav, config }: Props) {
   return (
     <div className="page">
       <div className={styles.header}>
-        <img src="/logo512.svg" className={styles.pageLogo} />
+        <div className={styles.headerLeft}>
+          <img src="/logo512.svg" className={styles.pageLogo} />
+          {/* Badge slides in when collapsed */}
+          <div
+            className={`${styles.headerBadge} ${scrolled ? styles.headerBadgeVisible : ""} ${isOnTask ? styles.statusOn : styles.statusOff}`}
+          >
+            <span className={styles.statusDot} />
+            {isOnTask ? "On task" : "Off task"}
+          </div>
+        </div>
         <div className={styles.headerButtons}>
           <button
             className={`${styles.headerBtn} ${trackingPaused ? styles.headerBtnActive : ""}`}
@@ -103,102 +125,150 @@ export default function ActiveSession({ nav, config }: Props) {
           >
             {trackingPaused ? "Resume tracking" : "Pause tracking"}
           </button>
-          <button className={styles.headerBtn} onClick={() => {}}>
-            Mini mode
-          </button>
+          <button className={styles.headerBtn}>Mini mode</button>
         </div>
       </div>
 
-      {/* ── Timer ── */}
-      <div className={styles.timerSection}>
-        <span className={styles.timerDisplay}>{formatTime(timeLeft)}</span>
-        <span className={styles.timerLabel}>
-          {onBreak ? "on break" : "remaining"}
-        </span>
+      {/* ── Scrollable content ── */}
+      <div
+        ref={scrollRef}
+        onScroll={handleScroll}
+        className={styles.scrollContent}
+      >
+        {/* Timer block — collapses + sticks on scroll */}
         <div
-          className={`${styles.statusBadge} ${
-            isOnTask ? styles.statusOn : styles.statusOff
-          }`}
+          className={`${styles.timerBlock} ${scrolled ? styles.timerBlockCollapsed : ""}`}
         >
-          <span className={styles.statusDot} />
-          {isOnTask ? "On task" : "Off task"}
-        </div>
-        <span className={styles.sessionSubtitle}>
-          Studying {config.subject || "—"} ·{" "}
-          <span className={styles.pointsEarned}>+{pointsEarned} points</span>
-        </span>
-      </div>
-
-      {/* ── Focus bar ── */}
-      <div className={styles.focusBarSection}>
-        <div className={styles.focusBarMeta}>
-          <span className={styles.focusLabel}>Focus score</span>
-          <span
-            className={styles.gradeLabel}
-            style={{ color: getGradeColor(grade) }}
-          >
-            {curvedScore >= 85 ? `On track for ${grade}` : `Grade: ${grade}`}
-          </span>
-        </div>
-        <div className={styles.focusBarTrack}>
+          {/* Row: timer + (inline bar when collapsed) */}
           <div
-            className={styles.focusBarFill}
-            style={{ width: `${curvedScore}%` }}
-          />
-        </div>
-        <div className={styles.focusBarTicks}>
-          <span>0%</span>
-          <span>50%</span>
-          <span>100%</span>
-        </div>
-      </div>
-
-      {/* ── Tasks + Captures ── */}
-      <div className={styles.columns}>
-        {/* Tasks */}
-        <div className={styles.column}>
-          <span className={styles.columnTitle}>TASKS</span>
-          {todos.map((t) => (
-            <button
-              key={t.id}
-              className={`${styles.taskItem} ${t.completed ? styles.taskDone : ""}`}
-              onClick={() => toggleTodo(t.id)}
+            className={`${styles.timerRow} ${scrolled ? styles.timerRowCollapsed : ""}`}
+          >
+            <span
+              className={`${styles.timerDisplay} ${scrolled ? styles.timerDisplayCollapsed : ""}`}
             >
-              <span
-                className={`${styles.taskCircle} ${
-                  t.completed ? styles.taskCircleDone : ""
-                }`}
-              />
-              <span className={styles.taskText}>{t.text}</span>
-            </button>
-          ))}
-        </div>
-
-        {/* Captures */}
-        <div className={styles.column}>
-          <span className={styles.columnTitle}>CAPTURES</span>
-          {captures.length === 0 && (
-            <span className={styles.emptyState}>No captures yet</span>
-          )}
-          {[...captures].reverse().map((c) => (
+              {formatTime(timeLeft)}
+            </span>
+            {/* Inline bar — only visible when collapsed */}
             <div
-              key={c.id}
-              className={`${styles.captureItem} ${
-                c.label === "off_task" ? styles.captureOff : styles.captureOn
-              }`}
+              className={`${styles.inlineBar} ${scrolled ? styles.inlineBarVisible : ""}`}
             >
-              <span
-                className={`${styles.captureDot} ${
-                  c.label === "off_task"
-                    ? styles.captureDotOff
-                    : styles.captureDotOn
-                }`}
-              />
-              <span className={styles.captureText}>{c.text}</span>
+              <div className={styles.inlineBarTrack}>
+                <div
+                  className={styles.focusBarFill}
+                  style={{ width: `${curvedScore}%` }}
+                />
+              </div>
             </div>
-          ))}
+            <span
+              className={`${styles.inlineGrade} ${scrolled ? styles.inlineGradeVisible : ""}`}
+              style={{ color: getGradeColor(grade) }}
+            >
+              On track for {grade}
+            </span>
+          </div>
+
+          {/* These collapse away */}
+          <span
+            className={`${styles.timerLabel} ${scrolled ? styles.colHide : ""}`}
+          >
+            {onBreak ? "on break" : "remaining"}
+          </span>
+          <div
+            className={`${styles.statusBadge} ${scrolled ? styles.colHide : ""} ${isOnTask ? styles.statusOn : styles.statusOff}`}
+          >
+            <span className={styles.statusDot} />
+            {isOnTask ? "On task" : "Off task"}
+          </div>
+
+          {/* Subtitle — always visible, position shifts */}
+          <span
+            className={`${styles.sessionSubtitle} ${scrolled ? styles.sessionSubtitleCollapsed : ""}`}
+          >
+            Studying {config.subject || "—"} ·{" "}
+            <span className={styles.pointsEarned}>+{pointsEarned} points</span>
+          </span>
+
+          {/* Full focus bar — collapses away */}
+          <div
+            className={`${styles.focusBarSection} ${scrolled ? styles.colHide : ""}`}
+          >
+            <div className={styles.focusBarMeta}>
+              <span className={styles.focusLabel}>Focus score</span>
+              <span
+                className={styles.gradeLabel}
+                style={{ color: getGradeColor(grade) }}
+              >
+                {curvedScore >= 85
+                  ? `On track for ${grade}`
+                  : `Grade: ${grade}`}
+              </span>
+            </div>
+            <div className={styles.focusBarTrack}>
+              <div
+                className={styles.focusBarFill}
+                style={{ width: `${curvedScore}%` }}
+              />
+            </div>
+            <div className={styles.focusBarTicks}>
+              <span>0%</span>
+              <span>50%</span>
+              <span>100%</span>
+            </div>
+          </div>
         </div>
+
+        {/* ── Tasks + Captures ── */}
+        <div className={styles.columns}>
+          <div className={styles.column}>
+            <span className={styles.columnTitle}>TASKS</span>
+            {todos.map((t) => (
+              <button
+                key={t.id}
+                className={`${styles.taskItem} ${t.completed ? styles.taskDone : ""}`}
+                onClick={() => toggleTodo(t.id)}
+              >
+                <span
+                  className={`${styles.taskCircle} ${t.completed ? styles.taskCircleDone : ""}`}
+                />
+                <span className={styles.taskText}>{t.text}</span>
+              </button>
+            ))}
+          </div>
+
+          <div className={styles.column}>
+            <span className={styles.columnTitle}>CAPTURES</span>
+            {[...captures].reverse().map((c) => (
+              <div
+                key={c.id}
+                className={`${styles.captureItem} ${c.label === "off_task" ? styles.captureOff : styles.captureOn}`}
+              >
+                <span
+                  className={`${styles.captureDot} ${c.label === "off_task" ? styles.captureDotOff : styles.captureDotOn}`}
+                />
+                <span className={styles.captureText}>{c.text}</span>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        {/* Bottom padding so last items aren't hidden behind bottomBar */}
+        <div style={{ height: 20 }} />
       </div>
+
+      {/* ── Fade gradient above bottom bar ── */}
+      <div className={styles.fadeGradient} />
+
+      {/* ── Back to top ── */}
+      {scrolled && (
+        <button
+          className={styles.backToTop}
+          onClick={() =>
+            scrollRef.current?.scrollTo({ top: 0, behavior: "smooth" })
+          }
+        >
+          ↑
+        </button>
+      )}
 
       {/* ── Bottom actions ── */}
       <div className={styles.bottomBar}>
