@@ -1,10 +1,44 @@
 .header {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
   display: flex;
   align-items: center;
   justify-content: space-between;
   height: 60px;
   padding: 10px 20px 10px 10px;
   border-bottom: 1px solid var(--orange-cream-20);
+  z-index: 20;
+  background: var(--dark-purple);
+}
+
+.headerLeft {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+/* Badge in header — hidden by default, fades in when scrolled */
+.headerBadge {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 12px;
+  border-radius: 20px;
+  font-size: 13px;
+  font-family: var(--body-text, sans-serif);
+  opacity: 0;
+  pointer-events: none;
+  transform: translateX(-6px);
+  transition:
+    opacity 0.25s,
+    transform 0.25s;
+}
+.headerBadgeVisible {
+  opacity: 1;
+  pointer-events: auto;
+  transform: translateX(0);
 }
 
 .pageLogo {
@@ -39,13 +73,61 @@
   color: var(--pink, #ce6c81);
 }
 
+/* ── Scroll container ── */
+.scrollContent {
+  position: fixed;
+  top: 60px; /* below header */
+  left: 0;
+  right: 0;
+  bottom: 74px; /* above bottom bar */
+  overflow-y: auto;
+  overflow-x: hidden;
+}
+
 /* ── timer ── */
+
+/* ── Timer block wrapper ── */
+.timerBlock {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 50px 20px 10px;
+  gap: 8px;
+  transition: all 0.3s ease;
+}
+
+.timerBlockCollapsed {
+  position: sticky;
+  top: 0;
+  z-index: 10;
+  background: var(--dark-purple);
+  border-bottom: 1px solid rgba(243, 229, 216, 0.1);
+  padding: 10px 20px 10px;
+  align-items: flex-start;
+  gap: 2px;
+}
+
+/* ── Timer row (wraps display + inline bar in collapsed) ── */
+.timerRow {
+  display: contents; /* transparent wrapper in expanded */
+}
+.timerRowCollapsed {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: 12px;
+  width: 100%;
+  height: 32px;
+  margin-top: 6px;
+}
+
 .timerSection {
   display: flex;
   flex-direction: column;
   align-items: center;
   gap: 6px;
-  padding: 50px 20px 15px 20px;
+  margin-top: 60px;
+  padding: 70px 20px 15px 20px;
 }
 
 .timerDisplay {
@@ -55,6 +137,14 @@
   font-weight: bold;
   line-height: 1;
   letter-spacing: 0.05em;
+  transition: font-size 0.3s ease;
+  flex-shrink: 0;
+}
+.timerDisplayCollapsed {
+  font-size: 36px;
+  width: 100px;
+  align-items: center;
+  line-height: default;
 }
 
 .timerLabel {
@@ -68,15 +158,59 @@
   display: flex;
   align-items: center;
   gap: 6px;
-  padding: 4px 14px;
+  padding: 6px 20px;
   border-radius: 24px;
   font-size: 14px;
   font-family: var(--body-text, sans-serif);
-  margin-top: 2px;
 }
 
-.statusOn  { background: rgba(76, 206, 122, 0.15); color: var(--status-green); }
-.statusOff { background: rgba(224, 85, 85, 0.15);  color: var(--status-red);   }
+.timerLabel,
+.statusBadge {
+  max-height: 60px;
+  overflow: hidden;
+  transition: all 0.2s ease;
+}
+
+/* ── Inline bar (only shown when collapsed) ── */
+.inlineBar {
+  display: none;
+  flex: 1;
+  align-items: center;
+}
+.inlineBarVisible {
+  display: flex;
+}
+.inlineBarTrack {
+  width: 100%;
+  height: 8px;
+  background: rgba(243, 229, 216, 0.08);
+  border-radius: 4px;
+  overflow: hidden;
+}
+
+/* ── Inline grade (only shown when collapsed) ── */
+.inlineGrade {
+  display: none;
+  font-size: 12px;
+  font-weight: 500;
+  font-family: var(--body-text, sans-serif);
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+.inlineGradeVisible {
+  display: block;
+}
+
+.statusOn {
+  background: rgba(76, 206, 122, 0.15);
+  color: var(--status-green);
+  border: 1px solid var(--status-green);
+}
+.statusOff {
+  background: rgba(224, 85, 85, 0.15);
+  color: var(--status-red);
+  border: 1px solid var(--status-red);
+}
 
 .statusDot {
   width: 7px;
@@ -86,9 +220,30 @@
 }
 
 .sessionSubtitle {
-  font-size: 12px;
+  font-size: 14px;
   color: rgba(243, 229, 216, 0.45);
   font-family: var(--body-text, sans-serif);
+  transition: font-size 0.25s;
+}
+.sessionSubtitleCollapsed {
+  font-size: 12px;
+}
+
+/* ── Collapse-away elements ── */
+.colHide {
+  opacity: 0;
+  max-height: 0 !important;
+  overflow: hidden;
+  margin-top: 0 !important;
+  margin-bottom: 0 !important;
+  padding-top: 0 !important;
+  padding-bottom: 0 !important;
+  pointer-events: none;
+  transition:
+    opacity 0.2s ease,
+    max-height 0.3s ease,
+    margin 0.2s ease,
+    padding 0.2s ease;
 }
 
 .pointsEarned {
@@ -97,7 +252,17 @@
 
 /* ── focus bar ── */
 .focusBarSection {
+  max-height: 120px;
+  overflow: hidden;
+  transition:
+    opacity 0.2s ease,
+    max-height 0.3s ease,
+    margin 0.2s ease,
+    padding 0.2s ease;
+  width: 100%;
   margin-bottom: 16px;
+  padding: 6px 20px;
+  box-sizing: border-box;
 }
 
 .focusBarMeta {
@@ -107,35 +272,35 @@
 }
 
 .focusLabel {
-  font-size: 11px;
+  font-size: 14px;
   color: rgba(243, 229, 216, 0.45);
   font-family: var(--body-text, sans-serif);
 }
 
 .gradeLabel {
-  font-size: 11px;
+  font-size: 14px;
   font-weight: 500;
   font-family: var(--body-text, sans-serif);
 }
 
 .focusBarTrack {
-  height: 8px;
+  height: 16px;
   background: rgba(243, 229, 216, 0.08);
-  border-radius: 4px;
+  border-radius: 8px;
   overflow: hidden;
 }
 
 .focusBarFill {
   height: 100%;
   background: var(--status-green);
-  border-radius: 4px;
+  border-radius: 6px;
   transition: width 0.6s ease;
 }
 
 .focusBarTicks {
   display: flex;
   justify-content: space-between;
-  font-size: 10px;
+  font-size: 12px;
   color: rgba(243, 229, 216, 0.25);
   margin-top: 4px;
   font-family: var(--body-text, sans-serif);
@@ -147,6 +312,7 @@
   grid-template-columns: 1fr 1fr;
   gap: 14px;
   flex: 1;
+  padding: 0 20px;
   overflow: hidden;
   margin-bottom: 0;
 }
@@ -159,12 +325,11 @@
 }
 
 .columnTitle {
-  font-size: 10px;
-  letter-spacing: 0.1em;
+  font-size: 14px;
   color: rgba(243, 229, 216, 0.35);
   font-family: var(--body-text, sans-serif);
   font-weight: 500;
-  margin-bottom: 2px;
+  margin-bottom: 4px;
 }
 
 .emptyState {
@@ -182,16 +347,21 @@
   background: transparent;
   border: 1px solid var(--orange-cream-50);
   border-radius: 12px;
-  padding: 8px 10px;
+  padding: 12px 12px;
   cursor: pointer;
   text-align: left;
-  transition: background 0.12s;
+  transition: all 0.12s;
   width: 100%;
+  height: 45px;
 }
 
-.taskItem:hover { background: rgba(243, 229, 216, 0.07); }
+.taskItem:hover {
+  background: rgba(243, 229, 216, 0.07);
+}
 
-.taskDone { opacity: 0.45; }
+.taskDone {
+  opacity: 0.45;
+}
 
 .taskCircle {
   width: 16px;
@@ -199,7 +369,9 @@
   border-radius: 50%;
   border: 1.5px solid rgba(243, 229, 216, 0.3);
   flex-shrink: 0;
-  transition: background 0.15s, border-color 0.15s;
+  transition:
+    all 0.15s,
+    border-color 0.15s;
 }
 
 .taskCircleDone {
@@ -208,7 +380,7 @@
 }
 
 .taskText {
-  font-size: 12px;
+  font-size: 16px;
   color: var(--orange-cream, #f3e5d8);
   font-family: var(--body-text, sans-serif);
   white-space: nowrap;
@@ -222,7 +394,8 @@
   align-items: center;
   gap: 8px;
   border-radius: 8px;
-  padding: 8px 10px;
+  padding: 12px 12px;
+  height: 45px;
   border: 1px solid transparent;
 }
 
@@ -243,8 +416,12 @@
   flex-shrink: 0;
 }
 
-.captureDotOn  { background: var(--status-green); }
-.captureDotOff { background: var(--status-red);   }
+.captureDotOn {
+  background: var(--status-green);
+}
+.captureDotOff {
+  background: var(--status-red);
+}
 
 .captureText {
   font-size: 12px;
@@ -255,12 +432,54 @@
   text-overflow: ellipsis;
 }
 
+/* ── Fade gradient above bottom bar ── */
+.fadeGradient {
+  position: fixed;
+  bottom: 74px; /* sits right on top of the bottom bar */
+  left: 0;
+  right: 0;
+  height: 72px;
+  background: linear-gradient(to top, var(--dark-purple) 0%, transparent 100%);
+  pointer-events: none;
+  z-index: 5;
+}
+
+/* ── Back to top ── */
+.backToTop {
+  position: fixed;
+  bottom: 90px;
+  right: 20px;
+  z-index: 15;
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background: rgba(243, 229, 216, 0.1);
+  border: 1px solid rgba(243, 229, 216, 0.2);
+  color: var(--orange-cream);
+  font-size: 16px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.15s;
+  backdrop-filter: blur(4px);
+}
+.backToTop:hover {
+  background: rgba(243, 229, 216, 0.18);
+}
+
 /* ── bottom bar ── */
 .bottomBar {
+  position: fixed;
   display: flex;
+  bottom: 0;
+  left: 0;
   gap: 8px;
-  padding: 12px 0 16px;
+  width: 100%;
+  padding: 16px 20px;
   margin-top: auto;
+  border-top: 1px solid var(--orange-cream-20);
+  background: var(--dark-purple);
 }
 
 .breakBtn {
@@ -273,10 +492,12 @@
   font-family: var(--body-text, sans-serif);
   padding: 11px;
   cursor: pointer;
-  transition: background 0.15s;
+  transition: all 0.15s;
 }
 
-.breakBtn:hover { background: rgba(243, 229, 216, 0.1); }
+.breakBtn:hover {
+  background: rgba(243, 229, 216, 0.1);
+}
 
 .endBtn {
   background: rgba(206, 108, 129, 0.12);
@@ -287,7 +508,9 @@
   font-family: var(--body-text, sans-serif);
   padding: 11px 20px;
   cursor: pointer;
-  transition: background 0.15s;
+  transition: all 0.15s;
 }
 
-.endBtn:hover { background: rgba(206, 108, 129, 0.2); }
+.endBtn:hover {
+  background: rgba(206, 108, 129, 0.2);
+}
