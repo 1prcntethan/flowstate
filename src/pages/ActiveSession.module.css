@@ -1,45 +1,32 @@
-.container {
-  display: flex;
-  flex-direction: column;
-  height: 100vh;
-  background: #1a0e16;
-  border: 1px solid rgba(243, 229, 216, 0.08);
-  border-radius: 14px;
-  overflow: hidden;
-  padding: 18px 20px 0;
-  box-sizing: border-box;
-}
-
-/* ── header ── */
 .header {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  margin-bottom: 12px;
+  height: 60px;
+  padding: 10px 20px 10px 10px;
+  border-bottom: 1px solid var(--orange-cream-50)
 }
 
-.pageTitle {
-  font-family: var(--body-text, sans-serif);
-  font-size: 13px;
-  color: rgba(243, 229, 216, 0.45);
-  letter-spacing: 0.02em;
+.pageLogo {
+  width: 40px;
+  height: 40px;
 }
 
 .headerButtons {
   display: flex;
-  gap: 8px;
+  gap: 12px;
 }
 
 .headerBtn {
-  background: rgba(243, 229, 216, 0.07);
-  border: 1px solid rgba(243, 229, 216, 0.12);
+  background: var(--orange-cream-10);
+  border: 1px transparent;
   border-radius: 20px;
-  color: rgba(243, 229, 216, 0.6);
-  font-size: 11px;
-  padding: 4px 12px;
+  color: var(--orange-cream);
+  font-size: 14px;
+  padding: 5px 20px;
   cursor: pointer;
-  font-family: var(--body-text, sans-serif);
-  transition: background 0.15s;
+  font-family: var(--body-text);
+  transition: all 0.15s;
 }
 
 .headerBtn:hover {
@@ -58,16 +45,16 @@
   flex-direction: column;
   align-items: center;
   gap: 6px;
-  padding: 16px 0 18px;
+  padding: 50px 20px 15px 20px;
 }
 
 .timerDisplay {
   font-family: var(--heading-text, serif);
-  font-size: 72px;
-  font-weight: 400;
-  color: var(--orange-cream, #f3e5d8);
+  font-size: 66px;
+  color: white;
+  font-weight: bold;
   line-height: 1;
-  letter-spacing: -0.02em;
+  letter-spacing: 0.05em;
 }
 
 .timerLabel {
