@@ -29,7 +29,11 @@ body {
   --pink-90: rgba(207, 110, 131, 0.9);
   --body-text: 'Red Hat Text';
   --heading-text: 'Fustat';
+  --status-green: #4cce7a;
+  --status-red:   #e05555;
+  --status-amber: #e6a817;
 }
+
 
 * {
   margin: 0;

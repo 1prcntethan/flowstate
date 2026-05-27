@@ -1,0 +1,306 @@
+.container {
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+  background: #1a0e16;
+  border: 1px solid rgba(243, 229, 216, 0.08);
+  border-radius: 14px;
+  overflow: hidden;
+  padding: 18px 20px 0;
+  box-sizing: border-box;
+}
+
+/* ── header ── */
+.header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 12px;
+}
+
+.pageTitle {
+  font-family: var(--body-text, sans-serif);
+  font-size: 13px;
+  color: rgba(243, 229, 216, 0.45);
+  letter-spacing: 0.02em;
+}
+
+.headerButtons {
+  display: flex;
+  gap: 8px;
+}
+
+.headerBtn {
+  background: rgba(243, 229, 216, 0.07);
+  border: 1px solid rgba(243, 229, 216, 0.12);
+  border-radius: 20px;
+  color: rgba(243, 229, 216, 0.6);
+  font-size: 11px;
+  padding: 4px 12px;
+  cursor: pointer;
+  font-family: var(--body-text, sans-serif);
+  transition: background 0.15s;
+}
+
+.headerBtn:hover {
+  background: rgba(243, 229, 216, 0.12);
+}
+
+.headerBtnActive {
+  background: rgba(206, 108, 129, 0.2);
+  border-color: rgba(206, 108, 129, 0.4);
+  color: var(--pink, #ce6c81);
+}
+
+/* ── timer ── */
+.timerSection {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  padding: 16px 0 18px;
+}
+
+.timerDisplay {
+  font-family: var(--heading-text, serif);
+  font-size: 72px;
+  font-weight: 400;
+  color: var(--orange-cream, #f3e5d8);
+  line-height: 1;
+  letter-spacing: -0.02em;
+}
+
+.timerLabel {
+  font-size: 12px;
+  color: rgba(243, 229, 216, 0.4);
+  font-family: var(--body-text, sans-serif);
+  letter-spacing: 0.04em;
+}
+
+.statusBadge {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 14px;
+  border-radius: 20px;
+  font-size: 12px;
+  font-family: var(--body-text, sans-serif);
+  margin-top: 2px;
+}
+
+.statusOn  { background: rgba(76, 206, 122, 0.15); color: var(--status-green); }
+.statusOff { background: rgba(224, 85, 85, 0.15);  color: var(--status-red);   }
+
+.statusDot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: currentColor;
+}
+
+.sessionSubtitle {
+  font-size: 12px;
+  color: rgba(243, 229, 216, 0.45);
+  font-family: var(--body-text, sans-serif);
+}
+
+.pointsEarned {
+  color: var(--status-amber);
+}
+
+/* ── focus bar ── */
+.focusBarSection {
+  margin-bottom: 16px;
+}
+
+.focusBarMeta {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 6px;
+}
+
+.focusLabel {
+  font-size: 11px;
+  color: rgba(243, 229, 216, 0.45);
+  font-family: var(--body-text, sans-serif);
+}
+
+.gradeLabel {
+  font-size: 11px;
+  font-weight: 500;
+  font-family: var(--body-text, sans-serif);
+}
+
+.focusBarTrack {
+  height: 8px;
+  background: rgba(243, 229, 216, 0.08);
+  border-radius: 4px;
+  overflow: hidden;
+}
+
+.focusBarFill {
+  height: 100%;
+  background: var(--status-green);
+  border-radius: 4px;
+  transition: width 0.6s ease;
+}
+
+.focusBarTicks {
+  display: flex;
+  justify-content: space-between;
+  font-size: 10px;
+  color: rgba(243, 229, 216, 0.25);
+  margin-top: 4px;
+  font-family: var(--body-text, sans-serif);
+}
+
+/* ── columns ── */
+.columns {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 14px;
+  flex: 1;
+  overflow: hidden;
+  margin-bottom: 0;
+}
+
+.column {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  overflow-y: auto;
+}
+
+.columnTitle {
+  font-size: 10px;
+  letter-spacing: 0.1em;
+  color: rgba(243, 229, 216, 0.35);
+  font-family: var(--body-text, sans-serif);
+  font-weight: 500;
+  margin-bottom: 2px;
+}
+
+.emptyState {
+  font-size: 12px;
+  color: rgba(243, 229, 216, 0.2);
+  font-family: var(--body-text, sans-serif);
+  font-style: italic;
+}
+
+/* tasks */
+.taskItem {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  background: rgba(243, 229, 216, 0.04);
+  border: 1px solid rgba(243, 229, 216, 0.08);
+  border-radius: 8px;
+  padding: 8px 10px;
+  cursor: pointer;
+  text-align: left;
+  transition: background 0.12s;
+  width: 100%;
+}
+
+.taskItem:hover { background: rgba(243, 229, 216, 0.07); }
+
+.taskDone { opacity: 0.45; }
+
+.taskCircle {
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  border: 1.5px solid rgba(243, 229, 216, 0.3);
+  flex-shrink: 0;
+  transition: background 0.15s, border-color 0.15s;
+}
+
+.taskCircleDone {
+  background: var(--status-green);
+  border-color: var(--status-green);
+}
+
+.taskText {
+  font-size: 12px;
+  color: var(--orange-cream, #f3e5d8);
+  font-family: var(--body-text, sans-serif);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* captures */
+.captureItem {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  border-radius: 8px;
+  padding: 8px 10px;
+  border: 1px solid transparent;
+}
+
+.captureOn {
+  background: rgba(76, 206, 122, 0.06);
+  border-color: rgba(76, 206, 122, 0.12);
+}
+
+.captureOff {
+  background: rgba(224, 85, 85, 0.1);
+  border-color: rgba(224, 85, 85, 0.2);
+}
+
+.captureDot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.captureDotOn  { background: var(--status-green); }
+.captureDotOff { background: var(--status-red);   }
+
+.captureText {
+  font-size: 12px;
+  font-family: var(--body-text, sans-serif);
+  color: rgba(243, 229, 216, 0.7);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* ── bottom bar ── */
+.bottomBar {
+  display: flex;
+  gap: 8px;
+  padding: 12px 0 16px;
+  margin-top: auto;
+}
+
+.breakBtn {
+  flex: 1;
+  background: rgba(243, 229, 216, 0.06);
+  border: 1px solid rgba(243, 229, 216, 0.12);
+  border-radius: 10px;
+  color: var(--orange-cream, #f3e5d8);
+  font-size: 13px;
+  font-family: var(--body-text, sans-serif);
+  padding: 11px;
+  cursor: pointer;
+  transition: background 0.15s;
+}
+
+.breakBtn:hover { background: rgba(243, 229, 216, 0.1); }
+
+.endBtn {
+  background: rgba(206, 108, 129, 0.12);
+  border: 1px solid rgba(206, 108, 129, 0.25);
+  border-radius: 10px;
+  color: var(--pink, #ce6c81);
+  font-size: 13px;
+  font-family: var(--body-text, sans-serif);
+  padding: 11px 20px;
+  cursor: pointer;
+  transition: background 0.15s;
+}
+
+.endBtn:hover { background: rgba(206, 108, 129, 0.2); }
