@@ -105,7 +105,7 @@ export default function PreSession({ nav, onStart }: Props) {
     todos.length > 0;
 
   return (
-    <div className="page">
+    <div className={`page ${styles.preSessionPage}`}>
       <div className={styles.headerSection}>
         <button
           className={styles.cancelButton}
