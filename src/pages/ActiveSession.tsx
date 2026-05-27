@@ -71,7 +71,8 @@ export default function ActiveSession({ nav, config }: Props) {
 
   const handleScroll = () => {
     if (!scrollRef.current) return;
-    setScrolled(scrollRef.current.scrollTop > 100);
+    const top = scrollRef.current.scrollTop;
+    setScrolled(prev => prev ? top > 0 : top > 1);
   };
 
   // Focus score derived from captures
@@ -129,13 +130,7 @@ export default function ActiveSession({ nav, config }: Props) {
         </div>
       </div>
 
-      {/* ── Scrollable content ── */}
-      <div
-        ref={scrollRef}
-        onScroll={handleScroll}
-        className={styles.scrollContent}
-      >
-        {/* Timer block — collapses + sticks on scroll */}
+      {/* Timer block — collapses + sticks on scroll */}
         <div
           className={`${styles.timerBlock} ${scrolled ? styles.timerBlockCollapsed : ""}`}
         >
@@ -217,6 +212,13 @@ export default function ActiveSession({ nav, config }: Props) {
           </div>
         </div>
 
+      {/* ── Scrollable content ── */}
+      <div
+        ref={scrollRef}
+        onScroll={handleScroll}
+        className={`${styles.scrollContent} ${scrolled ? styles.scrollContentCollapsed : ""}`}
+      >
+
         {/* ── Tasks + Captures ── */}
         <div className={styles.columns}>
           <div className={styles.column}>
@@ -283,5 +285,7 @@ export default function ActiveSession({ nav, config }: Props) {
         </button>
       </div>
     </div>
+
+    
   );
 }

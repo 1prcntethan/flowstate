@@ -381,3 +381,20 @@
 .trackingEye {
   width: 32px;
 }
+
+.preSessionPage::-webkit-scrollbar {
+  width: 4px;
+}
+
+.preSessionPage::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.preSessionPage::-webkit-scrollbar-thumb {
+  background: var(--orange-cream-20);
+  border-radius: 2px;
+}
+
+.preSessionPage::-webkit-scrollbar-thumb:hover {
+  background: var(--orange-cream-50);
+}

@@ -49,3 +49,20 @@ body {
 .page {
   animation: fadeIn 0.18s ease-out;
 }
+
+body::-webkit-scrollbar {
+  width: 4px;
+}
+
+body::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+body::-webkit-scrollbar-thumb {
+  background: var(--orange-cream-20);
+  border-radius: 2px;
+}
+
+body::-webkit-scrollbar::-webkit-scrollbar-thumb:hover {
+  background: var(--orange-cream-50);
+}

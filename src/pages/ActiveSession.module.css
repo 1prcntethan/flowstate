@@ -76,31 +76,40 @@
 /* ── Scroll container ── */
 .scrollContent {
   position: fixed;
-  top: 60px; /* below header */
+  top: calc(60px + 315px); /* 60px header + ~180px expanded timer */
   left: 0;
   right: 0;
-  bottom: 74px; /* above bottom bar */
+  bottom: 74px;
   overflow-y: auto;
   overflow-x: hidden;
+  transition: top 0.3s ease;
+}
+
+.scrollContentCollapsed {
+  top: calc(60px + 70px); /* 60px header + ~70px collapsed timer */
 }
 
 /* ── timer ── */
 
 /* ── Timer block wrapper ── */
 .timerBlock {
+  position: fixed;
+  top: 60px;
+  left: 0;
+  right: 0;
+  z-index: 10;
+  background: var(--dark-purple);
   display: flex;
   flex-direction: column;
   align-items: center;
   padding: 50px 20px 10px;
   gap: 8px;
+  border-color: var(--dark-purple);
   transition: all 0.3s ease;
 }
 
 .timerBlockCollapsed {
-  position: sticky;
-  top: 0;
-  z-index: 10;
-  background: var(--dark-purple);
+  /* position/top/z-index inherited from above, just override layout */
   border-bottom: 1px solid rgba(243, 229, 216, 0.1);
   padding: 10px 20px 10px;
   align-items: flex-start;
@@ -137,7 +146,7 @@
   font-weight: bold;
   line-height: 1;
   letter-spacing: 0.05em;
-  transition: font-size 0.3s ease;
+  transition: none;
   flex-shrink: 0;
 }
 .timerDisplayCollapsed {
@@ -513,4 +522,21 @@
 
 .endBtn:hover {
   background: rgba(206, 108, 129, 0.2);
+}
+
+.scrollContent::-webkit-scrollbar {
+  width: 4px;
+}
+
+.scrollContent::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.scrollContent::-webkit-scrollbar-thumb {
+  background: var(--orange-cream-20);
+  border-radius: 2px;
+}
+
+.scrollContent::-webkit-scrollbar-thumb:hover {
+  background: var(--orange-cream-50);
 }
