@@ -158,9 +158,6 @@ export default function ActiveSession({ nav, config }: Props) {
         {/* Tasks */}
         <div className={styles.column}>
           <span className={styles.columnTitle}>TASKS</span>
-          {todos.length === 0 && (
-            <span className={styles.emptyState}>No tasks added</span>
-          )}
           {todos.map((t) => (
             <button
               key={t.id}

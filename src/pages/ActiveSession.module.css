@@ -4,7 +4,7 @@
   justify-content: space-between;
   height: 60px;
   padding: 10px 20px 10px 10px;
-  border-bottom: 1px solid var(--orange-cream-50)
+  border-bottom: 1px solid var(--orange-cream-20);
 }
 
 .pageLogo {
@@ -18,9 +18,9 @@
 }
 
 .headerBtn {
-  background: var(--orange-cream-10);
+  background: rgba(79, 79, 79, 0.2);
   border: 1px transparent;
-  border-radius: 20px;
+  border-radius: 8px;
   color: var(--orange-cream);
   font-size: 14px;
   padding: 5px 20px;
@@ -50,7 +50,7 @@
 
 .timerDisplay {
   font-family: var(--heading-text, serif);
-  font-size: 66px;
+  font-size: 64px;
   color: white;
   font-weight: bold;
   line-height: 1;
@@ -58,8 +58,8 @@
 }
 
 .timerLabel {
-  font-size: 12px;
-  color: rgba(243, 229, 216, 0.4);
+  font-size: 14px;
+  color: rgb(243, 229, 216, 0.5);
   font-family: var(--body-text, sans-serif);
   letter-spacing: 0.04em;
 }
@@ -69,8 +69,8 @@
   align-items: center;
   gap: 6px;
   padding: 4px 14px;
-  border-radius: 20px;
-  font-size: 12px;
+  border-radius: 24px;
+  font-size: 14px;
   font-family: var(--body-text, sans-serif);
   margin-top: 2px;
 }
@@ -179,9 +179,9 @@
   display: flex;
   align-items: center;
   gap: 10px;
-  background: rgba(243, 229, 216, 0.04);
-  border: 1px solid rgba(243, 229, 216, 0.08);
-  border-radius: 8px;
+  background: transparent;
+  border: 1px solid var(--orange-cream-50);
+  border-radius: 12px;
   padding: 8px 10px;
   cursor: pointer;
   text-align: left;
