@@ -9,10 +9,11 @@ function applyTheme(theme: Theme) {
 }
 
 export function useTheme() {
-  const [themeId, setThemeId] = useState<string>(() => {
-    // read from localStorage for now — swap for electron-store later
-    return localStorage.getItem('themeId') ?? DEFAULT_THEME_ID
-  })
+  // const [themeId, setThemeId] = useState<string>(() => {
+  //   // read from localStorage for now — swap for electron-store later
+  //   return localStorage.getItem('themeId') ?? DEFAULT_THEME_ID
+  // })
+  const [themeId, setThemeId] = useState<string>(DEFAULT_THEME_ID)
 
   useEffect(() => {
     const theme = themes[themeId] ?? themes[DEFAULT_THEME_ID]
