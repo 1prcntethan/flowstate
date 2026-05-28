@@ -30,6 +30,10 @@ export type Theme = {
     '--headerbtn-bg': string
     '--captures-statusOn': string
     '--captures-statusOff': string
+    '--captureOn-bg': string
+    '--captureOn-border': string
+    '--captureOff-bg': string
+    '--captureOff-border': string
   }
 }
 
@@ -66,6 +70,10 @@ export const themes: Record<string, Theme> = {
       '--headerbtn-bg': 'rgba(79, 79, 79, 0.2)',
       '--captures-statusOn': 'rgba(76, 206, 122, 0.15)',
       '--captures-statusOff': 'rgba(224, 85, 85, 0.15)',
+      '--captureOn-bg': 'rgba(76, 206, 122, 0.06)',
+      '--captureOff-bg': 'rgba(224, 85, 85, 0.1)',
+      '--captureOn-border': 'rgba(76, 206, 122, 0.12)',
+      '--captureOff-border': 'rgba(224, 85, 85, 0.2)',
       }
     },}
   // Future gacha-unlockable themes — define now, ship later

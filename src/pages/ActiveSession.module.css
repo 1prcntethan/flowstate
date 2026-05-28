@@ -192,7 +192,7 @@
 .inlineBarTrack {
   width: 100%;
   height: 8px;
-  background: var(--timerbar-border);
+  background: var(--orange-cream-10);
   border-radius: 4px;
   overflow: hidden;
 }
@@ -294,7 +294,7 @@
 
 .focusBarTrack {
   height: 16px;
-  background: var(--orange-cream-80);
+  background: var(--orange-cream-10);
   border-radius: 8px;
   overflow: hidden;
 }
@@ -310,7 +310,7 @@
   display: flex;
   justify-content: space-between;
   font-size: 12px;
-  color: rgba(243, 229, 216, 0.25);
+  color: var(--orange-cream-30);
   margin-top: 4px;
   font-family: var(--body-text, sans-serif);
 }
@@ -390,7 +390,7 @@
 
 .taskText {
   font-size: 16px;
-  color: var(--orange-cream, #f3e5d8);
+  color: var(--orange-cream);
   font-family: var(--body-text, sans-serif);
   white-space: nowrap;
   overflow: hidden;
@@ -409,13 +409,13 @@
 }
 
 .captureOn {
-  background: rgba(76, 206, 122, 0.06);
-  border-color: rgba(76, 206, 122, 0.12);
+  background: var(--captureOn-bg);
+  border-color: var(--captureOn-border);
 }
 
 .captureOff {
-  background: rgba(224, 85, 85, 0.1);
-  border-color: rgba(224, 85, 85, 0.2);
+  background: var(--captureOff-bg);
+  border-color: var(--captureOff-border);
 }
 
 .captureDot {
@@ -462,8 +462,8 @@
   width: 36px;
   height: 36px;
   border-radius: 50%;
-  background: rgba(243, 229, 216, 0.1);
-  border: 1px solid rgba(243, 229, 216, 0.2);
+  background: var(--orange-cream-10);
+  border: 1px solid var(--orange-cream-20);
   color: var(--orange-cream);
   font-size: 16px;
   cursor: pointer;
@@ -474,7 +474,7 @@
   backdrop-filter: blur(4px);
 }
 .backToTop:hover {
-  background: rgba(243, 229, 216, 0.18);
+  background: var(--orange-cream-0);
 }
 
 /* ── bottom bar ── */
@@ -493,10 +493,10 @@
 
 .breakBtn {
   flex: 1;
-  background: rgba(243, 229, 216, 0.06);
-  border: 1px solid rgba(243, 229, 216, 0.12);
+  background: var(--orange-cream-10);
+  border: 1px solid var(--orange-cream-20);
   border-radius: 10px;
-  color: var(--orange-cream, #f3e5d8);
+  color: var(--orange-cream);
   font-size: 13px;
   font-family: var(--body-text, sans-serif);
   padding: 11px;
@@ -505,14 +505,14 @@
 }
 
 .breakBtn:hover {
-  background: rgba(243, 229, 216, 0.1);
+  background: var(--orange-cream-20);
 }
 
 .endBtn {
-  background: rgba(206, 108, 129, 0.12);
-  border: 1px solid rgba(206, 108, 129, 0.25);
+  background: var(--pink-10);
+  border: 1px solid var(--pink-20);
   border-radius: 10px;
-  color: var(--pink, #ce6c81);
+  color: var(--pink, --pink);
   font-size: 13px;
   font-family: var(--body-text, sans-serif);
   padding: 11px 20px;
@@ -521,7 +521,7 @@
 }
 
 .endBtn:hover {
-  background: rgba(206, 108, 129, 0.2);
+  background: var(--pink-20);
 }
 
 .scrollContent::-webkit-scrollbar {
