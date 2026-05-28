@@ -2,6 +2,7 @@ import NavBarTop from "../components/NavBarTop";
 import NavBarBottom from "../components/NavBarBottom";
 import styles from "./Dashboard.module.css";
 import type { Page } from "../App";
+import type { User } from '../types'
 import DashboardStatCard from "../components/DashboardStatCard";
 
 
