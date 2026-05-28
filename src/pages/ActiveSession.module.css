@@ -365,7 +365,7 @@
 }
 
 .taskItem:hover {
-  background: var(--orange-cream-70);
+  background: var(--orange-cream-40);
 }
 
 .taskDone {
