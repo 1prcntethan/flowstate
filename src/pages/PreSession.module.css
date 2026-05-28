@@ -332,7 +332,7 @@
 .slider {
   position: absolute;
   inset: 0;
-  background: #3a2535;
+  background: var(--pink-20);
   border-radius: 28px;
   cursor: pointer;
   transition: all 0.2s;

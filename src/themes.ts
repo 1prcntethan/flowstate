@@ -3,6 +3,7 @@ export type Theme = {
   name: string
   unlockable: boolean   // false = default, true = gacha reward
   vars: {
+    '--text-important': string
     '--dark-purple': string
     '--orange-cream': string
     '--orange-cream-10': string
@@ -43,6 +44,7 @@ export const themes: Record<string, Theme> = {
     name: 'Flowstate',
     unlockable: false,
     vars: {
+      '--text-important':  'white',
       '--dark-purple':     'rgb(23, 11, 19)',
       '--orange-cream':    'rgb(243, 229, 216)',
       '--orange-cream-10': 'rgba(243,229,216,0.1)',

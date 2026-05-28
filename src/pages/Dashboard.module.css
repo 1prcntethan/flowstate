@@ -12,7 +12,7 @@
 
 .startSessionButton {
     background-color: var(--pink);
-    color: white;
+    color: var(--text-important);
     border: none;
     border-radius: 12px;
     height: 120px;
@@ -42,7 +42,7 @@
     font-family: var(--heading-text);
     font-weight: bold;
     letter-spacing: 0.05em;
-    color: white;
+    color: var(--text-important);
     border: 1px solid var(--orange-cream-50);
 }
 
