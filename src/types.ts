@@ -13,3 +13,18 @@ export type SessionConfig = {
   todos: TodoItem[]
   trackingEnabled: boolean
 }
+
+export type User = {
+  id: string
+  name: string
+  coins: number
+  streak: number
+}
+
+export type UserCosmetics = {
+  equippedThemeId: string
+  equippedAvatarFrameId: string | null
+  equippedCompanionId: string | null
+  equippedTimerStyleId: string | null
+  ownedItemIds: string[]
+}

@@ -5,12 +5,14 @@ import type { Page } from "../App";
 import DashboardStatCard from "../components/DashboardStatCard";
 
 
-type Props = { nav: (p: Page) => void };
-
-export default function Dashboard({ nav }: Props) {
+type Props = { 
+  nav: (p: Page) => void
+  user: User
+}
+export default function Dashboard({ nav, user }: Props) {
   return (
     <div className="page">
-      <NavBarTop currentCoins={100} streak={5} userName={"Alexis Ma"} />
+      <NavBarTop currentCoins={user.coins} streak={user.streak} userName={user.name} />
       <NavBarBottom />
       <div className={styles.dashboardContent}>
         <button
