@@ -435,7 +435,7 @@
 .captureText {
   font-size: 12px;
   font-family: var(--body-text, sans-serif);
-  color: rgba(243, 229, 216, 0.7);
+  color: var(--orange-cream-70);
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;

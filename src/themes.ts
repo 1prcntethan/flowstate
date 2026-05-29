@@ -56,7 +56,7 @@ export const themes: Record<string, Theme> = {
       '--orange-cream-70': 'rgba(243,229,216,0.7)',
       '--orange-cream-80': 'rgba(243,229,216,0.8)',
       '--orange-cream-90': 'rgba(243,229,216,0.9)',
-      '--pink':            '#CE6C81',
+      '--pink':            'rgb(206, 108, 129)',
       '--pink-10': 'rgba(207, 110, 131, 0.1)',
       '--pink-20': 'rgba(207, 110, 131, 0.2)',
       '--pink-30': 'rgba(207, 110, 131, 0.3)',
