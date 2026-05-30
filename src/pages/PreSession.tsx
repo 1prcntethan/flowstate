@@ -141,7 +141,7 @@ export default function PreSession({ nav, onStart }: Props) {
             </button>
           </div>
           {showSubjectInput && (
-            <div className={styles.todoInput}>
+            <div className={styles.subjectInput}>
               <input
                 autoFocus
                 type="text"

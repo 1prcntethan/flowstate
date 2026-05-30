@@ -36,6 +36,7 @@ export default function BreakScreen({
 }: Props) {
   const [tipIndex, setTipIndex] = useState(0)
 
+
   return (
     <div className="page">
       <div className={styles.container}>

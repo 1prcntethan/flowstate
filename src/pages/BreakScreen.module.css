@@ -4,7 +4,7 @@
   align-items: center;
   justify-content: center;
   min-height: 100vh;
-  padding: 0 100px;
+  padding: 0 175px;
   gap: 18px;
   background: var(--dark-purple);
   box-sizing: border-box;
@@ -20,24 +20,23 @@
 
 .breakLabel {
   font-family: var(--body-text, sans-serif);
-  font-size: 11px;
-  font-weight: 600;
-  letter-spacing: 0.18em;
+  font-size: 16px;
   color: var(--orange-cream-50);
-  text-transform: uppercase;
+  margin-bottom: 4px;
+
 }
 
 .timerDisplay {
   font-family: var(--heading-text, serif);
-  font-size: 80px;
+  font-size: 66px;
   font-weight: bold;
-  color: white;
+  color: var(--text-important);
   line-height: 1;
-  letter-spacing: 0.02em;
+  letter-spacing: 0.05em;
 }
 
 .timerSub {
-  font-size: 13px;
+  font-size: 14px;
   color: var(--orange-cream-50);
   font-family: var(--body-text, sans-serif);
 }
@@ -51,18 +50,19 @@
   font-size: 14px;
   font-family: var(--body-text, sans-serif);
   text-align: center;
-  background: rgba(224, 85, 85, 0.06);
+  background: var(--status-red-background);
 }
 
 .statsRow {
   display: flex;
   gap: 12px;
   width: 100%;
+  margin-bottom: 20px;
 }
 
 .statCard {
   flex: 1;
-  border: 1px solid var(--orange-cream-20);
+  border: 1px solid var(--orange-cream-50);
   border-radius: 12px;
   padding: 16px 12px;
   display: flex;
@@ -75,6 +75,7 @@
   font-family: var(--heading-text, serif);
   font-size: 26px;
   font-weight: bold;
+  letter-spacing: 0.05em;
   color: var(--orange-cream);
 }
 
@@ -89,7 +90,7 @@
   align-items: center;
   justify-content: space-between;
   width: 100%;
-  border: 1px solid var(--orange-cream-20);
+  border: 1px solid var(--orange-cream-50);
   border-radius: 10px;
   padding: 14px 18px;
   gap: 12px;
@@ -123,15 +124,17 @@
   border: none;
   border-radius: 12px;
   padding: 16px;
-  color: white;
+  color: var(--orange-cream);
   font-size: 16px;
   font-family: var(--body-text, sans-serif);
   font-weight: 600;
   cursor: pointer;
-  transition: opacity 0.15s;
+  transition: all 0.2s;
 }
 
-.resumeBtn:hover { opacity: 0.88; }
+.resumeBtn:hover { 
+  transform: scale(1.02);
+}
 
 .resumeBtnOvertime {
   background: rgba(206, 108, 129, 0.12);
@@ -142,13 +145,13 @@
 
 @keyframes pulse {
   0%, 100% { opacity: 1; }
-  50% { opacity: 0.65; }
+  50% { opacity: 0.75; }
 }
 
 .endBtn {
   background: none;
   border: none;
-  color: var(--pink);
+  color: var(--status-red);
   font-size: 13px;
   font-family: var(--body-text, sans-serif);
   cursor: pointer;
