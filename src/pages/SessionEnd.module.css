@@ -1,0 +1,306 @@
+.page {
+  width: 100%;
+  height: 100vh;
+  overflow: hidden;
+  background: var(--dark-purple);
+  display: flex;
+  flex-direction: column;
+}
+
+.scrollArea {
+  flex: 1;
+  overflow-y: auto;
+  overflow-x: hidden;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 40px 20px 0;
+  gap: 0;
+}
+
+/* ── custom scrollbar ── */
+.scrollArea::-webkit-scrollbar { width: 4px; }
+.scrollArea::-webkit-scrollbar-track { background: transparent; }
+.scrollArea::-webkit-scrollbar-thumb { background: var(--orange-cream-20); border-radius: 2px; }
+.scrollArea::-webkit-scrollbar-thumb:hover { background: var(--orange-cream-50); }
+
+/* ── Gacha card ── */
+.cardWrap {
+  margin-bottom: 20px;
+}
+
+.gachaCard {
+  width: 90px;
+  height: 120px;
+  border-radius: 12px;
+  background: #2d6a4f;
+  border: 1px solid rgba(76, 206, 122, 0.3);
+}
+
+/* ── Headline ── */
+.headline {
+  font-family: var(--heading-text);
+  font-size: 28px;
+  color: var(--orange-cream);
+  margin: 0 0 6px;
+  text-align: center;
+  letter-spacing: 0.02em;
+}
+
+.subline {
+  font-family: var(--body-text);
+  font-size: 15px;
+  color: rgba(243, 229, 216, 0.5);
+  margin: 0 0 24px;
+  text-align: center;
+}
+
+/* ── Points block ── */
+.pointsBlock {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  margin-bottom: 24px;
+}
+
+.pointsNumber {
+  font-family: var(--heading-text);
+  font-size: 72px;
+  font-weight: bold;
+  color: var(--status-amber);
+  line-height: 1;
+  letter-spacing: 0.02em;
+}
+
+.pointsLabel {
+  font-family: var(--body-text);
+  font-size: 15px;
+  color: rgba(243, 229, 216, 0.5);
+}
+
+.pointsBreakdown {
+  display: flex;
+  gap: 14px;
+  margin-top: 4px;
+  font-family: var(--body-text);
+  font-size: 14px;
+}
+
+.pointsPos {
+  color: rgba(243, 229, 216, 0.6);
+}
+
+.pointsNeg {
+  color: var(--status-red);
+}
+
+/* ── Stat cards ── */
+.statsRow {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 10px;
+  width: 100%;
+  margin-bottom: 16px;
+}
+
+.statCard {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  background: transparent;
+  border: 1px solid rgba(243, 229, 216, 0.15);
+  border-radius: 12px;
+  padding: 14px 8px;
+}
+
+.statValue {
+  font-family: var(--heading-text);
+  font-size: 22px;
+  color: var(--orange-cream);
+  font-weight: bold;
+  letter-spacing: 0.02em;
+}
+
+.statLabel {
+  font-family: var(--body-text);
+  font-size: 12px;
+  color: rgba(243, 229, 216, 0.4);
+}
+
+/* ── Task completion ── */
+.taskSection {
+  width: 100%;
+  border: 1px solid rgba(243, 229, 216, 0.15);
+  border-radius: 12px;
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-bottom: 20px;
+}
+
+.taskSectionTitle {
+  font-family: var(--body-text);
+  font-size: 12px;
+  letter-spacing: 0.08em;
+  color: rgba(243, 229, 216, 0.4);
+  font-weight: 500;
+}
+
+.taskRow {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.taskDot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.taskDotDone {
+  background: var(--status-green);
+}
+
+.taskDotMiss {
+  background: var(--status-red);
+}
+
+.taskText {
+  font-family: var(--body-text);
+  font-size: 15px;
+  color: var(--orange-cream);
+}
+
+.taskTextDone {
+  text-decoration: line-through;
+  color: rgba(243, 229, 216, 0.4);
+}
+
+/* ── Streak pill ── */
+.streakPill {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 10px 28px;
+  border-radius: 24px;
+  background: rgba(76, 206, 122, 0.15);
+  border: 1px solid rgba(76, 206, 122, 0.3);
+  color: var(--status-green);
+  font-family: var(--body-text);
+  font-size: 15px;
+  font-weight: 500;
+  margin-bottom: 20px;
+}
+
+/* ── Carry toggle ── */
+.carryRow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  border: 1px solid rgba(243, 229, 216, 0.15);
+  border-radius: 12px;
+  padding: 16px;
+  margin-bottom: 16px;
+  gap: 16px;
+}
+
+.carryLabel {
+  font-family: var(--body-text);
+  font-size: 15px;
+  color: var(--orange-cream);
+  flex: 1;
+}
+
+.toggle {
+  position: relative;
+  display: inline-block;
+  width: 48px;
+  height: 28px;
+  flex-shrink: 0;
+}
+
+.toggle input {
+  opacity: 0;
+  width: 0;
+  height: 0;
+  position: absolute;
+}
+
+.slider {
+  position: absolute;
+  inset: 0;
+  background: rgba(243, 229, 216, 0.15);
+  border-radius: 28px;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.slider::before {
+  content: "";
+  position: absolute;
+  width: 20px;
+  height: 20px;
+  left: 4px;
+  top: 4px;
+  background: var(--orange-cream);
+  border-radius: 50%;
+  transition: transform 0.2s;
+}
+
+.toggle input:checked + .slider {
+  background: var(--pink);
+}
+
+.toggle input:checked + .slider::before {
+  transform: translateX(20px);
+}
+
+/* ── Buttons ── */
+.dashBtn {
+  width: 100%;
+  height: 56px;
+  background: var(--pink);
+  border: none;
+  border-radius: 12px;
+  color: white;
+  font-family: var(--heading-text);
+  font-size: 18px;
+  font-weight: bold;
+  letter-spacing: 0.04em;
+  cursor: pointer;
+  margin-bottom: 12px;
+  transition: opacity 0.15s;
+}
+
+.dashBtn:hover {
+  opacity: 0.88;
+}
+
+.shareBtn {
+  width: 100%;
+  height: 56px;
+  background: transparent;
+  border: 1px solid rgba(243, 229, 216, 0.2);
+  border-radius: 12px;
+  color: var(--orange-cream);
+  font-family: var(--heading-text);
+  font-size: 18px;
+  font-weight: bold;
+  letter-spacing: 0.04em;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  transition: background 0.15s;
+}
+
+.shareBtn:hover {
+  background: rgba(243, 229, 216, 0.06);
+}

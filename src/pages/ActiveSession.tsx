@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef, useMemo, useCallback} from "react";
-import type { Page } from "../App";
+import type { Page, SessionResult } from "../App";
 import type { SessionConfig } from "../types";
 import styles from "./ActiveSession.module.css";
 import BreakScreen from "./BreakScreen";
@@ -15,6 +15,7 @@ type CaptureEntry = {
 type Props = {
   nav: (p: Page) => void;
   config: SessionConfig;
+  onEnd: (result: SessionResult) => void;
 };
 
 function formatTime(seconds: number): string {
@@ -37,7 +38,7 @@ function getGradeColor(grade: string): string {
   return "var(--status-red)";
 }
 
-export default function ActiveSession({ nav, config }: Props) {
+export default function ActiveSession({ nav, config, onEnd }: Props) {
   const [timeLeft, setTimeLeft] = useState(config.durationMinutes * 60);
   const [todos, setTodos] = useState(config.todos);
   const [trackingPaused, setTrackingPaused] = useState(false);
@@ -84,7 +85,7 @@ export default function ActiveSession({ nav, config }: Props) {
 
   useEffect(() => {
     if (onBreak && !breakOvertime) return
-    if (timeLeft <= 0) { nav("sessionend"); return }
+    if (timeLeft <= 0) { handleEnd(); return }
     const tick = setInterval(() => setTimeLeft(t => t - 1), 1000)
     return () => clearInterval(tick)
   }, [timeLeft, onBreak, breakOvertime])
@@ -170,7 +171,7 @@ export default function ActiveSession({ nav, config }: Props) {
         completedTodos={todos.filter(t => t.completed).length}
         totalTodos={todos.length}
         onResume={endBreak}
-        onEnd={() => nav("sessionend")}
+        onEnd={() => handleEnd()}
       />
     )
   }
@@ -185,6 +186,20 @@ export default function ActiveSession({ nav, config }: Props) {
         : `Break in ${Math.ceil(secsUntilBreak / 60)}m`
 
   const breakBtnDisabled = !breakAvailable || !breakConfig || config.breakMode === "pomodoro"
+
+  const handleEnd = () => {
+    onEnd({
+      subject: config.subject,
+      durationMinutes: config.durationMinutes,
+      focusScore: curvedScore,
+      pointsEarned,
+      breakPenalty: 0,           // wire up if you track break overtime penalty
+      onTaskCount,
+      totalCaptures: captures.length,
+      breakMinutes: Math.round(/* track total break seconds */ 0 / 60),
+      todos,
+  });
+};
 
   return (
     <div className="page">
@@ -361,7 +376,7 @@ export default function ActiveSession({ nav, config }: Props) {
         >
           {breakBtnLabel}
         </button>
-        <button className={styles.endBtn} onClick={() => nav("sessionend")}>End</button>
+        <button className={styles.endBtn} onClick={() => handleEnd()}>End</button>
       </div>
     </div>
 
