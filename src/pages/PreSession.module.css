@@ -73,7 +73,13 @@
   color: var(--orange-cream);
   font-family: var(--body-text);
   font-size: 16px;
-  cursor: pointer; 
+  cursor: pointer;
+  transition: all 0.2s ease-in-out;
+}
+
+.chipSubject:hover {
+  background-color: var(--orange-cream-10);
+  transform: scale(1.05);
 }
 
 .chipSubjectAdd {
@@ -85,7 +91,7 @@
   color: var(--orange-cream);
   font-family: var(--body-text);
   font-size: 16px;
-  cursor: pointer; 
+  cursor: pointer;
   width: 35px;
   height: 35px;
 }
@@ -96,10 +102,51 @@
   background-color: var(--pink-30);
   border-radius: 24px;
   border: 1px solid var(--pink);
-  color: var(--pink); 
+  color: var(--pink);
   font-family: var(--body-text);
   font-size: 16px;
   cursor: pointer;
+}
+
+.subjectInput {
+  display: flex;
+  flex-direction: row;
+  border: none;
+  height: 40px;
+  padding: 0;
+  background-color: transparent;
+  color: var(--orange-cream);
+  font-family: var(--body-text);
+  font-size: 16px;
+  gap: 10px;
+  margin-top: 10px;
+}
+
+.subjectInput > input {
+  flex: 1;
+  border: none;
+  padding: 6px 12px;
+  background-color: var(--orange-cream-10);
+  color: var(--orange-cream);
+  font-family: var(--body-text);
+  font-size: 16px;
+  border-radius: 8px;
+  border: 1px solid var(--orange-cream-70);
+}
+
+.subjectInput > button {
+  border: none;
+  background-color: transparent;
+  color: var(--orange-cream);
+  font-family: var(--body-text);
+  font-size: 16px;
+  border: 1px solid var(--orange-cream-50);
+  border-radius: 8px;
+  cursor: pointer;
+  align-items: center;
+  justify-content: center;
+  width: 80px;
+  height: 40px;
 }
 
 .chipDuration {
@@ -112,6 +159,12 @@
   font-family: var(--body-text);
   font-size: 16px;
   cursor: pointer;
+  transition: all 0.2s ease-in-out;
+}
+
+.chipDuration:hover {
+  background-color: var(--orange-cream-10);
+  transform: scale(1.05);
 }
 
 .chipDurationActive {
@@ -138,7 +191,7 @@
 }
 
 .customDurationInput::placeholder {
-    color: var(--orange-cream-70);
+  color: var(--orange-cream-70);
 }
 
 .chipBreak {
@@ -153,7 +206,13 @@
   font-size: 16px;
   cursor: pointer;
   text-align: left;
-  width: calc(50% - 6px)
+  width: calc(50% - 6px);
+  transition: all 0.2s ease-in-out;
+}
+
+.chipBreak:hover {
+  background-color: var(--orange-cream-10);
+  transform: scale(1.02);
 }
 
 .chipBreakActive {
@@ -179,49 +238,54 @@
 }
 
 .breakText {
-    color: var(--orange-cream-50);
+  color: var(--orange-cream-50);
 }
 
 .todoInput {
-    display: flex;
-    flex-direction: row;
-    border: none;
-    height: 40px;
-    padding: 0;
-    background-color: transparent;
-    color: var(--orange-cream);
-    font-family: var(--body-text);
-    font-size: 16px; 
-    gap: 10px;
+  display: flex;
+  flex-direction: row;
+  border: none;
+  height: 40px;
+  padding: 0;
+  background-color: transparent;
+  color: var(--orange-cream);
+  font-family: var(--body-text);
+  font-size: 16px;
+  gap: 10px;
 }
 
 .todoInput > input {
-    flex: 1;
-    border: none;
-    padding: 6px 12px;
-    background-color: var(--orange-cream-10);
-    color: var(--orange-cream);
-    font-family: var(--body-text);
-    font-size: 16px;
-    border-radius: 8px;
-    border: 1px solid var(--orange-cream-70);
+  flex: 1;
+  border: none;
+  padding: 6px 12px;
+  background-color: var(--orange-cream-10);
+  color: var(--orange-cream);
+  font-family: var(--body-text);
+  font-size: 16px;
+  border-radius: 8px;
+  border: 1px solid var(--orange-cream-70);
 }
 
 .todoInput > button {
-    border: none;
-    background-color: transparent;
-    color: var(--orange-cream);
-    font-family: var(--body-text);
-    font-size: 16px;
-    border: 1px solid var(--orange-cream-50);
-    border-radius: 8px;   
-    cursor: pointer;
-    padding: 11px;
-    align-items: center;
-    justify-content: center;
-    width: 40px;
-    height: 40px;
-  }
+  border: none;
+  background-color: transparent;
+  color: var(--orange-cream);
+  font-family: var(--body-text);
+  font-size: 16px;
+  border: 1px solid var(--orange-cream-50);
+  border-radius: 8px;
+  cursor: pointer;
+  padding: 11px;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  transition: all 0.2s ease-in-out;
+}
+
+.todoInput > button:hover {
+  background-color: var(--orange-cream-10);
+}
 
 .todoInput > button > img {
   align-self: center;
@@ -230,52 +294,51 @@
 }
 
 .todoInput > input::placeholder {
-    color: var(--orange-cream-70);
+  color: var(--orange-cream-70);
 }
 
 .todoItem {
-    display: flex;
-    border: 1px solid var(--orange-cream-50);
-    padding: 12px 0 12px 12px;
-    gap: 10px;
-    border-radius: 8px;
-    color: var(--orange-cream-50);
-    font-family: var(--body-text);
-    font-size: 16px;
-    height: 40px;
-    align-items: center;
+  display: flex;
+  border: 1px solid var(--orange-cream-50);
+  padding: 12px 0 12px 12px;
+  gap: 10px;
+  border-radius: 8px;
+  color: var(--orange-cream-50);
+  font-family: var(--body-text);
+  font-size: 16px;
+  height: 40px;
+  align-items: center;
 }
 
 .todoItem > span {
-    padding: 6px 12px;
-    color: var(--orange-cream-50);
-    font-family: var(--body-text);
-    font-size: 16px;
-    flex: 1;
-    display: flex;
+  padding: 6px 12px;
+  color: var(--orange-cream-50);
+  font-family: var(--body-text);
+  font-size: 16px;
+  flex: 1;
+  display: flex;
 }
 
 .todoItem > button {
-    border: none;
-    padding: 12px;
-    background-color: transparent;
-    color: var(--orange-cream-50);
-    font-family: var(--body-text);
-    font-size: 18px;
-    height: 32px;
-    width: 32px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    cursor: pointer;
-    margin-right: 3px; 
-    border-radius: 16px;
+  border: none;
+  padding: 12px;
+  background-color: transparent;
+  color: var(--orange-cream-50);
+  font-family: var(--body-text);
+  font-size: 18px;
+  height: 32px;
+  width: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  margin-right: 3px;
+  border-radius: 16px;
 }
 
 .todoItem > button:hover {
-    background-color: var(--orange-cream-10);
+  background-color: var(--orange-cream-10);
 }
-
 
 .toggleRow {
   display: flex;
@@ -291,7 +354,7 @@
 .toggleLeft {
   display: flex;
   flex-direction: row;
-  gap: 12px
+  gap: 12px;
 }
 
 .toggleText {
@@ -310,9 +373,7 @@
 .toggleDesc {
   font-size: 16px;
   color: var(--orange-cream-50);
-
 }
-
 
 .toggle {
   position: relative;
@@ -337,6 +398,9 @@
   cursor: pointer;
   transition: all 0.2s;
 }
+.slider:hover {
+  transform: scale(1.08);
+}
 
 .slider::before {
   content: "";
@@ -359,23 +423,29 @@
 }
 
 .startButton {
-    background-color: var(--pink);
-    color: white;
-    border: none;
-    border-radius: 12px;
-    height: 60px;
-    width: 100%;
-    font-size: 24px;
-    font-family: var(--heading-text);
-    letter-spacing: 0.05em;
-    font-weight: bold;
-    cursor: pointer;
+  background-color: var(--pink);
+  color: white;
+  border: none;
+  border-radius: 12px;
+  height: 60px;
+  width: 100%;
+  font-size: 24px;
+  font-family: var(--heading-text);
+  letter-spacing: 0.05em;
+  font-weight: bold;
+  cursor: pointer;
+  transition: all 0.2s ease-in-out;
+}
+
+.startButton:hover {
+  transform: scale(1.02);
 }
 
 .startButton:disabled {
-    background-color: var(--pink-30);
-    color: var(--pink-50);
-    cursor: not-allowed;
+  background-color: var(--pink-30);
+  color: var(--pink-50);
+  cursor: not-allowed;
+  transform: none;
 }
 
 .trackingEye {

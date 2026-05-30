@@ -27,6 +27,7 @@ export type Theme = {
     '--pink-90': string
     '--status-green': string
     '--status-red': string
+    '--status-red-background': string
     '--status-amber': string
     '--headerbtn-bg': string
     '--captures-statusOn': string
@@ -68,6 +69,7 @@ export const themes: Record<string, Theme> = {
       '--pink-90': 'rgba(207, 110, 131, 0.9)',
       '--status-green':    '#4CCE7A',
       '--status-red':      '#E05555',
+      '--status-red-background':'rgba(143, 19, 19, 0.2)',
       '--status-amber':    '#E6A817',
       '--headerbtn-bg': 'rgba(79, 79, 79, 0.2)',
       '--captures-statusOn': 'rgba(76, 206, 122, 0.15)',
