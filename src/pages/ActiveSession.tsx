@@ -1,7 +1,8 @@
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, useMemo, useCallback} from "react";
 import type { Page } from "../App";
 import type { SessionConfig } from "../types";
 import styles from "./ActiveSession.module.css";
+import BreakScreen from "./BreakScreen";
 
 type CaptureLabel = "on_task" | "off_task" | "ambiguous";
 
@@ -41,8 +42,10 @@ export default function ActiveSession({ nav, config }: Props) {
   const [todos, setTodos] = useState(config.todos);
   const [trackingPaused, setTrackingPaused] = useState(false);
   const [onBreak, setOnBreak] = useState(false);
+  const [breakElapsed, setBreakElapsed] = useState(0) 
   const [scrolled, setScrolled] = useState(false);
   const scrollRef = useRef<HTMLDivElement>(null);
+  const timeLeftAtLastBreakEnd = useRef(config.durationMinutes * 60)
 
   const [captures, setCaptures] = useState<CaptureEntry[]>([
     { id: "1", label: "on_task", text: `${config.subject} PDF: Chapter 5` },
@@ -59,15 +62,57 @@ export default function ActiveSession({ nav, config }: Props) {
     { id: "12", label: "off_task", text: "YouTube video feed" },
   ]);
 
-  useEffect(() => {
-    if (onBreak) return;
-    if (timeLeft <= 0) {
-      nav("sessionend");
-      return;
+  const breakConfig = useMemo(() => {
+    const d = config.durationMinutes
+    if (d <= 30) return null  // no break for short sessions
+    if (config.breakMode === "pomodoro") {
+      return d >= 90
+        ? { intervalSecs: 0.1 * 60, breakSecs: 1 * 60 }
+        : { intervalSecs: 1 * 60, breakSecs: 1 * 60 }
     }
-    const tick = setInterval(() => setTimeLeft((t) => t - 1), 1000);
-    return () => clearInterval(tick);
-  }, [timeLeft, onBreak]);
+    // manual
+    return d > 60
+      ? { intervalSecs: 45 * 60, breakSecs: 10 * 60 }
+      : { intervalSecs: 25 * 60, breakSecs: 5 * 60 }
+  }, [config.durationMinutes, config.breakMode])
+
+  const totalSeconds = config.durationMinutes * 60
+  const studySinceLastBreak = timeLeftAtLastBreakEnd.current - timeLeft
+  const breakOvertime = onBreak && !!breakConfig && breakElapsed > breakConfig.breakSecs
+  const breakAvailable = !!breakConfig && !onBreak && studySinceLastBreak >= (breakConfig?.intervalSecs ?? Infinity)
+  const secsUntilBreak = breakConfig ? Math.max(0, breakConfig.intervalSecs - studySinceLastBreak) : 0
+
+  useEffect(() => {
+    if (onBreak && !breakOvertime) return
+    if (timeLeft <= 0) { nav("sessionend"); return }
+    const tick = setInterval(() => setTimeLeft(t => t - 1), 1000)
+    return () => clearInterval(tick)
+  }, [timeLeft, onBreak, breakOvertime])
+
+  useEffect(() => { //break elapsed counts up
+    if (!onBreak) return
+    const tick = setInterval(() => setBreakElapsed(t => t + 1), 1000)
+    return () => clearInterval(tick)
+  }, [onBreak])
+
+  useEffect(() => { //pomodoro auto-break logic
+    if (config.breakMode !== "pomodoro" || !breakConfig || onBreak || timeLeft <= 0) return
+    if (studySinceLastBreak >= breakConfig.intervalSecs) {
+      startBreak()
+    }
+  }, [timeLeft])
+
+  useEffect(() => { // add off-task captures every 30s during break
+    if (!breakOvertime) return
+    const tick = setInterval(() => {
+      setCaptures(prev => [...prev, {
+        id: Date.now().toString(),
+        label: "off_task" as CaptureLabel,
+        text: "Break overtime",
+      }])
+    }, 30_000)
+    return () => clearInterval(tick)
+  }, [breakOvertime])
 
   const handleScroll = () => {
     if (!scrollRef.current) return;
@@ -84,19 +129,15 @@ export default function ActiveSession({ nav, config }: Props) {
       ? 100
       : Math.round((onTaskCount / captures.length) * 100);
 
-  // Curve: square root — rewards consistency, softens occasional slip
   const curvedScore = Math.round(Math.sqrt(focusScore / 100) * 100);
   const grade = getGrade(curvedScore);
 
-  // Points earned so far
-  const totalSeconds = config.durationMinutes * 60;
   const elapsedMinutes = (totalSeconds - timeLeft) / 60;
   const pointsEarned = Math.max(
     0,
     Math.round(elapsedMinutes * (focusScore / 100) * 2),
   );
 
-  // Current status from last capture
   const lastLabel = captures[captures.length - 1]?.label ?? "on_task";
   const isOnTask = lastLabel !== "off_task";
 
@@ -105,6 +146,45 @@ export default function ActiveSession({ nav, config }: Props) {
       prev.map((t) => (t.id === id ? { ...t, completed: !t.completed } : t)),
     );
   };
+
+  // ── NEW: break functions ──
+  const startBreak = useCallback(() => {
+    setOnBreak(true)
+    setBreakElapsed(0)
+  }, [])
+
+  const endBreak = useCallback(() => {
+    timeLeftAtLastBreakEnd.current = timeLeft
+    setOnBreak(false)
+    setBreakElapsed(0)
+  }, [timeLeft])
+
+  if (onBreak) {
+    return (
+      <BreakScreen
+        breakElapsed={breakElapsed}
+        breakLimitSecs={breakConfig?.breakSecs ?? 300}
+        isOvertime={breakOvertime}
+        focusScore={curvedScore}
+        pointsEarned={pointsEarned}
+        completedTodos={todos.filter(t => t.completed).length}
+        totalTodos={todos.length}
+        onResume={endBreak}
+        onEnd={() => nav("sessionend")}
+      />
+    )
+  }
+
+  // ── Break button label for manual mode ──
+  const breakBtnLabel = !breakConfig
+    ? "No break this session"
+    : config.breakMode === "pomodoro"
+      ? `Auto-break in ${Math.ceil(secsUntilBreak / 60)}m`
+      : breakAvailable
+        ? "Take a break"
+        : `Break in ${Math.ceil(secsUntilBreak / 60)}m`
+
+  const breakBtnDisabled = !breakAvailable || !breakConfig || config.breakMode === "pomodoro"
 
   return (
     <div className="page">
@@ -275,14 +355,13 @@ export default function ActiveSession({ nav, config }: Props) {
       {/* ── Bottom actions ── */}
       <div className={styles.bottomBar}>
         <button
-          className={styles.breakBtn}
-          onClick={() => setOnBreak((b) => !b)}
+          className={`${styles.breakBtn} ${breakBtnDisabled ? styles.breakBtnDisabled : ""}`}
+          onClick={() => !breakBtnDisabled && startBreak()}
+          disabled={breakBtnDisabled}
         >
-          {onBreak ? "Resume session" : "Take a break"}
+          {breakBtnLabel}
         </button>
-        <button className={styles.endBtn} onClick={() => nav("sessionend")}>
-          End
-        </button>
+        <button className={styles.endBtn} onClick={() => nav("sessionend")}>End</button>
       </div>
     </div>
 
