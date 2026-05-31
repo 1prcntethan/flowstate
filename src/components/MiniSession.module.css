@@ -1,0 +1,84 @@
+.container {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  height: 100vh;
+  background: var(--dark-purple);
+  padding: 14px 14px 14px 22px;
+  box-sizing: border-box;
+  -webkit-app-region: drag; /* makes the whole window draggable */
+}
+
+.left {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  -webkit-app-region: drag;
+}
+
+.timer {
+  font-family: var(--heading-text, serif);
+  font-size: 44px;
+  font-weight: bold;
+  color: white;
+  line-height: 1;
+  letter-spacing: 0.02em;
+}
+
+.points {
+  font-family: var(--body-text, sans-serif);
+  font-size: 13px;
+  color: var(--status-amber);
+}
+
+.dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  margin-top: 6px;
+}
+
+.dotOn  { background: var(--status-green); }
+.dotOff { background: var(--status-red); }
+
+/* Buttons must opt out of dragging */
+.right {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  -webkit-app-region: no-drag;
+}
+
+.iconBtn {
+  width: 42px;
+  height: 42px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.08);
+  border: none;
+  color: rgba(255, 255, 255, 0.55);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.15s, color 0.15s;
+}
+
+.iconBtn:hover {
+  background: rgba(255, 255, 255, 0.14);
+  color: white;
+}
+
+.iconBtnActive {
+  background: var(--pink-20);
+  color: var(--pink);
+}
+
+.iconBtnActive:hover {
+  background: var(--pink-30);
+}
+
+.iconBtnEnd:hover {
+  background: rgba(224, 85, 85, 0.2);
+  color: var(--status-red);
+}

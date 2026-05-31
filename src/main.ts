@@ -1,26 +1,28 @@
-import { app, BrowserWindow, Menu } from 'electron';
-import path from 'node:path';
-import started from 'electron-squirrel-startup';
+import { app, BrowserWindow, ipcMain, Menu } from "electron";
+import path from "node:path";
+import started from "electron-squirrel-startup";
 
 // Handle creating/removing shortcuts on Windows when installing/uninstalling.
 if (started) {
   app.quit();
 }
 
+let mainWindow: BrowserWindow | null = null;
+
 const createWindow = () => {
   // Create the browser window.
-  const mainWindow = new BrowserWindow({
+  mainWindow = new BrowserWindow({
     width: 960,
     height: 720,
     resizable: false,
     webPreferences: {
-      preload: path.join(__dirname, 'preload.js'),
+      preload: path.join(__dirname, "preload.js"),
     },
   });
 
-  mainWindow.webContents.on('will-navigate', (e) => {
-      e.preventDefault()
-    })
+  mainWindow.webContents.on("will-navigate", (e) => {
+    e.preventDefault();
+  });
 
   // and load the index.html of the app.
   if (MAIN_WINDOW_VITE_DEV_SERVER_URL) {
@@ -32,32 +34,43 @@ const createWindow = () => {
   }
 
   // Open the DevTools.
-  mainWindow.webContents.openDevTools({mode: 'detach'});
+  mainWindow.webContents.openDevTools({ mode: "detach" });
 };
 
 // This method will be called when Electron has finished
 // initialization and is ready to create browser windows.
 // Some APIs can only be used after this event occurs.
 app.whenReady().then(() => {
-  Menu.setApplicationMenu(null) // Remove default menu, fix later for MAC
-  createWindow()
-})
+  Menu.setApplicationMenu(null); // Remove default menu, fix later for MAC
+  createWindow();
 
+  ipcMain.handle("window:mini", () => {
+    if (!mainWindow) return;
+    mainWindow.setSize(480, 185); // 185 accounts for the title bar height
+    mainWindow.setAlwaysOnTop(true);
+    mainWindow.setResizable(false);
+  });
 
+  ipcMain.handle("window:expand", () => {
+    if (!mainWindow) return;
+    mainWindow.setSize(840, 640);
+    mainWindow.setAlwaysOnTop(false);
+    mainWindow.setResizable(false);
+  });
+});
 
 // Quit when all windows are closed, except on macOS. There, it's common
 // for applications and their menu bar to stay active until the user quits
 // explicitly with Cmd + Q.
-app.on('window-all-closed', () => {
-  if (process.platform !== 'darwin') {
+app.on("window-all-closed", () => {
+  if (process.platform !== "darwin") {
     app.quit();
   }
 });
 
-app.on('activate', () => {
+app.on("activate", () => {
   if (BrowserWindow.getAllWindows().length === 0) {
     createWindow();
-  
   }
 });
 

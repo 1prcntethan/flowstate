@@ -194,6 +194,14 @@
   color: var(--orange-cream-70);
 }
 
+.noBreakNote {
+  font-size: 12px;
+  color: var(--orange-cream-40);
+  font-family: var(--body-text, sans-serif);
+  margin-top: 4px;
+  font-style: italic;
+}
+
 .chipBreak {
   display: flex;
   flex-direction: column;

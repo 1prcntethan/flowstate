@@ -41,16 +41,16 @@ export default function PreSession({ nav, onStart }: Props) {
     const trimmed = subjectInput.trim();
     if (!trimmed || subjects.includes(trimmed)) return;
     setSubjects([...subjects, trimmed]);
-    setSelectedSubjects(prev => [...prev, trimmed]);
+    setSelectedSubjects((prev) => [...prev, trimmed]);
     setSubjectInput("");
     setShowSubjectInput(false);
   };
 
   const toggleSubject = (s: string) => {
-    setSelectedSubjects(prev =>
-      prev.includes(s) ? prev.filter(x => x !== s) : [...prev, s]
+    setSelectedSubjects((prev) =>
+      prev.includes(s) ? prev.filter((x) => x !== s) : [...prev, s],
     );
-  }
+  };
 
   // --- todos ---
   const addTodo = () => {
@@ -100,9 +100,7 @@ export default function PreSession({ nav, onStart }: Props) {
   };
 
   const canStart =
-    selectedSubjects.length > 0 &&
-    getFinalDuration() > 0 &&
-    todos.length > 0;
+    selectedSubjects.length > 0 && getFinalDuration() > 0 && todos.length > 0;
 
   return (
     <div className={`page ${styles.preSessionPage}`}>
@@ -126,7 +124,9 @@ export default function PreSession({ nav, onStart }: Props) {
               <button
                 key={s}
                 className={
-                  selectedSubjects.includes(s) ? styles.chipSubjectActive : styles.chipSubject
+                  selectedSubjects.includes(s)
+                    ? styles.chipSubjectActive
+                    : styles.chipSubject
                 }
                 onClick={() => toggleSubject(s)}
               >
@@ -201,6 +201,14 @@ export default function PreSession({ nav, onStart }: Props) {
               max={480}
             />
           )}
+          {((duration !== null && !showCustomDuration && duration <= 30) ||
+            (showCustomDuration &&
+              parseInt(customDuration) <= 30 &&
+              customDuration !== "")) && (
+            <p className={styles.noBreakNote}>
+              Sessions 30 min or under don't include a break.
+            </p>
+          )}
         </div>
 
         {/* BREAK STYLE */}
@@ -220,8 +228,8 @@ export default function PreSession({ nav, onStart }: Props) {
                 </span>
                 <span className={styles.breakText}>
                   {mode === "pomodoro"
-                    ? "Auto-break every 25 minutes"
-                    : "Take breaks as needed"}
+                    ? "Auto-break 25/5 min, or 50/10 min for longer sessions"
+                    : "Take breaks as needed, unlocks every 25 min or 45 min for longer sessions"}
                 </span>
               </button>
             ))}
@@ -268,10 +276,12 @@ export default function PreSession({ nav, onStart }: Props) {
         <div className={styles.field}>
           <div className={styles.toggleRow}>
             <div className={styles.toggleLeft}>
-              <img className={styles.trackingEye} src="TrackingEye.svg"/>
+              <img className={styles.trackingEye} src="TrackingEye.svg" />
               <div className={styles.toggleText}>
                 <span className={styles.toggleTitle}>Track my screen</span>
-                <span className={styles.toggleDesc}>Focus tracking + full points?????</span>
+                <span className={styles.toggleDesc}>
+                  Focus tracking + full points?????
+                </span>
               </div>
             </div>
             <label className={styles.toggle}>
