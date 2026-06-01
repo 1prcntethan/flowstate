@@ -46,14 +46,14 @@ app.whenReady().then(() => {
 
   ipcMain.handle("window:mini", () => {
     if (!mainWindow) return;
-    mainWindow.setSize(480, 185); // 185 accounts for the title bar height
+    mainWindow.setSize(300, 185); // 185 accounts for the title bar height
     mainWindow.setAlwaysOnTop(true);
     mainWindow.setResizable(false);
   });
 
   ipcMain.handle("window:expand", () => {
     if (!mainWindow) return;
-    mainWindow.setSize(840, 640);
+    mainWindow.setSize(960, 720);
     mainWindow.setAlwaysOnTop(false);
     mainWindow.setResizable(false);
   });
