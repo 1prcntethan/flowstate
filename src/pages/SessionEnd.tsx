@@ -52,7 +52,7 @@ export default function SessionEnd({
 
         {/* ── Card graphic ── */}
         <div className={styles.cardWrap}>
-          <div className={styles.gachaCard} />
+          <div className={styles.gradeCard} />
         </div>
 
         {/* ── Headline ── */}

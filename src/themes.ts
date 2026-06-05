@@ -36,6 +36,7 @@ export type Theme = {
     '--captureOn-border': string
     '--captureOff-bg': string
     '--captureOff-border': string
+    '--gradeCard-bg': string
   }
 }
 
@@ -67,10 +68,10 @@ export const themes: Record<string, Theme> = {
       '--pink-70': 'rgba(207, 110, 131, 0.7)',
       '--pink-80': 'rgba(207, 110, 131, 0.8)',
       '--pink-90': 'rgba(207, 110, 131, 0.9)',
-      '--status-green':    '#4CCE7A',
+      '--status-green':    'rgb(76, 206, 122)',
       '--status-red':      '#E05555',
       '--status-red-background':'rgba(143, 19, 19, 0.2)',
-      '--status-amber':    '#E6A817',
+      '--status-amber':    '#D6A85F',
       '--headerbtn-bg': 'rgba(79, 79, 79, 0.2)',
       '--captures-statusOn': 'rgba(76, 206, 122, 0.15)',
       '--captures-statusOff': 'rgba(224, 85, 85, 0.15)',
@@ -78,6 +79,7 @@ export const themes: Record<string, Theme> = {
       '--captureOff-bg': 'rgba(224, 85, 85, 0.1)',
       '--captureOn-border': 'rgba(76, 206, 122, 0.12)',
       '--captureOff-border': 'rgba(224, 85, 85, 0.2)',
+      '--gradeCard-bg': 'rgba(76, 206, 122, 0.4)',
       }
     },}
   // Future gacha-unlockable themes — define now, ship later

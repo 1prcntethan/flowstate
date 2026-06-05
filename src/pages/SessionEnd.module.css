@@ -24,17 +24,17 @@
 .scrollArea::-webkit-scrollbar-thumb { background: var(--orange-cream-20); border-radius: 2px; }
 .scrollArea::-webkit-scrollbar-thumb:hover { background: var(--orange-cream-50); }
 
-/* ── Gacha card ── */
+/* ── Grade card ── */
 .cardWrap {
   margin-bottom: 20px;
 }
 
-.gachaCard {
+.gradeCard {
   width: 90px;
   height: 120px;
   border-radius: 12px;
-  background: #2d6a4f;
-  border: 1px solid rgba(76, 206, 122, 0.3);
+  background: var(--gradeCard-bg);
+  border: 1px solid var(--status-green);
 }
 
 /* ── Headline ── */
@@ -50,7 +50,7 @@
 .subline {
   font-family: var(--body-text);
   font-size: 15px;
-  color: rgba(243, 229, 216, 0.5);
+  color: var(--orange-cream-50);
   margin: 0 0 24px;
   text-align: center;
 }
@@ -88,7 +88,7 @@
 }
 
 .pointsPos {
-  color: rgba(243, 229, 216, 0.6);
+  color: var(--orange-cream-60);
 }
 
 .pointsNeg {
