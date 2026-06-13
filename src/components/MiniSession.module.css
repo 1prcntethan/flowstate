@@ -94,3 +94,8 @@
   background: rgba(224, 85, 85, 0.2);
   color: var(--status-red);
 }
+
+.iconBtnDisabled {
+  opacity: 0.3;
+  cursor: not-allowed;
+}

@@ -6,7 +6,8 @@ type Props = {
   isOnTask: boolean;
   trackingPaused: boolean;
   onExpand: () => void;
-  onTogglePause: () => void;
+  onBreak: () => void;        // add this
+  breakDisabled: boolean;     // add this
   onEnd: () => void;
 };
 
@@ -22,7 +23,8 @@ export default function MiniSession({
   isOnTask,
   trackingPaused,
   onExpand,
-  onTogglePause,
+  onBreak,
+  breakDisabled,
   onEnd,
 }: Props) {
   return (
@@ -57,9 +59,10 @@ export default function MiniSession({
         </button>
 
         <button
-          className={`${styles.iconBtn} ${trackingPaused ? styles.iconBtnActive : ""}`}
-          onClick={onTogglePause}
-          title={trackingPaused ? "Resume tracking" : "Pause tracking"}
+          className={`${styles.iconBtn} ${breakDisabled ? styles.iconBtnDisabled : ""}`}
+          onClick={onBreak}
+          disabled={breakDisabled}
+          title="Take a break"
         >
           <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor">
             <rect x="6" y="4" width="4" height="16" rx="1" />
