@@ -76,7 +76,7 @@
 .pointsLabel {
   font-family: var(--body-text);
   font-size: 15px;
-  color: rgba(243, 229, 216, 0.5);
+  color: var(--orange-cream-50);
 }
 
 .pointsBreakdown {
@@ -110,7 +110,7 @@
   align-items: center;
   gap: 6px;
   background: transparent;
-  border: 1px solid rgba(243, 229, 216, 0.15);
+  border: 1px solid var(--orange-cream-20);
   border-radius: 12px;
   padding: 14px 8px;
 }
@@ -126,13 +126,13 @@
 .statLabel {
   font-family: var(--body-text);
   font-size: 12px;
-  color: rgba(243, 229, 216, 0.4);
+  color: var(--orange-cream-40);
 }
 
 /* ── Task completion ── */
 .taskSection {
   width: 100%;
-  border: 1px solid rgba(243, 229, 216, 0.15);
+  border: 1px solid var(--orange-cream-20);
   border-radius: 12px;
   padding: 16px;
   display: flex;
@@ -145,7 +145,7 @@
   font-family: var(--body-text);
   font-size: 12px;
   letter-spacing: 0.08em;
-  color: rgba(243, 229, 216, 0.4);
+  color: var(--orange-cream-40);
   font-weight: 500;
 }
 
@@ -178,7 +178,7 @@
 
 .taskTextDone {
   text-decoration: line-through;
-  color: rgba(243, 229, 216, 0.4);
+  color: var(--orange-cream-40);
 }
 
 /* ── Streak pill ── */
@@ -188,8 +188,8 @@
   justify-content: center;
   padding: 10px 28px;
   border-radius: 24px;
-  background: rgba(76, 206, 122, 0.15);
-  border: 1px solid rgba(76, 206, 122, 0.3);
+  background: var(--captures-statusOn);
+  border: 1px solid var(--gradeCard-bg);
   color: var(--status-green);
   font-family: var(--body-text);
   font-size: 15px;
@@ -203,7 +203,7 @@
   align-items: center;
   justify-content: space-between;
   width: 100%;
-  border: 1px solid rgba(243, 229, 216, 0.15);
+  border: 1px solid var(--orange-cream-20);
   border-radius: 12px;
   padding: 16px;
   margin-bottom: 16px;
@@ -235,7 +235,7 @@
 .slider {
   position: absolute;
   inset: 0;
-  background: rgba(243, 229, 216, 0.15);
+  background: var(--orange-cream-20);
   border-radius: 28px;
   cursor: pointer;
   transition: background 0.2s;
@@ -264,7 +264,7 @@
 /* ── Buttons ── */
 .dashBtn {
   width: 100%;
-  height: 56px;
+  height: 200px;
   background: var(--pink);
   border: none;
   border-radius: 12px;
@@ -286,7 +286,7 @@
   width: 100%;
   height: 56px;
   background: transparent;
-  border: 1px solid rgba(243, 229, 216, 0.2);
+  border: 1px solid var(--orange-cream-20);
   border-radius: 12px;
   color: var(--orange-cream);
   font-family: var(--heading-text);
@@ -302,5 +302,5 @@
 }
 
 .shareBtn:hover {
-  background: rgba(243, 229, 216, 0.06);
+  background: var(--orange-cream-10);
 }

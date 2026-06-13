@@ -92,6 +92,9 @@ export default function ActiveSession({ nav, config, onEnd }: Props) {
     ? Math.max(0, breakConfig.intervalSecs - studySinceLastBreak)
     : 0;
 
+  const breakBtnDisabled =
+    !breakAvailable || !breakConfig || config.breakMode === "pomodoro";
+
   useEffect(() => {
     if (onBreak && !breakOvertime) return;
     if (timeLeft <= 0) {
@@ -174,6 +177,8 @@ export default function ActiveSession({ nav, config, onEnd }: Props) {
 
   // ── NEW: break functions ──
   const startBreak = useCallback(() => {
+    window.electronAPI?.setExpandMode?.().catch?.(() => {});  // ← add this line
+    setIsMiniMode(false);
     setOnBreak(true);
     setBreakElapsed(0);
   }, []);
@@ -184,10 +189,18 @@ export default function ActiveSession({ nav, config, onEnd }: Props) {
     setBreakElapsed(0);
   }, [timeLeft]);
 
-  const handleEnd = () => {
+  const handleExpand = async () => {
+    try {
+      await window.electronAPI?.setExpandMode();
+    } catch {}
+    setIsMiniMode(false);
+  };
+
+  const handleEnd = async () => {
+    await handleExpand();
     onEnd({
       subject: config.subject,
-      durationMinutes: config.durationMinutes,
+      durationMinutes: Math.round(elapsedMinutes),
       focusScore: curvedScore,
       pointsEarned,
       breakPenalty: 0, // wire up if you track break overtime penalty
@@ -205,13 +218,6 @@ export default function ActiveSession({ nav, config, onEnd }: Props) {
     setIsMiniMode(true);
   };
 
-  const handleExpand = async () => {
-    try {
-      await window.electronAPI?.setExpandMode();
-    } catch {}
-    setIsMiniMode(false);
-  };
-
   if (isMiniMode) {
     return (
       <>
@@ -221,8 +227,12 @@ export default function ActiveSession({ nav, config, onEnd }: Props) {
           isOnTask={isOnTask}
           trackingPaused={trackingPaused}
           onExpand={handleExpand}
-          onTogglePause={() => setTrackingPaused((p) => !p)}
-          onEnd={() => setShowEndConfirm(true)}
+          onBreak={startBreak}
+          breakDisabled={breakBtnDisabled}
+          onEnd={async () => {
+            await handleExpand();
+            setShowEndConfirm(true);
+          }}
         />
         {showEndConfirm && (
           <EndConfirmModal
@@ -268,9 +278,6 @@ export default function ActiveSession({ nav, config, onEnd }: Props) {
       : breakAvailable
         ? "Take a break"
         : `Break in ${Math.ceil(secsUntilBreak / 60)}m`;
-
-  const breakBtnDisabled =
-    !breakAvailable || !breakConfig || config.breakMode === "pomodoro";
 
   return (
     <div className="page">
