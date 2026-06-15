@@ -8,7 +8,7 @@ import { SessionConfig } from "./types";
 import { useTheme } from './useTheme'
 import type { User, TodoItem } from './types'
 
-export type Page = "dashboard" | "presession" | "session" | "sessionend"; 
+export type Page = "dashboard" | "presession" | "session" | "sessionend" | "settings"; 
 
 // Shape passed from ActiveSession → SessionEnd
 export type SessionResult = {
@@ -62,4 +62,5 @@ export default function App() {
       streak={user.streak}
     />
   );
+  if (page === 'settings') return <Settings nav={nav} user={user} />
 }
