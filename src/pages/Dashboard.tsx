@@ -14,7 +14,7 @@ export default function Dashboard({ nav, user }: Props) {
   return (
     <div className="page">
       <NavBarTop currentCoins={user.coins} streak={user.streak} userName={user.name} />
-      <NavBarBottom />
+      <NavBarBottom nav={nav} />
       <div className={styles.dashboardContent}>
         <button
           className={styles.startSessionButton}

@@ -1,7 +1,7 @@
 import { useState } from "react";
-import styles from "./Settings.module.css";
 import type { Page } from "../App";
 import type { User } from "../types";
+import styles from "./Settings.module.css";
 
 type Props = {
   nav: (p: Page) => void;

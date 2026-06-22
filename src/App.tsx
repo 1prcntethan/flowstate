@@ -3,12 +3,18 @@ import "./index.css";
 import Dashboard from "./pages/Dashboard";
 import PreSession from "./pages/PreSession";
 import ActiveSession from "./pages/ActiveSession";
-import SessionEnd from './pages/SessionEnd'
+import SessionEnd from "./pages/SessionEnd";
+import Settings from "./pages/Settings";
 import { SessionConfig } from "./types";
-import { useTheme } from './useTheme'
-import type { User, TodoItem } from './types'
+import { useTheme } from "./useTheme";
+import type { User, TodoItem } from "./types";
 
-export type Page = "dashboard" | "presession" | "session" | "sessionend" | "settings"; 
+export type Page =
+  | "dashboard"
+  | "presession"
+  | "session"
+  | "sessionend"
+  | "settings";
 
 // Shape passed from ActiveSession → SessionEnd
 export type SessionResult = {
@@ -24,18 +30,21 @@ export type SessionResult = {
 };
 
 export default function App() {
-  const { themeId, setThemeId } = useTheme()  // applies on mount + change
+  const { themeId, setThemeId } = useTheme(); // applies on mount + change
 
-  const [page, setPage] = useState<Page>("dashboard")
+  const [page, setPage] = useState<Page>("dashboard");
   const [user, setUser] = useState<User>({
-    id: 'local',
-    name: 'Alexis',
+    id: "local",
+    name: "Alexis",
     coins: 320,
     streak: 7,
-  })
-  const [sessionConfig, setSessionConfig] = useState<SessionConfig | null>(null)
-    const [sessionResult, setSessionResult] = useState<SessionResult | null>(null)
-
+  });
+  const [sessionConfig, setSessionConfig] = useState<SessionConfig | null>(
+    null,
+  );
+  const [sessionResult, setSessionResult] = useState<SessionResult | null>(
+    null,
+  );
 
   const nav = (p: Page) => setPage(p);
 
