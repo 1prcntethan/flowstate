@@ -46,16 +46,18 @@ app.whenReady().then(() => {
 
   ipcMain.handle("window:mini", () => {
     if (!mainWindow) return;
-    mainWindow.setSize(300, 185); // 185 accounts for the title bar height
+    mainWindow.setResizable(true); // ← unlock first
+    mainWindow.setSize(300, 185);
     mainWindow.setAlwaysOnTop(true);
-    mainWindow.setResizable(false);
+    mainWindow.setResizable(false); // ← lock again
   });
 
   ipcMain.handle("window:expand", () => {
     if (!mainWindow) return;
+    mainWindow.setResizable(true); // ← unlock first
     mainWindow.setSize(960, 720);
     mainWindow.setAlwaysOnTop(false);
-    mainWindow.setResizable(false);
+    mainWindow.setResizable(false); // ← lock again
   });
 });
 
