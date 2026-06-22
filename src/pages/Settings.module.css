@@ -1,0 +1,325 @@
+.settingsPage {
+  width: 960px;
+  height: 720px;
+  display: flex;
+  overflow: hidden;
+  background: var(--dark-purple);
+}
+
+/* ── Sidebar ── */
+.sidebar {
+  width: 220px;
+  flex-shrink: 0;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  padding: 40px 20px;
+  border-right: 1px solid var(--orange-cream-20);
+  height: 100%;
+  box-sizing: border-box;
+}
+
+.sideNav {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+.navItem {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  background: transparent;
+  border: none;
+  color: var(--orange-cream);
+  font-family: var(--body-text);
+  font-size: 18px;
+  cursor: pointer;
+  padding: 0;
+  text-align: left;
+}
+
+.navDot {
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  background: var(--orange-cream-30);
+  flex-shrink: 0;
+  transition: background 0.15s;
+}
+
+.navDotActive {
+  background: var(--orange-cream);
+}
+
+.signOutBtn {
+  background: transparent;
+  border: none;
+  color: var(--orange-cream-50);
+  font-family: var(--body-text);
+  font-size: 15px;
+  cursor: pointer;
+  padding: 0;
+  text-align: left;
+  align-self: flex-start;
+}
+
+.signOutBtn:hover {
+  color: var(--orange-cream);
+}
+
+/* ── Content ── */
+.content {
+  flex: 1;
+  overflow-y: auto;
+  overflow-x: hidden;
+  padding: 40px;
+  display: flex;
+  flex-direction: column;
+  gap: 32px;
+  box-sizing: border-box;
+}
+
+.content::-webkit-scrollbar { width: 4px; }
+.content::-webkit-scrollbar-track { background: transparent; }
+.content::-webkit-scrollbar-thumb { background: var(--orange-cream-20); border-radius: 2px; }
+.content::-webkit-scrollbar-thumb:hover { background: var(--orange-cream-50); }
+
+/* ── Section ── */
+.section {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.sectionTitle {
+  font-family: var(--body-text);
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  color: var(--orange-cream);
+}
+
+/* ── Profile ── */
+.profileRow {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.avatarBtn {
+  width: 64px;
+  height: 64px;
+  border-radius: 12px;
+  background: var(--gradeCard-bg);
+  border: 1px solid var(--status-green);
+  color: var(--status-green);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  flex-shrink: 0;
+}
+
+.profileInfo {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.username {
+  font-family: var(--body-text);
+  font-size: 17px;
+  font-weight: 700;
+  color: var(--orange-cream);
+}
+
+.email {
+  font-family: var(--body-text);
+  font-size: 15px;
+  color: var(--orange-cream-60);
+}
+
+.linkBtn {
+  background: transparent;
+  border: none;
+  padding: 0;
+  text-align: left;
+  font-family: var(--body-text);
+  font-size: 14px;
+  color: var(--orange-cream-60);
+  cursor: pointer;
+  text-decoration: underline;
+  width: fit-content;
+}
+
+.linkBtn:hover {
+  color: var(--orange-cream);
+}
+
+/* ── Chips ── */
+.chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.chip {
+  padding: 8px 20px;
+  border-radius: 20px;
+  background: var(--pink-10);
+  border: 1px solid var(--pink-40);
+  color: var(--pink);
+  font-family: var(--body-text);
+  font-size: 14px;
+  cursor: pointer;
+}
+
+.chipAdd {
+  padding: 8px 20px;
+  border-radius: 20px;
+  background: transparent;
+  border: 1px solid var(--orange-cream-30);
+  color: var(--orange-cream);
+  font-family: var(--body-text);
+  font-size: 14px;
+  cursor: pointer;
+}
+
+.chipAdd:hover {
+  background: var(--orange-cream-10);
+}
+
+/* ── Rows ── */
+.row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.subRow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-top: 4px;
+}
+
+.rowLabel {
+  font-family: var(--body-text);
+  font-size: 15px;
+  color: var(--orange-cream);
+}
+
+.helperText {
+  font-family: var(--body-text);
+  font-size: 13px;
+  color: var(--orange-cream-40);
+}
+
+/* ── Segmented control ── */
+.segmented {
+  display: flex;
+  gap: 18px;
+}
+
+.segment {
+  background: transparent;
+  border: none;
+  font-family: var(--body-text);
+  font-size: 15px;
+  color: var(--orange-cream-40);
+  cursor: pointer;
+  padding: 0;
+}
+
+.segmentActive {
+  color: var(--orange-cream);
+}
+
+/* ── Toggle ── */
+.toggle {
+  position: relative;
+  display: inline-block;
+  width: 48px;
+  height: 28px;
+  flex-shrink: 0;
+}
+
+.toggle input {
+  opacity: 0;
+  width: 0;
+  height: 0;
+  position: absolute;
+}
+
+.slider {
+  position: absolute;
+  inset: 0;
+  background: var(--orange-cream-20);
+  border-radius: 28px;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.slider::before {
+  content: "";
+  position: absolute;
+  width: 20px;
+  height: 20px;
+  left: 4px;
+  top: 4px;
+  background: var(--orange-cream);
+  border-radius: 50%;
+  transition: transform 0.2s;
+}
+
+.toggle input:checked + .slider {
+  background: var(--pink);
+}
+
+.toggle input:checked + .slider::before {
+  transform: translateX(20px);
+}
+
+/* ── Data & Privacy links/actions ── */
+.textLink {
+  background: transparent;
+  border: none;
+  padding: 0;
+  text-align: left;
+  font-family: var(--body-text);
+  font-size: 15px;
+  color: var(--orange-cream);
+  cursor: pointer;
+  width: fit-content;
+}
+
+.textLink:hover {
+  color: var(--orange-cream-70);
+}
+
+.actionRow {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  background: transparent;
+  border: none;
+  padding: 0;
+  font-family: var(--body-text);
+  font-size: 15px;
+  color: var(--orange-cream);
+  cursor: pointer;
+  width: fit-content;
+}
+
+.actionAmber {
+  color: var(--status-amber);
+}
+
+.actionRed {
+  color: var(--status-red);
+}
+
+.actionRow:hover {
+  opacity: 0.8;
+}
