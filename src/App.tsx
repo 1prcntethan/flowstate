@@ -53,32 +53,23 @@ export default function App() {
     setPage("sessionend");
   };
 
-  if (page === "dashboard") return <Dashboard nav={nav} user={user} />;
-  if (page === "presession")
-    return <PreSession nav={nav} onStart={setSessionConfig} />;
-  if (page === "session")
-    return (
-      <ActiveSession
-        nav={nav}
-        config={sessionConfig!}
-        onEnd={handleSessionEnd}
-      />
-    );
-  if (page === "sessionend")
-    return (
-      <SessionEnd
-        nav={nav}
-        subject={sessionResult?.subject ?? ""}
-        durationMinutes={sessionResult?.durationMinutes ?? 0}
-        focusScore={sessionResult?.focusScore ?? 0}
-        pointsEarned={sessionResult?.pointsEarned ?? 0}
-        breakPenalty={sessionResult?.breakPenalty ?? 0}
-        onTaskCount={sessionResult?.onTaskCount ?? 0}
-        totalCaptures={sessionResult?.totalCaptures ?? 0}
-        breakMinutes={sessionResult?.breakMinutes ?? 0}
-        todos={sessionResult?.todos ?? []}
-        streak={user.streak}
-      />
-    );
-  if (page === "settings") return <Settings nav={nav} user={user} />;
+  if (page === 'dashboard')  return <Dashboard nav={nav} user={user} />
+  if (page === 'presession') return <PreSession nav={nav} onStart={setSessionConfig} />
+  if (page === 'session')    return <ActiveSession nav={nav} config={sessionConfig!} onEnd={handleSessionEnd} />
+  if (page === 'sessionend') return (
+    <SessionEnd
+      nav={nav}
+      subject={sessionResult?.subject ?? ""}
+      durationMinutes={sessionResult?.durationMinutes ?? 0}
+      focusScore={sessionResult?.focusScore ?? 0}
+      pointsEarned={sessionResult?.pointsEarned ?? 0}
+      breakPenalty={sessionResult?.breakPenalty ?? 0}
+      onTaskCount={sessionResult?.onTaskCount ?? 0}
+      totalCaptures={sessionResult?.totalCaptures ?? 0}
+      breakMinutes={sessionResult?.breakMinutes ?? 0}
+      todos={sessionResult?.todos ?? []}
+      streak={user.streak}
+    />
+  );
+  if (page === 'settings') return <Settings nav={nav} user={user} />
 }
