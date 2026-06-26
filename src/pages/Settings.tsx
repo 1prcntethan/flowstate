@@ -14,11 +14,10 @@ type ThemeMode = "light" | "dark" | "system";
 const NAV_SECTIONS = [
   "Profile",
   "Subjects",
-  "Tracking",
-  "Privacy",
-  "Notifications",
-  "App",
-  "History",
+  // "Tracking",
+  // "Notifications",
+  // "App",
+  "Data & Privacy",
 ] as const;
 
 const DEFAULT_SUBJECTS = ["Math", "CS", "History"];
@@ -26,6 +25,7 @@ const DEFAULT_APPS = ["Spotify", "Apple Music", "Finder"];
 
 export default function Settings({ nav, user }: Props) {
   const [activeSection, setActiveSection] = useState<string>("Profile");
+  const [showCollectModal, setShowCollectModal] = useState(false);
 
   const [subjects, setSubjects] = useState<string[]>(DEFAULT_SUBJECTS);
   const [studyApps, setStudyApps] = useState<string[]>(DEFAULT_APPS);
@@ -114,7 +114,7 @@ export default function Settings({ nav, user }: Props) {
           </div>
         </section>
 
-        {/* TRACKING */}
+        {/* TRACKING
         <section id="section-Tracking" className={styles.section}>
           <span className={styles.sectionTitle}>TRACKING</span>
 
@@ -154,18 +154,9 @@ export default function Settings({ nav, user }: Props) {
           <span className={styles.helperText}>
             These apps are never counted as off task
           </span>
-        </section>
+        </section> */}
 
-        {/* PRIVACY (placeholder section so nav anchor works) */}
-        <section id="section-Privacy" className={styles.section}>
-          <span className={styles.sectionTitle}>PRIVACY</span>
-          <span className={styles.helperText}>
-            Screenshots are processed locally and never leave your device
-            unless you choose to sync session summaries.
-          </span>
-        </section>
-
-        {/* NOTIFICATIONS */}
+        {/* NOTIFICATIONS
         <section id="section-Notifications" className={styles.section}>
           <span className={styles.sectionTitle}>NOTIFICATIONS</span>
 
@@ -191,9 +182,9 @@ export default function Settings({ nav, user }: Props) {
             <span className={styles.rowLabel}>Remind me at</span>
             <ToggleSwitch checked={notifRemind} onChange={setNotifRemind} />
           </div>
-        </section>
+        </section> */}
 
-        {/* APP */}
+        {/* APP
         <section id="section-App" className={styles.section}>
           <span className={styles.sectionTitle}>APP</span>
 
@@ -231,22 +222,22 @@ export default function Settings({ nav, user }: Props) {
               </button>
             </div>
           </div>
-        </section>
+        </section> */}
 
         {/* DATA & PRIVACY */}
         <section id="section-History" className={styles.section}>
           <span className={styles.sectionTitle}>DATA &amp; PRIVACY</span>
 
-          <button className={styles.textLink}>What we collect</button>
+          <button className={styles.textLink} onClick={() => setShowCollectModal(true)}>What we collect</button>
 
-          <button className={styles.actionRow}>
+          {/* <button className={styles.actionRow}>
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
               <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
               <polyline points="17 8 12 3 7 8" />
               <line x1="12" y1="3" x2="12" y2="15" />
             </svg>
             Export session data to CSV
-          </button>
+          </button> */}
 
           <button className={`${styles.actionRow} ${styles.actionAmber}`}>
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
@@ -267,6 +258,53 @@ export default function Settings({ nav, user }: Props) {
 
         <div style={{ height: 40 }} />
       </div>
+
+      {/* ── What We Collect modal ── */}
+      {showCollectModal && (
+        <div className={styles.modalOverlay} onClick={() => setShowCollectModal(false)}>
+          <div className={styles.modalCard} onClick={(e) => e.stopPropagation()}>
+            <button className={styles.modalClose} onClick={() => setShowCollectModal(false)}>
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <line x1="18" y1="6" x2="6" y2="18" />
+                <line x1="6" y1="6" x2="18" y2="18" />
+              </svg>
+            </button>
+
+            <h2 className={styles.modalTitle}>What we collect</h2>
+
+            <section className={styles.modalSection}>
+              <h3 className={styles.modalSectionHead}>Stored locally on your computer</h3>
+              <p className={styles.modalText}>
+                <strong>Screenshots</strong> — screenshots taken during study sessions are saved only on your device. 
+                They are never uploaded, transmitted, or accessible by anyone else.
+              </p>
+              <p className={styles.modalText}>
+                <strong>Session details</strong> — information about what you were doing during a session 
+                (e.g. the specific YouTube video you watched, websites visited, or apps used) stays on your machine. 
+                We don&rsquo;t collect or store this data on our servers.
+              </p>
+            </section>
+
+            <section className={styles.modalSection}>
+              <h3 className={styles.modalSectionHead}>Stored in our database</h3>
+              <p className={styles.modalText}>
+                <strong>Quantitative data only</strong> — we record high-level metrics like total focus time, 
+                focus percentage, and whether you were on-task or off-task during a given interval. 
+                No personal content, no URLs, and no app details.
+              </p>
+            </section>
+
+            <section className={styles.modalSection}>
+              <h3 className={styles.modalSectionHead}>What this means for you</h3>
+              <p className={styles.modalText}>
+                You have full privacy over your study activity. Your screenshots and browsing context 
+                never leave your computer. The only data we ever see are the numbers that help you 
+                track your productivity over time.
+              </p>
+            </section>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
