@@ -51,21 +51,7 @@ export default function ActiveSession({ nav, config, onEnd }: Props) {
   const timeLeftAtLastBreakEnd = useRef(config.durationMinutes * 60);
   const [showEndConfirm, setShowEndConfirm] = useState(false);
   const [isMiniMode, setIsMiniMode] = useState(false);
-
-  const [captures, setCaptures] = useState<CaptureEntry[]>([
-    { id: "1", label: "on_task", text: `${config.subject} PDF: Chapter 5` },
-    { id: "2", label: "on_task", text: `${config.subject} PDF: Chapter 5` },
-    { id: "3", label: "off_task", text: "YouTube video feed" },
-    { id: "4", label: "on_task", text: `${config.subject} PDF: Chapter 5` },
-    { id: "5", label: "on_task", text: `${config.subject} PDF: Chapter 5` },
-    { id: "6", label: "on_task", text: `${config.subject} PDF: Chapter 5` },
-    { id: "7", label: "on_task", text: `${config.subject} PDF: Chapter 5` },
-    { id: "8", label: "on_task", text: `${config.subject} PDF: Chapter 5` },
-    { id: "9", label: "off_task", text: "YouTube video feed" },
-    { id: "10", label: "on_task", text: `${config.subject} PDF: Chapter 5` },
-    { id: "11", label: "on_task", text: `${config.subject} PDF: Chapter 5` },
-    { id: "12", label: "off_task", text: "YouTube video feed" },
-  ]);
+  const [captures, setCaptures] = useState<CaptureEntry[]>([]);
 
   const breakConfig = useMemo(() => {
     const d = config.durationMinutes;
@@ -94,6 +80,27 @@ export default function ActiveSession({ nav, config, onEnd }: Props) {
 
   const breakBtnDisabled =
     !breakAvailable || !breakConfig || config.breakMode === "pomodoro";
+
+  useEffect(() => {
+    if (!config.trackingEnabled || trackingPaused || onBreak) return;
+
+    const loop = setInterval(async () => {
+      const result = await window.electronAPI.classify({
+        subjects: [config.subject],
+        todos: config.todos.map((t) => ({ text: t.text })),
+      });
+      setCaptures((prev) => [
+        ...prev,
+        {
+          id: Date.now().toString(),
+          label: result.label,
+          text: result.reason,
+        },
+      ]);
+    }, 5_000);
+
+    return () => clearInterval(loop);
+  }, [trackingPaused, onBreak]);
 
   useEffect(() => {
     if (onBreak && !breakOvertime) return;
@@ -149,13 +156,14 @@ export default function ActiveSession({ nav, config, onEnd }: Props) {
   };
 
   // Focus score derived from captures
-  const onTaskCount = captures.filter(
-    (c) => c.label === "on_task" || c.label === "ambiguous",
-  ).length;
+  const onTaskCount = captures.filter((c) => c.label === "on_task").length;
+  const ambiguousCount = captures.filter((c) => c.label === "ambiguous").length;
   const focusScore =
     captures.length === 0
       ? 100
-      : Math.round((onTaskCount / captures.length) * 100);
+      : Math.round(
+          ((onTaskCount + ambiguousCount * 0.5) / captures.length) * 100,
+        );
 
   const curvedScore = Math.round(Math.sqrt(focusScore / 100) * 100);
   const grade = getGrade(curvedScore);
@@ -177,7 +185,7 @@ export default function ActiveSession({ nav, config, onEnd }: Props) {
 
   // ── NEW: break functions ──
   const startBreak = useCallback(() => {
-    window.electronAPI?.setExpandMode?.().catch?.(() => {});  // ← add this line
+    window.electronAPI?.setExpandMode?.().catch?.(() => {}); // ← add this line
     setIsMiniMode(false);
     setOnBreak(true);
     setBreakElapsed(0);
@@ -414,7 +422,13 @@ export default function ActiveSession({ nav, config, onEnd }: Props) {
             {[...captures].reverse().map((c) => (
               <div
                 key={c.id}
-                className={`${styles.captureItem} ${c.label === "off_task" ? styles.captureOff : styles.captureOn}`}
+                className={`${styles.captureItem} ${
+                  c.label === "off_task"
+                    ? styles.captureOff
+                    : c.label === "ambiguous"
+                      ? styles.captureAmbiguous
+                      : styles.captureOn
+                }`}
               >
                 <span
                   className={`${styles.captureDot} ${c.label === "off_task" ? styles.captureDotOff : styles.captureDotOn}`}

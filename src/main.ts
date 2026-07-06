@@ -1,6 +1,7 @@
 import { app, BrowserWindow, ipcMain, Menu } from "electron";
 import path from "node:path";
 import started from "electron-squirrel-startup";
+import { spawn, ChildProcess } from 'child_process'
 
 // Handle creating/removing shortcuts on Windows when installing/uninstalling.
 if (started) {
@@ -8,6 +9,7 @@ if (started) {
 }
 
 let mainWindow: BrowserWindow | null = null;
+let pythonProcess: ChildProcess | null = null
 
 const createWindow = () => {
   // Create the browser window.
@@ -37,13 +39,20 @@ const createWindow = () => {
   mainWindow.webContents.openDevTools({ mode: "detach" });
 };
 
+function startPythonSidecar() {
+  const scriptPath = path.join(__dirname, '../../python/server.py')
+  pythonProcess = spawn('python', [scriptPath])
+  pythonProcess.stdout?.on('data', d => console.log('[Python]', d.toString().trim()))
+  pythonProcess.stderr?.on('data', d => console.error('[Python error]', d.toString().trim()))
+}
+
 // This method will be called when Electron has finished
 // initialization and is ready to create browser windows.
 // Some APIs can only be used after this event occurs.
 app.whenReady().then(() => {
   Menu.setApplicationMenu(null); // Remove default menu, fix later for MAC
   createWindow();
-
+  startPythonSidecar();
   ipcMain.handle("window:mini", () => {
     if (!mainWindow) return;
     mainWindow.setResizable(true); // ← unlock first
@@ -59,11 +68,26 @@ app.whenReady().then(() => {
     mainWindow.setAlwaysOnTop(false);
     mainWindow.setResizable(false); // ← lock again
   });
+  
+  ipcMain.handle('session:classify', async (_, payload: { subjects: string[], todos: { text: string }[] }) => {
+  try {
+    const res = await fetch('http://localhost:5001/classify', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload)
+    })
+    return await res.json()
+  } catch {
+    return { label: 'ambiguous', confidence: 0.5, reason: 'python unreachable' }
+  }
+})
 });
 
 // Quit when all windows are closed, except on macOS. There, it's common
 // for applications and their menu bar to stay active until the user quits
 // explicitly with Cmd + Q.
+app.on('before-quit', () => { pythonProcess?.kill() })
+
 app.on("window-all-closed", () => {
   if (process.platform !== "darwin") {
     app.quit();
