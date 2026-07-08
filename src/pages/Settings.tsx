@@ -40,6 +40,9 @@ export default function Settings({ nav, user, subjects, setSubjects }: Props) {
   const [defaultMinimode, setDefaultMinimode] = useState(false);
   const [themeMode, setThemeMode] = useState<ThemeMode>("system");
 
+  const [showSubjectInput, setShowSubjectInput] = useState(false);
+  const [subjectInput, setSubjectInput] = useState("");
+
   const removeSubject = (s: string) =>
     setSubjects((prev) => prev.filter((x) => x !== s));
 
@@ -51,6 +54,14 @@ export default function Settings({ nav, user, subjects, setSubjects }: Props) {
     document
       .getElementById(`section-${id}`)
       ?.scrollIntoView({ behavior: "smooth", block: "start" });
+  };
+
+  const addSubject = () => {
+    const trimmed = subjectInput.trim();
+    if (!trimmed || subjects.includes(trimmed)) return;
+    setSubjects((prev) => [...prev, trimmed]);
+    setSubjectInput("");
+    setShowSubjectInput(false);
   };
 
   return (
@@ -120,12 +131,32 @@ export default function Settings({ nav, user, subjects, setSubjects }: Props) {
                 key={s}
                 className={styles.chip}
                 onClick={() => removeSubject(s)}
+                title="Click to remove"
               >
-                {s}
+                <span className={styles.chipLabel}>{s}</span>
+                <span className={styles.chipX}>×</span>
               </button>
             ))}
-            <button className={styles.chipAdd}>+ Add</button>
+            <button
+              className={styles.chipAdd}
+              onClick={() => setShowSubjectInput((v) => !v)}
+            >
+              + Add
+            </button>
           </div>
+          {showSubjectInput && (
+            <div className={styles.subjectInput}>
+              <input
+                autoFocus
+                type="text"
+                placeholder="Subject name..."
+                value={subjectInput}
+                onChange={(e) => setSubjectInput(e.target.value)}
+                onKeyDown={(e) => e.key === "Enter" && addSubject()}
+              />
+              <button onClick={addSubject}>Add</button>
+            </div>
+          )}
         </section>
 
         {/* TRACKING
