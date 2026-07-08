@@ -197,7 +197,10 @@
 }
 
 .chip {
-  padding: 8px 20px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 16px 8px 20px;
   border-radius: 20px;
   background: var(--pink-10);
   border: 1px solid var(--pink-40);
@@ -205,6 +208,7 @@
   font-family: var(--body-text);
   font-size: 14px;
   cursor: pointer;
+  transition: all 0.15s;
 }
 
 .chipAdd {
@@ -218,7 +222,58 @@
   cursor: pointer;
 }
 
-.chipAdd:hover {
+.chip:hover {
+  background: rgba(206, 108, 129, 0.25);
+  border-color: var(--pink);
+}
+
+.chipX {
+  font-size: 16px;
+  line-height: 1;
+  opacity: 0;
+  transition: opacity 0.15s;
+  margin-left: 2px;
+}
+
+.chip:hover .chipX {
+  opacity: 1;
+}
+
+.subjectInput {
+  display: flex;
+  flex-direction: row;
+  height: 40px;
+  gap: 10px;
+}
+
+.subjectInput > input {
+  flex: 1;
+  padding: 6px 12px;
+  background-color: var(--orange-cream-10);
+  color: var(--orange-cream);
+  font-family: var(--body-text);
+  font-size: 15px;
+  border-radius: 8px;
+  border: 1px solid var(--orange-cream-50);
+}
+
+.subjectInput > input::placeholder {
+  color: var(--orange-cream-40);
+}
+
+.subjectInput > button {
+  border: 1px solid var(--orange-cream-50);
+  border-radius: 8px;
+  background: transparent;
+  color: var(--orange-cream);
+  font-family: var(--body-text);
+  font-size: 15px;
+  cursor: pointer;
+  width: 80px;
+  height: 40px;
+}
+
+.subjectInput > button:hover {
   background: var(--orange-cream-10);
 }
 
