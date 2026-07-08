@@ -6,20 +6,12 @@ import styles from "./PreSession.module.css";
 type Props = {
   nav: (p: Page) => void;
   onStart: (config: SessionConfig) => void;
+  subjects: string[];
+  setSubjects: React.Dispatch<React.SetStateAction<string[]>>;
 };
 
-const DEFAULT_SUBJECTS = [
-  "Math",
-  "Science",
-  "CS",
-  "English",
-  "History",
-  "Language",
-];
-
-export default function PreSession({ nav, onStart }: Props) {
+export default function PreSession({ nav, onStart, subjects, setSubjects }: Props) {
   const [selectedSubjects, setSelectedSubjects] = useState<string[]>([]);
-  const [subjects, setSubjects] = useState<string[]>(DEFAULT_SUBJECTS);
   const [showSubjectInput, setShowSubjectInput] = useState(false);
   const [subjectInput, setSubjectInput] = useState("");
 

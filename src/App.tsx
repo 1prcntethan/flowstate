@@ -29,6 +29,15 @@ export type SessionResult = {
   todos: TodoItem[];
 };
 
+const DEFAULT_SUBJECTS = [
+  "Math",
+  "Science",
+  "CS",
+  "English",
+  "History",
+  "Language",
+];
+
 export default function App() {
   const { themeId, setThemeId } = useTheme(); // applies on mount + change
 
@@ -39,6 +48,7 @@ export default function App() {
     coins: 320,
     streak: 7,
   });
+  const [subjects, setSubjects] = useState<string[]>(DEFAULT_SUBJECTS);
   const [sessionConfig, setSessionConfig] = useState<SessionConfig | null>(
     null,
   );
@@ -54,7 +64,7 @@ export default function App() {
   };
 
   if (page === 'dashboard')  return <Dashboard nav={nav} user={user} />
-  if (page === 'presession') return <PreSession nav={nav} onStart={setSessionConfig} />
+  if (page === 'presession') return <PreSession nav={nav} onStart={setSessionConfig} subjects={subjects} setSubjects={setSubjects} />
   if (page === 'session')    return <ActiveSession nav={nav} config={sessionConfig!} onEnd={handleSessionEnd} />
   if (page === 'sessionend') return (
     <SessionEnd
@@ -71,5 +81,5 @@ export default function App() {
       streak={user.streak}
     />
   );
-  if (page === 'settings') return <Settings nav={nav} user={user} />
+  if (page === 'settings') return <Settings nav={nav} user={user} subjects={subjects} setSubjects={setSubjects} />
 }
