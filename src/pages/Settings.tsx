@@ -6,6 +6,8 @@ import styles from "./Settings.module.css";
 type Props = {
   nav: (p: Page) => void;
   user: User;
+  subjects: string[];
+  setSubjects: React.Dispatch<React.SetStateAction<string[]>>;
 };
 
 type BreakStyle = "pomodoro" | "manual";
@@ -20,14 +22,12 @@ const NAV_SECTIONS = [
   "Data & Privacy",
 ] as const;
 
-const DEFAULT_SUBJECTS = ["Math", "CS", "History"];
 const DEFAULT_APPS = ["Spotify", "Apple Music", "Finder"];
 
-export default function Settings({ nav, user }: Props) {
+export default function Settings({ nav, user, subjects, setSubjects }: Props) {
   const [activeSection, setActiveSection] = useState<string>("Profile");
   const [showCollectModal, setShowCollectModal] = useState(false);
 
-  const [subjects, setSubjects] = useState<string[]>(DEFAULT_SUBJECTS);
   const [studyApps, setStudyApps] = useState<string[]>(DEFAULT_APPS);
   const [breakStyle, setBreakStyle] = useState<BreakStyle>("pomodoro");
 
@@ -54,9 +54,15 @@ export default function Settings({ nav, user }: Props) {
   };
 
   return (
-    <div className={`page ${styles.settingsPage}`}>
+  <div className={`page ${styles.settingsPage}`}>
       {/* ── Left sidebar ── */}
-      <div className={styles.sidebar}>
+      {/* <div className={styles.sidebar}>
+        <button className={styles.backBtn} onClick={() => nav("dashboard")}>
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+            <polyline points="15 18 9 12 15 6" />
+          </svg>
+          Dashboard
+        </button>
         <nav className={styles.sideNav}>
           {NAV_SECTIONS.map((s) => (
             <button
@@ -74,8 +80,16 @@ export default function Settings({ nav, user }: Props) {
         <button className={styles.signOutBtn} onClick={() => nav("dashboard")}>
           Sign out
         </button>
+      </div> */}
+      <div className={styles.headerSection}>
+        <button className={styles.backButton} onClick={() => nav("dashboard")}>
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+            <polyline points="15 18 9 12 15 6" />
+          </svg>
+          <span>Dashboard</span>
+        </button>
+        <span className={styles.title}>Settings</span>
       </div>
-
       {/* ── Right content ── */}
       <div className={styles.content}>
 
