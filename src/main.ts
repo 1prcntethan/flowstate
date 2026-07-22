@@ -37,7 +37,10 @@ const createWindow = () => {
 };
 
 function startPythonSidecar() {
-  const pythonExe = `C:\\Users\\${os.userInfo().username}\\AppData\\Local\\Python\\pythoncore-3.14-64\\python.exe`
+  const pythonExe = process.platform === 'win32'
+    ? `C:\\Users\\${os.userInfo().username}\\AppData\\Local\\Python\\pythoncore-3.14-64\\python.exe`
+    : '/Library/Frameworks/Python.framework/Versions/3.11/bin/python3'
+
   const scriptPath = path.join(__dirname, '../../python/server.py')
   pythonProcess = spawn(pythonExe, ['-u', scriptPath])
   pythonProcess.stdout?.on('data', d => console.log('[Python]', d.toString().trim()))
