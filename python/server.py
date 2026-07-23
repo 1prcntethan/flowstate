@@ -33,7 +33,6 @@ def take_screenshot() -> Image.Image:
         return Image.frombytes('RGB', raw.size, raw.rgb)
 
 def ocr_image(img: Image.Image) -> str:
-    img = img.resize((1280, 800))
     text = pytesseract.image_to_string(img)
     print("=" * 50)
     print("OCR SCANNED TEXT:")
