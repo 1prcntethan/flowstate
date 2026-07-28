@@ -1,0 +1,57 @@
+/* Welcome.module.css */
+.container {
+  max-width: 420px;
+  margin: 0 auto;
+  padding: 5rem 1.5rem 2rem;
+  text-align: center;
+}
+.logo {
+  width: 56px;
+  height: 56px;
+  margin: 0 auto 1.5rem;
+}
+.title {
+  font-family: var(--heading-text, serif);
+  font-size: 1.8rem;
+  color: var(--orange-cream);
+  margin-bottom: 0.5rem;
+}
+.subtitle {
+  font-size: 0.9rem;
+  color: var(--orange-cream-50);
+  margin-bottom: 2.2rem;
+}
+.bullets {
+  list-style: none;
+  text-align: left;
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  margin-bottom: 2.5rem;
+}
+.bullets li {
+  display: flex;
+  gap: 0.7rem;
+  font-size: 0.88rem;
+  color: var(--orange-cream);
+  line-height: 1.5;
+}
+.dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--pink);
+  flex-shrink: 0;
+  margin-top: 7px;
+}
+.continueBtn {
+  width: 100%;
+  background: var(--pink);
+  border: none;
+  border-radius: 10px;
+  padding: 14px;
+  color: white;
+  font-size: 15px;
+  font-weight: 600;
+  cursor: pointer;
+}

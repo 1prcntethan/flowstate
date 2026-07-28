@@ -12,4 +12,6 @@ contextBridge.exposeInMainWorld("electronAPI", {
     ipcRenderer.invoke("auth:signIn", { email, password }),
   getSession: () => ipcRenderer.invoke("auth:getSession"),
   signOut: () => ipcRenderer.invoke("auth:signOut"),
+  getOnboardingCompleted: () => ipcRenderer.invoke("onboarding:getCompleted"),
+  setOnboardingCompleted: () => ipcRenderer.invoke("onboarding:setCompleted"),
 });

@@ -15,5 +15,7 @@ declare interface Window {
     signIn: (email: string, password: string) => Promise<{ email: string }>;
     getSession: () => Promise<{ email: string; hasSession: boolean } | null>;
     signOut: () => Promise<void>;
+    getOnboardingCompleted: () => Promise<boolean>;
+    setOnboardingCompleted: () => Promise<void>;
   };
 }

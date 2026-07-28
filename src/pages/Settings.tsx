@@ -2,6 +2,7 @@ import { useState } from "react";
 import type { Page } from "../App";
 import type { User } from "../types";
 import styles from "./Settings.module.css";
+import { useAuth } from "../auth/AuthContext";
 
 type Props = {
   nav: (p: Page) => void;
@@ -25,6 +26,7 @@ const NAV_SECTIONS = [
 const DEFAULT_APPS = ["Spotify", "Apple Music", "Finder"];
 
 export default function Settings({ nav, user, subjects, setSubjects }: Props) {
+  const { signOut } = useAuth();
   const [activeSection, setActiveSection] = useState<string>("Profile");
   const [showCollectModal, setShowCollectModal] = useState(false);
 
@@ -65,7 +67,7 @@ export default function Settings({ nav, user, subjects, setSubjects }: Props) {
   };
 
   return (
-  <div className={`page ${styles.settingsPage}`}>
+    <div className={`page ${styles.settingsPage}`}>
       {/* ── Left sidebar ── */}
       {/* <div className={styles.sidebar}>
         <button className={styles.backBtn} onClick={() => nav("dashboard")}>
@@ -94,7 +96,16 @@ export default function Settings({ nav, user, subjects, setSubjects }: Props) {
       </div> */}
       <div className={styles.headerSection}>
         <button className={styles.backButton} onClick={() => nav("dashboard")}>
-          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+          <svg
+            width="18"
+            height="18"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="2"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+          >
             <polyline points="15 18 9 12 15 6" />
           </svg>
           <span>Dashboard</span>
@@ -103,13 +114,21 @@ export default function Settings({ nav, user, subjects, setSubjects }: Props) {
       </div>
       {/* ── Right content ── */}
       <div className={styles.content}>
-
         {/* PROFILE */}
         <section id="section-Profile" className={styles.section}>
           <span className={styles.sectionTitle}>PROFILE</span>
           <div className={styles.profileRow}>
             <button className={styles.avatarBtn}>
-              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <svg
+                width="20"
+                height="20"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              >
                 <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7" />
                 <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4Z" />
               </svg>
@@ -119,6 +138,9 @@ export default function Settings({ nav, user, subjects, setSubjects }: Props) {
               <span className={styles.email}>email@example.com</span>
               <button className={styles.linkBtn}>Edit username</button>
             </div>
+            <button className={styles.signOutBtn} onClick={() => signOut()}>
+              Sign out
+            </button>
           </div>
         </section>
 
@@ -273,7 +295,12 @@ export default function Settings({ nav, user, subjects, setSubjects }: Props) {
         <section id="section-History" className={styles.section}>
           <span className={styles.sectionTitle}>DATA &amp; PRIVACY</span>
 
-          <button className={styles.textLink} onClick={() => setShowCollectModal(true)}>What we collect</button>
+          <button
+            className={styles.textLink}
+            onClick={() => setShowCollectModal(true)}
+          >
+            What we collect
+          </button>
 
           {/* <button className={styles.actionRow}>
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
@@ -285,7 +312,16 @@ export default function Settings({ nav, user, subjects, setSubjects }: Props) {
           </button> */}
 
           <button className={`${styles.actionRow} ${styles.actionAmber}`}>
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+            <svg
+              width="16"
+              height="16"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="2"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            >
               <polyline points="3 6 5 6 21 6" />
               <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2" />
             </svg>
@@ -293,7 +329,16 @@ export default function Settings({ nav, user, subjects, setSubjects }: Props) {
           </button>
 
           <button className={`${styles.actionRow} ${styles.actionRed}`}>
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+            <svg
+              width="16"
+              height="16"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="2"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            >
               <polyline points="3 6 5 6 21 6" />
               <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2" />
             </svg>
@@ -306,10 +351,28 @@ export default function Settings({ nav, user, subjects, setSubjects }: Props) {
 
       {/* ── What We Collect modal ── */}
       {showCollectModal && (
-        <div className={styles.modalOverlay} onClick={() => setShowCollectModal(false)}>
-          <div className={styles.modalCard} onClick={(e) => e.stopPropagation()}>
-            <button className={styles.modalClose} onClick={() => setShowCollectModal(false)}>
-              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+        <div
+          className={styles.modalOverlay}
+          onClick={() => setShowCollectModal(false)}
+        >
+          <div
+            className={styles.modalCard}
+            onClick={(e) => e.stopPropagation()}
+          >
+            <button
+              className={styles.modalClose}
+              onClick={() => setShowCollectModal(false)}
+            >
+              <svg
+                width="20"
+                height="20"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              >
                 <line x1="18" y1="6" x2="6" y2="18" />
                 <line x1="6" y1="6" x2="18" y2="18" />
               </svg>
@@ -318,33 +381,43 @@ export default function Settings({ nav, user, subjects, setSubjects }: Props) {
             <h2 className={styles.modalTitle}>What we collect</h2>
 
             <section className={styles.modalSection}>
-              <h3 className={styles.modalSectionHead}>Stored locally on your computer</h3>
+              <h3 className={styles.modalSectionHead}>
+                Stored locally on your computer
+              </h3>
               <p className={styles.modalText}>
-                <strong>Screenshots</strong> — screenshots taken during study sessions are saved only on your device. 
-                They are never uploaded, transmitted, or accessible by anyone else.
+                <strong>Screenshots</strong> — screenshots taken during study
+                sessions are saved only on your device. They are never uploaded,
+                transmitted, or accessible by anyone else.
               </p>
               <p className={styles.modalText}>
-                <strong>Session details</strong> — information about what you were doing during a session 
-                (e.g. the specific YouTube video you watched, websites visited, or apps used) stays on your machine. 
+                <strong>Session details</strong> — information about what you
+                were doing during a session (e.g. the specific YouTube video you
+                watched, websites visited, or apps used) stays on your machine.
                 We don&rsquo;t collect or store this data on our servers.
               </p>
             </section>
 
             <section className={styles.modalSection}>
-              <h3 className={styles.modalSectionHead}>Stored in our database</h3>
+              <h3 className={styles.modalSectionHead}>
+                Stored in our database
+              </h3>
               <p className={styles.modalText}>
-                <strong>Quantitative data only</strong> — we record high-level metrics like total focus time, 
-                focus percentage, and whether you were on-task or off-task during a given interval. 
-                No personal content, no URLs, and no app details.
+                <strong>Quantitative data only</strong> — we record high-level
+                metrics like total focus time, focus percentage, and whether you
+                were on-task or off-task during a given interval. No personal
+                content, no URLs, and no app details.
               </p>
             </section>
 
             <section className={styles.modalSection}>
-              <h3 className={styles.modalSectionHead}>What this means for you</h3>
+              <h3 className={styles.modalSectionHead}>
+                What this means for you
+              </h3>
               <p className={styles.modalText}>
-                You have full privacy over your study activity. Your screenshots and browsing context 
-                never leave your computer. The only data we ever see are the numbers that help you 
-                track your productivity over time.
+                You have full privacy over your study activity. Your screenshots
+                and browsing context never leave your computer. The only data we
+                ever see are the numbers that help you track your productivity
+                over time.
               </p>
             </section>
           </div>
