@@ -5,6 +5,10 @@ import { spawn, exec, ChildProcess } from 'child_process'
 import os from 'node:os'
 import { CognitoUserPool, CognitoUser, AuthenticationDetails } from 'amazon-cognito-identity-js'
 import fs from 'node:fs'
+import Store from 'electron-store'
+
+
+
 
 if (started) {
   app.quit();
@@ -12,6 +16,8 @@ if (started) {
 
 let mainWindow: BrowserWindow | null = null;
 let pythonProcess: ChildProcess | null = null
+
+const store = new Store()
 
 const createWindow = () => {
   mainWindow = new BrowserWindow({
@@ -110,6 +116,14 @@ function loadTokens(): any | null {
   if (!fs.existsSync(tokenPath)) return null
   return JSON.parse(safeStorage.decryptString(fs.readFileSync(tokenPath)))
 }
+
+ipcMain.handle('onboarding:getCompleted', () => {
+  return store.get('onboardingCompleted', false)
+})
+
+ipcMain.handle('onboarding:setCompleted', () => {
+  store.set('onboardingCompleted', true)
+})
 
 ipcMain.handle('auth:signUp', (_, { email, password }) =>
   new Promise((resolve, reject) => {

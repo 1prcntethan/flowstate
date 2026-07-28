@@ -1,0 +1,56 @@
+/* Auth.module.css */
+.container {
+  max-width: 360px;
+  margin: 0 auto;
+  padding: 5rem 1.5rem 2rem;
+}
+.title {
+  font-family: var(--heading-text, serif);
+  font-size: 1.6rem;
+  color: var(--orange-cream);
+  margin-bottom: 1.6rem;
+  text-align: center;
+}
+.input {
+  width: 100%;
+  background: rgba(243, 229, 216, 0.06);
+  border: 1px solid var(--orange-cream-20);
+  border-radius: 10px;
+  padding: 12px 14px;
+  color: var(--orange-cream);
+  font-size: 14px;
+  margin-bottom: 10px;
+}
+.helper {
+  font-size: 0.85rem;
+  color: var(--orange-cream-50);
+  margin-bottom: 10px;
+}
+.error {
+  color: #e38c8c;
+  font-size: 0.82rem;
+  margin-bottom: 10px;
+}
+.primaryBtn {
+  width: 100%;
+  background: var(--pink);
+  border: none;
+  border-radius: 10px;
+  padding: 13px;
+  color: white;
+  font-weight: 600;
+  cursor: pointer;
+  margin-top: 6px;
+}
+.primaryBtn:disabled {
+  opacity: 0.6;
+}
+.linkBtn {
+  width: 100%;
+  background: none;
+  border: none;
+  color: var(--orange-cream-50);
+  font-size: 0.82rem;
+  margin-top: 14px;
+  cursor: pointer;
+}

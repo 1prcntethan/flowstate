@@ -1,0 +1,9 @@
+/* ProfileSetup.module.css */
+.container { max-width: 420px; margin: 0 auto; padding: 5rem 1.5rem 2rem; }
+.title { font-family: var(--heading-text, serif); font-size: 1.6rem; color: var(--orange-cream); margin-bottom: 1.6rem; text-align: center; }
+.input { width: 100%; background: rgba(243,229,216,0.06); border: 1px solid var(--orange-cream-20); border-radius: 10px; padding: 12px 14px; color: var(--orange-cream); font-size: 14px; margin-bottom: 24px; }
+.label { font-size: 0.8rem; color: var(--orange-cream-50); margin-bottom: 10px; }
+.chips { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 30px; }
+.chip, .chipActive { border-radius: 20px; padding: 7px 14px; font-size: 13px; cursor: pointer; border: 1px solid var(--orange-cream-20); background: transparent; color: var(--orange-cream); }
+.chipActive { background: var(--pink); border-color: var(--pink); color: white; }
+.finishBtn { width: 100%; background: var(--pink); border: none; border-radius: 10px; padding: 14px; color: white; font-weight: 600; cursor: pointer; }

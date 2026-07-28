@@ -8,6 +8,8 @@ import Settings from "./pages/Settings";
 import { SessionConfig } from "./types";
 import { useTheme } from "./useTheme";
 import type { User, TodoItem } from "./types";
+import Onboarding from "./onboarding/Onboarding";
+import { useAuth } from "./auth/AuthContext";
 
 export type Page =
   | "dashboard"
@@ -39,11 +41,10 @@ const DEFAULT_SUBJECTS = [
 ];
 
 export default function App() {
-  const { themeId, setThemeId } = useTheme(); // applies on mount + change
-
+  const { user, authChecked, hasCompletedOnboarding, onboardingChecked } =
+    useAuth();
+  const { themeId, setThemeId } = useTheme();
   const [page, setPage] = useState<Page>("dashboard");
-  const [user, setUser] = useState<User | null>(null);
-  const [authChecked, setAuthChecked] = useState(false);
   const [subjects, setSubjects] = useState<string[]>(DEFAULT_SUBJECTS);
   const [sessionConfig, setSessionConfig] = useState<SessionConfig | null>(
     null,
@@ -53,31 +54,19 @@ export default function App() {
   );
 
   const nav = (p: Page) => setPage(p);
-
   const handleSessionEnd = (result: SessionResult) => {
     setSessionResult(result);
     setPage("sessionend");
   };
+  
+  if (!authChecked || !onboardingChecked) return null;
 
-  useEffect(() => {
-    window.electronAPI.getSession().then((session) => {
-      if (session) {
-        setUser({
-          id: session.email,
-          name: session.email,
-          coins: 0,
-          streak: 0,
-        });
-      }
-      setAuthChecked(true);
-    });
-  }, []);
-
-  if (!authChecked) return null; // or a loading spinner
+  if (!hasCompletedOnboarding) {
+    return <Onboarding />; // brand new device — starts at Welcome
+  }
 
   if (!user) {
-    // show a login/signup screen here — you haven't built one yet
-    return <div>Not logged in — build login screen</div>;
+    return <Onboarding startAt="auth" />; // seen this before, just needs to log in
   }
 
   if (page === "dashboard") return <Dashboard nav={nav} user={user} />;
