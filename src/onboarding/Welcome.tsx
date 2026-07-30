@@ -18,29 +18,29 @@ export default function Welcome({ onNext }: Props) {
             <ul className={styles.bullets}>
               <li>
                 <span className={styles.greenDot} />
-                Placeholder
+                Focus session summaries 
               </li>
               <li>
                 <span className={styles.greenDot} />
-                Placeholder
+                Your streaks, tasks, and settings
               </li>
               <li>
                 <span className={styles.greenDot} />
-                Placeholder
+                Focus performance over time
               </li>
             </ul>
             <ul className={styles.bullets}>
               <li>
                 <span className={styles.redDot} />
-                Placeholder
+                Screenshots and OCR text
               </li>
               <li>
                 <span className={styles.redDot} />
-                Placeholder
+                Window titles and app names
               </li>
               <li>
                 <span className={styles.redDot} />
-                Placeholder
+                Raw activity logs
               </li>
             </ul>
           </div>
