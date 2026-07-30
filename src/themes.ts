@@ -69,7 +69,7 @@ export const themes: Record<string, Theme> = {
       '--pink-80': 'rgba(207, 110, 131, 0.8)',
       '--pink-90': 'rgba(207, 110, 131, 0.9)',
       '--status-green':    'rgb(76, 206, 122)',
-      '--status-red':      '#E05555',
+      '--status-red':      '#8F1313',
       '--status-red-background':'rgba(143, 19, 19, 0.2)',
       '--status-amber':    '#D6A85F',
       '--headerbtn-bg': 'rgba(79, 79, 79, 0.2)',
