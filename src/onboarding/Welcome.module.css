@@ -1,25 +1,54 @@
 /* Welcome.module.css */
 .container {
-  max-width: 420px;
+  max-width: 700px;
   margin: 0 auto;
   padding: 5rem 1.5rem 2rem;
   text-align: center;
 }
 .logo {
-  width: 56px;
-  height: 56px;
+  width: 72px;
+  height: 72px;
   margin: 0 auto 1.5rem;
 }
 .title {
   font-family: var(--heading-text, serif);
-  font-size: 1.8rem;
+  font-size: 32px;
   color: var(--orange-cream);
+  font-weight: 700;
+  letter-spacing: 0.05em;
   margin-bottom: 0.5rem;
 }
 .subtitle {
-  font-size: 0.9rem;
-  color: var(--orange-cream-50);
+  font-family: var(--body-text);
+  font-size: 14px;
+  color: var(--orange-cream-60);
   margin-bottom: 2.2rem;
+}
+.bulletContainer {
+  display: flex;
+  width: 85%;
+  border-radius: 24px;
+  border: 1px solid var(--orange-cream-50);
+  justify-self: center;
+  flex-direction: column;
+  padding: 18px 28px;
+  margin-bottom: 24px;
+  color: var(--orange-cream)
+}
+.bulletCaption {
+  font-family: var(--body-text);
+  text-align: left;
+  margin-bottom: 12px;
+  font-size: 16px;
+  color: var(--orange-cream-60);
+}
+.captionsContainer {
+  display: flex;
+  flex-direction: row;
+}
+.captionsContainer > ul:nth-child(2){
+  color: var(--orange-cream-50);
+  text-decoration: line-through;
 }
 .bullets {
   list-style: none;
@@ -27,31 +56,61 @@
   display: flex;
   flex-direction: column;
   gap: 1rem;
-  margin-bottom: 2.5rem;
+  width: 50%;
 }
 .bullets li {
+  font-family: var(--body-text);
   display: flex;
   gap: 0.7rem;
-  font-size: 0.88rem;
-  color: var(--orange-cream);
+  font-size: 14px;
   line-height: 1.5;
 }
-.dot {
-  width: 6px;
-  height: 6px;
+.greenDot {
+  width: 12px;
+  height: 12px;
   border-radius: 50%;
-  background: var(--pink);
+  background: var(--status-green);
   flex-shrink: 0;
-  margin-top: 7px;
+  margin-top: 4px;
+}
+.redDot {
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  background: var(--status-red);
+  flex-shrink: 0;
+  margin-top: 4px;
+}
+.buttonContainer {
+  display: flex;
+  flex-direction: row;
+  width: 85%;
+  gap: 16px;
+  justify-self: center;
 }
 .continueBtn {
-  width: 100%;
+  font-family: var(--body-text);
+  width: 50%;
   background: var(--pink);
   border: none;
-  border-radius: 10px;
+  border-radius: 12px;
   padding: 14px;
   color: white;
-  font-size: 15px;
-  font-weight: 600;
+  font-size: 16px;
+  font-weight: bold;
+  cursor: pointer;
+}
+
+.privacyBtn {
+  font-family: var(--body-text);
+  width: 50%;
+  background: transparent;
+  border: none;
+  border-radius: 12px;
+  border: 1px solid var(--orange-cream-50);
+  padding: 14px;
+  color: var(--orange-cream);
+  font-size: 16px;
+  font-weight: bold;
   cursor: pointer;
 }

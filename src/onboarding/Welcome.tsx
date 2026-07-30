@@ -1,6 +1,6 @@
-import styles from './Welcome.module.css'
+import styles from "./Welcome.module.css";
 
-type Props = { onNext: () => void }
+type Props = { onNext: () => void };
 
 export default function Welcome({ onNext }: Props) {
   return (
@@ -8,16 +8,51 @@ export default function Welcome({ onNext }: Props) {
       <div className={styles.container}>
         <img src="/logo512.svg" className={styles.logo} alt="" />
         <h1 className={styles.title}>Welcome to Flowstate</h1>
-        <p className={styles.subtitle}>A focus companion that keeps everything on your device.</p>
+        <p className={styles.subtitle}>
+          A focus companion that keeps everything on your device.
+        </p>
 
-        <ul className={styles.bullets}>
-          <li><span className={styles.dot} />We read your screen to check what you're studying — then forget it.</li>
-          <li><span className={styles.dot} />Screenshots are never saved. Only a focus label leaves your device.</li>
-          <li><span className={styles.dot} />You can pause tracking any time during a session.</li>
-        </ul>
+        <div className={styles.bulletContainer}>
+          <span className={styles.bulletCaption}>WHAT WE SEE</span>
+          <div className={styles.captionsContainer}>
+            <ul className={styles.bullets}>
+              <li>
+                <span className={styles.greenDot} />
+                Placeholder
+              </li>
+              <li>
+                <span className={styles.greenDot} />
+                Placeholder
+              </li>
+              <li>
+                <span className={styles.greenDot} />
+                Placeholder
+              </li>
+            </ul>
+            <ul className={styles.bullets}>
+              <li>
+                <span className={styles.redDot} />
+                Placeholder
+              </li>
+              <li>
+                <span className={styles.redDot} />
+                Placeholder
+              </li>
+              <li>
+                <span className={styles.redDot} />
+                Placeholder
+              </li>
+            </ul>
+          </div>
+        </div>
 
-        <button className={styles.continueBtn} onClick={onNext}>Continue</button>
+        <div className={styles.buttonContainer}>
+          <button className={styles.privacyBtn}>Read privacy policy</button>
+          <button className={styles.continueBtn} onClick={onNext}>
+            Get Started →
+          </button>
+        </div>
       </div>
     </div>
-  )
+  );
 }
