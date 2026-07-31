@@ -17,5 +17,10 @@ declare interface Window {
     signOut: () => Promise<void>;
     getOnboardingCompleted: () => Promise<boolean>;
     setOnboardingCompleted: () => Promise<void>;
+    getPlatform: () => Promise<NodeJS.Platform>;
+    checkScreenAccess: () => Promise<
+      "granted" | "denied" | "not-determined" | "restricted" | "unknown"
+    >;
+    openScreenSettings: () => Promise<void>;
   };
 }
