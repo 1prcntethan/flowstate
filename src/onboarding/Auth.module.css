@@ -1,46 +1,107 @@
 /* Auth.module.css */
 .container {
-  max-width: 360px;
+  max-width: 600px;
   margin: 0 auto;
   padding: 5rem 1.5rem 2rem;
 }
 .title {
   font-family: var(--heading-text, serif);
-  font-size: 1.6rem;
+  font-size: 32px;
   color: var(--orange-cream);
-  margin-bottom: 1.6rem;
+  margin-bottom: 0.5rem;
+  letter-spacing: 0.05em;
   text-align: center;
+}
+.subtitle {
+  font-family: var(--body-text);
+  font-size: 14px;
+  color: var(--orange-cream-60);
+  margin-bottom: 2.2rem;
+  text-align: center;
+}
+
+.googleBtn {
+  width: 100%;
+  max-width: 450px;
+  margin: 0 auto 18px;
+  display: flex;
+  justify-content: center;
+  background: rgba(243, 229, 216, 0.05);
+  border: 1px solid var(--orange-cream-20);
+  border-radius: 12px;
+  padding: 13px;
+  color: var(--orange-cream);
+  font-family: var(--body-text);
+  font-weight: 600;
+  font-size: 15px;
+  cursor: not-allowed;
+  opacity: 0.55;
+}
+
+.divider {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  max-width: 450px;
+  margin: 0 auto 18px;
+  color: var(--orange-cream-40);
+  font-family: var(--body-text);
+  font-size: 13px;
+}
+.divider::before,
+.divider::after {
+  content: "";
+  flex: 1;
+  height: 1px;
+  background: var(--orange-cream-20);
 }
 .input {
   width: 100%;
   background: rgba(243, 229, 216, 0.06);
   border: 1px solid var(--orange-cream-20);
-  border-radius: 10px;
+  border-radius: 12px;
   padding: 12px 14px;
   color: var(--orange-cream);
-  font-size: 14px;
+  font-family: var(--body-text);
   margin-bottom: 10px;
+  font-size: 16px;
+  max-width: 450px;
+  justify-self: center;
+  display: flex;
 }
 .helper {
-  font-size: 0.85rem;
+  font-size: 14px;
   color: var(--orange-cream-50);
   margin-bottom: 10px;
+  font-family: var(--body-text);
+  display: flex;
+  justify-self: center;
 }
 .error {
   color: #e38c8c;
   font-size: 0.82rem;
   margin-bottom: 10px;
+  font-family: var(--body-text);
+  display: flex;
+  justify-self: center;
 }
 .primaryBtn {
+  display: flex;
   width: 100%;
   background: var(--pink);
   border: none;
-  border-radius: 10px;
+  border-radius: 12px;
   padding: 13px;
   color: white;
-  font-weight: 600;
+  font-weight: bold;
+  font-size: 16px;
   cursor: pointer;
-  margin-top: 6px;
+  margin-top: 32px;
+  font-family: var(--body-text);
+  max-width: 450px;
+  justify-self: center;
+  justify-content: center;
+
 }
 .primaryBtn:disabled {
   opacity: 0.6;
@@ -50,7 +111,9 @@
   background: none;
   border: none;
   color: var(--orange-cream-50);
+  font-family: var(--body-text);
   font-size: 0.82rem;
   margin-top: 14px;
   cursor: pointer;
+  text-align: center;
 }

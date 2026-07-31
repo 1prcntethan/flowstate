@@ -14,4 +14,8 @@ contextBridge.exposeInMainWorld("electronAPI", {
   signOut: () => ipcRenderer.invoke("auth:signOut"),
   getOnboardingCompleted: () => ipcRenderer.invoke("onboarding:getCompleted"),
   setOnboardingCompleted: () => ipcRenderer.invoke("onboarding:setCompleted"),
+  getPlatform: () => ipcRenderer.invoke("permissions:getPlatform"),
+  checkScreenAccess: () => ipcRenderer.invoke("permissions:checkScreenAccess"),
+  openScreenSettings: () =>
+    ipcRenderer.invoke("permissions:openScreenSettings"),
 });

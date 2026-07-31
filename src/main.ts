@@ -6,6 +6,7 @@ import os from 'node:os'
 import { CognitoUserPool, CognitoUser, AuthenticationDetails } from 'amazon-cognito-identity-js'
 import fs from 'node:fs'
 import Store from 'electron-store'
+import { systemPreferences, shell } from 'electron'
 
 
 
@@ -123,6 +124,17 @@ ipcMain.handle('onboarding:getCompleted', () => {
 
 ipcMain.handle('onboarding:setCompleted', () => {
   store.set('onboardingCompleted', true)
+})
+
+ipcMain.handle('permissions:getPlatform', () => process.platform)
+
+ipcMain.handle('permissions:checkScreenAccess', () => {
+  if (process.platform !== 'darwin') return 'granted' // not applicable elsewhere
+  return systemPreferences.getMediaAccessStatus('screen')
+})
+
+ipcMain.handle('permissions:openScreenSettings', () => {
+  shell.openExternal('x-apple.systempreferences:com.apple.preference.security?Privacy_ScreenCapture')
 })
 
 ipcMain.handle('auth:signUp', (_, { email, password }) =>
