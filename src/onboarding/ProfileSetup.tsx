@@ -1,4 +1,5 @@
 import { useRef, useState } from "react";
+import { useAuth } from "../auth/AuthContext";
 import styles from "./ProfileSetup.module.css";
 
 const SUBJECTS = ["Math", "Science", "CS", "English", "History", "Languages", "Other"];
@@ -6,6 +7,7 @@ const SUBJECTS = ["Math", "Science", "CS", "English", "History", "Languages", "O
 type Props = { onFinish: () => void };
 
 export default function ProfileSetup({ onFinish }: Props) {
+  const { user } = useAuth();
   const [username, setUsername] = useState("");
   const [selected, setSelected] = useState<string[]>([]);
   const [photoPreview, setPhotoPreview] = useState<string | null>(null);
@@ -26,6 +28,20 @@ export default function ProfileSetup({ onFinish }: Props) {
     reader.readAsDataURL(file);
     // TODO: upload to real storage once backend exists — this is a local preview only
   };
+
+  const handleFinish = async () => {
+    if (!user) return;
+    
+    await window.electronAPI.createUserProfile({
+      userId: user?.id,
+      username,
+      subjects: selected,
+      coins: 0,
+      streak: 0,
+      createdAt: new Date().toISOString(),
+    })
+    onFinish()
+  }
 
   // TODO: replace with a real uniqueness check against the users table
   const usernameStatus = username.trim().length >= 3 ? "available" : null;
@@ -85,7 +101,7 @@ export default function ProfileSetup({ onFinish }: Props) {
         </p>
 
         {/* TODO: persist photo, username, and selected subjects once DynamoDB is wired up */}
-        <button className={styles.finishBtn} onClick={onFinish}>
+        <button className={styles.finishBtn} onClick={handleFinish} disabled={!usernameStatus}>
           Go to dashboard →
         </button>
       </div>

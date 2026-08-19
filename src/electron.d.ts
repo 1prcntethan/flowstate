@@ -22,5 +22,11 @@ declare interface Window {
       "granted" | "denied" | "not-determined" | "restricted" | "unknown"
     >;
     openScreenSettings: () => Promise<void>;
+    getUserProfile: (userId: string) => Promise<any | null>;
+    createUserProfile: (profile: any) => Promise<void>;
+    updateUserStats: (payload: any) => Promise<void>;
+    saveSession: (payload: any) => Promise<void>;
+    getRecentSessions: (userId: string) => Promise<any[]>;
+    getTodaySessions: (userId: string) => Promise<any[]>;
   };
 }

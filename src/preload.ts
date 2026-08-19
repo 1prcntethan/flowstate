@@ -18,4 +18,15 @@ contextBridge.exposeInMainWorld("electronAPI", {
   checkScreenAccess: () => ipcRenderer.invoke("permissions:checkScreenAccess"),
   openScreenSettings: () =>
     ipcRenderer.invoke("permissions:openScreenSettings"),
+  getUserProfile: (userId: string) =>
+    ipcRenderer.invoke("db:getUserProfile", userId),
+  createUserProfile: (profile: any) =>
+    ipcRenderer.invoke("db:createUserProfile", profile),
+  updateUserStats: (payload: any) =>
+    ipcRenderer.invoke("db:updateUserStats", payload),
+  saveSession: (payload: any) => ipcRenderer.invoke("db:saveSession", payload),
+  getRecentSessions: (userId: string) =>
+    ipcRenderer.invoke("db:getRecentSessions", userId),
+  getTodaySessions: (userId: string) =>
+    ipcRenderer.invoke("db:getTodaySessions", userId),
 });
