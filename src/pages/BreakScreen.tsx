@@ -53,7 +53,7 @@ export default function BreakScreen({
 
         {isOvertime && (
           <div className={styles.overtimeBanner}>
-            Break overtime—points paused
+            Break overtime—points & tracking paused
           </div>
         )}
 

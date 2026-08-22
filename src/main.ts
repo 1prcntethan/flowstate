@@ -7,7 +7,9 @@ import { CognitoUserPool, CognitoUser, AuthenticationDetails } from 'amazon-cogn
 import fs from 'node:fs'
 import Store from 'electron-store'
 import { systemPreferences, shell } from 'electron'
-
+import 'dotenv/config'
+import { DynamoDBClient } from '@aws-sdk/client-dynamodb'
+import { DynamoDBDocumentClient, GetCommand, PutCommand, UpdateCommand, QueryCommand } from '@aws-sdk/lib-dynamodb'
 
 
 
@@ -118,6 +120,15 @@ function loadTokens(): any | null {
   return JSON.parse(safeStorage.decryptString(fs.readFileSync(tokenPath)))
 }
 
+const dynamoClient = new DynamoDBClient({
+  region: 'us-west-1',
+  credentials: {
+    accessKeyId: process.env.AWS_ACCESS_KEY_ID!,
+    secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY!,
+  },
+})
+const db = DynamoDBDocumentClient.from(dynamoClient)
+
 ipcMain.handle('onboarding:getCompleted', () => {
   return store.get('onboardingCompleted', false)
 })
@@ -190,6 +201,60 @@ function extractEmailFromIdToken(idToken: string): string {
 ipcMain.handle('auth:signOut', () => {
   if (fs.existsSync(tokenPath)) fs.unlinkSync(tokenPath)
 })
+
+ipcMain.handle('db:getUserProfile', async (_, userId: string) => {
+  const res = await db.send(new GetCommand({ TableName: 'flowstate-users', Key: { userId } }))
+  return res.Item ?? null
+})
+
+ipcMain.handle('db:createUserProfile', async (_, profile: any) => {
+  await db.send(new PutCommand({ TableName: 'flowstate-users', Item: profile }))
+})
+
+ipcMain.handle('db:updateUserStats', async (_, { userId, coinDelta, newStreak }: any) => {
+  await db.send(new UpdateCommand({
+    TableName: 'flowstate-users',
+    Key: { userId },
+    UpdateExpression: 'ADD coins :c SET streak = :s',
+    ExpressionAttributeValues: { ':c': coinDelta, ':s': newStreak },
+  }))
+})
+
+ipcMain.handle('db:saveSession', async (_, { userId, result }: any) => {
+  await db.send(new PutCommand({
+    TableName: 'flowstate-sessions',
+    Item: {
+      userId,
+      sessionId: `SESSION#${new Date().toISOString()}`,
+      ...result,
+    },
+  }))
+})
+
+ipcMain.handle('db:getRecentSessions', async (_, userId: string) => {
+  const res = await db.send(new QueryCommand({
+    TableName: 'flowstate-sessions',
+    KeyConditionExpression: 'userId = :u',
+    ExpressionAttributeValues: { ':u': userId },
+    ScanIndexForward: false, // newest first
+    Limit: 5,
+  }))
+  return res.Items ?? []
+})
+
+ipcMain.handle('db:getTodaySessions', async (_, userId: string) => {
+  const todayPrefix = `SESSION#${new Date().toISOString().split('T')[0]}`
+  const res = await db.send(new QueryCommand({
+    TableName: 'flowstate-sessions',
+    KeyConditionExpression: 'userId = :u AND begins_with(sessionId, :d)',
+    ExpressionAttributeValues: { ':u': userId, ':d': todayPrefix },
+  }))
+  return res.Items ?? []
+})
+
+
+
+
 
 app.on('before-quit', () => { stopPythonSidecar() }) 
 

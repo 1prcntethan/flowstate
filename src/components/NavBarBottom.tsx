@@ -9,11 +9,11 @@ export default function NavBarBottom({ nav }: Props) {
   return (
     <nav className={styles.nav}>
         <div className={styles.item} onClick={() => {/* nav("leaderboard") once it exists */}}>
-            <img src="/NavIconPlaceholder.png" alt="Nav icon" />
+            <img className={styles.icon} src="/trophy.svg" alt="Nav icon" />
             <span>Leaderboard</span>
         </div>
         <div className={styles.item} onClick={() => {/* nav("collection") once it exists */}}>
-            <img src="/NavIconPlaceholder.png" alt="Nav icon" />
+            <img className={styles.icon} src="/collection.svg" alt="Nav icon" />
             <span>Collection</span>
         </div>
         {/* <div className={styles.item} onClick={() => nav("dashboard")}>
@@ -21,11 +21,11 @@ export default function NavBarBottom({ nav }: Props) {
             <span>Home</span>
         </div> */}
         <div className={styles.item} onClick={() => {/* nav("history") once it exists */}}>
-            <img src="/NavIconPlaceholder.png" alt="Nav icon" />
+            <img className={styles.icon} src="/history.svg" alt="Nav icon" />
             <span>History</span>
         </div>
         <div className={styles.item} onClick={() => nav("settings")}>
-            <img src="/NavIconPlaceholder.png" alt="Nav icon" />
+            <img className={styles.icon} src="/settings.svg" alt="Nav icon" />
             <span>Settings</span>
         </div> 
     </nav>

@@ -41,7 +41,7 @@ const DEFAULT_SUBJECTS = [
 ];
 
 export default function App() {
-  const { user, authChecked, hasCompletedOnboarding, onboardingChecked } =
+  const { user, updateCoins, authChecked, hasCompletedOnboarding, onboardingChecked } =
     useAuth();
   const { themeId, setThemeId } = useTheme();
   const [page, setPage] = useState<Page>("dashboard");
@@ -54,9 +54,15 @@ export default function App() {
   );
 
   const nav = (p: Page) => setPage(p);
-  const handleSessionEnd = (result: SessionResult) => {
+  const handleSessionEnd = async (result: SessionResult) => {
     setSessionResult(result);
     setPage("sessionend");
+
+    await updateCoins(result.pointsEarned);
+
+    window.electronAPI.saveSession({ userId: user!.id, result }).catch(err =>
+    console.error('Failed to save session:', err)
+  )
   };
   
   if (!authChecked || !onboardingChecked) return null;

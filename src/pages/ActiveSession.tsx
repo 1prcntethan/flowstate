@@ -52,6 +52,10 @@ export default function ActiveSession({ nav, config, onEnd }: Props) {
   const [showEndConfirm, setShowEndConfirm] = useState(false);
   const [isMiniMode, setIsMiniMode] = useState(false);
   const [captures, setCaptures] = useState<CaptureEntry[]>([]);
+  const pauseStartedAtRef = useRef<number | null>(null);
+
+  const PAUSE_GRACE_MS = 90_000; // how long a pause gets benefit-of-the-doubt
+  const CAPTURE_INTERVAL_MS = 5_000; // adjust tracking interval here (ms)
 
   const breakConfig = useMemo(() => {
     const d = config.durationMinutes;
@@ -82,22 +86,35 @@ export default function ActiveSession({ nav, config, onEnd }: Props) {
     !breakAvailable || !breakConfig || config.breakMode === "pomodoro";
 
   useEffect(() => {
-    if (!config.trackingEnabled || trackingPaused || onBreak) return;
+    if (!config.trackingEnabled || onBreak) return;
 
     const loop = setInterval(async () => {
+      if (trackingPaused) {
+        const pausedFor = pauseStartedAtRef.current
+          ? Date.now() - pauseStartedAtRef.current
+          : 0;
+        const escalated = pausedFor > PAUSE_GRACE_MS;
+
+        setCaptures((prev) => [
+          ...prev,
+          {
+            id: Date.now().toString(),
+            label: escalated ? "off_task" : "ambiguous",
+            text: escalated ? "Tracking paused (extended)" : "Tracking paused",
+          },
+        ]);
+        return;
+      }
+
       const result = await window.electronAPI.classify({
         subjects: [config.subject],
         todos: config.todos.map((t) => ({ text: t.text })),
       });
       setCaptures((prev) => [
         ...prev,
-        {
-          id: Date.now().toString(),
-          label: result.label,
-          text: result.reason,
-        },
+        { id: Date.now().toString(), label: result.label, text: result.reason },
       ]);
-    }, 5_000);
+    }, CAPTURE_INTERVAL_MS);
 
     return () => clearInterval(loop);
   }, [trackingPaused, onBreak]);
@@ -162,7 +179,7 @@ export default function ActiveSession({ nav, config, onEnd }: Props) {
     captures.length === 0
       ? 100
       : Math.round(
-          ((onTaskCount + ambiguousCount * 0.5) / captures.length) * 100,
+          ((onTaskCount + ambiguousCount * 0.33) / captures.length) * 100,
         );
 
   const curvedScore = Math.round(Math.sqrt(focusScore / 100) * 100);
@@ -171,7 +188,7 @@ export default function ActiveSession({ nav, config, onEnd }: Props) {
   const elapsedMinutes = (totalSeconds - timeLeft) / 60;
   const pointsEarned = Math.max(
     0,
-    Math.round(elapsedMinutes * (focusScore / 100) * 2),
+    Math.round(elapsedMinutes * (curvedScore / 100) * 2),
   );
 
   const lastLabel = captures[captures.length - 1]?.label ?? "on_task";
@@ -183,9 +200,8 @@ export default function ActiveSession({ nav, config, onEnd }: Props) {
     );
   };
 
-  // ── NEW: break functions ──
   const startBreak = useCallback(() => {
-    window.electronAPI?.setExpandMode?.().catch?.(() => {}); // ← add this line
+    window.electronAPI?.setExpandMode?.().catch?.(() => {});
     setIsMiniMode(false);
     setOnBreak(true);
     setBreakElapsed(0);
