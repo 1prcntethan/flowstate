@@ -29,14 +29,16 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [onboardingChecked, setOnboardingChecked] = useState(false);
 
   useEffect(() => {
-    window.electronAPI.getSession().then((session) => {
-      if (session)
+    window.electronAPI.getSession().then(async (session) => {
+      if (session) {
+        const profile = await window.electronAPI.getUserProfile(session.email);
         setUser({
           id: session.email,
-          name: session.email,
-          coins: 0,
-          streak: 0,
+          name: profile?.username ?? session.email,
+          coins: profile?.coins ?? 0,
+          streak: profile?.streak ?? 0,
         });
+      }
       setAuthChecked(true);
     });
     window.electronAPI.getOnboardingCompleted().then((completed) => {
