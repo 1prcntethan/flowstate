@@ -36,7 +36,7 @@ function getGrade(pct: number): string {
 
 function getGradeColor(grade: string): string {
   if (grade === "S" || grade === "A") return "var(--status-green)";
-  if (grade === "B") return "var(--status-amber)";
+  if (grade === "B" || grade === "C") return "var(--status-amber)";
   return "var(--status-red)";
 }
 
@@ -53,8 +53,9 @@ export default function ActiveSession({ nav, config, onEnd }: Props) {
   const [isMiniMode, setIsMiniMode] = useState(false);
   const [captures, setCaptures] = useState<CaptureEntry[]>([]);
   const pauseStartedAtRef = useRef<number | null>(null);
+  const totalPausedMsRef = useRef(0);
 
-  const PAUSE_GRACE_MS = 90_000; // how long a pause gets benefit-of-the-doubt
+  const PAUSE_GRACE_MS = 120_000; // how long a pause gets benefit-of-the-doubt
   const CAPTURE_INTERVAL_MS = 5_000; // adjust tracking interval here (ms)
 
   const breakConfig = useMemo(() => {
@@ -93,7 +94,8 @@ export default function ActiveSession({ nav, config, onEnd }: Props) {
         const pausedFor = pauseStartedAtRef.current
           ? Date.now() - pauseStartedAtRef.current
           : 0;
-        const escalated = pausedFor > PAUSE_GRACE_MS;
+        const cumulativePaused = totalPausedMsRef.current + pausedFor;
+        const escalated = cumulativePaused > PAUSE_GRACE_MS; // one-time budget for the whole session
 
         setCaptures((prev) => [
           ...prev,
@@ -104,6 +106,19 @@ export default function ActiveSession({ nav, config, onEnd }: Props) {
           },
         ]);
         return;
+      }
+
+      const idleSecs = await window.electronAPI.getIdleTime();
+      if (idleSecs > 120) {
+        setCaptures((prev) => [
+          ...prev,
+          {
+            id: Date.now().toString(),
+            label: "off_task",
+            text: `Idle ${idleSecs}s`,
+          },
+        ]);
+        return; 
       }
 
       const result = await window.electronAPI.classify({
@@ -118,6 +133,15 @@ export default function ActiveSession({ nav, config, onEnd }: Props) {
 
     return () => clearInterval(loop);
   }, [trackingPaused, onBreak]);
+
+  useEffect(() => {
+    if (trackingPaused) {
+      pauseStartedAtRef.current = Date.now();
+    } else if (pauseStartedAtRef.current) {
+      totalPausedMsRef.current += Date.now() - pauseStartedAtRef.current;
+      pauseStartedAtRef.current = null;
+    }
+  }, [trackingPaused]);
 
   useEffect(() => {
     if (onBreak && !breakOvertime) return;
@@ -179,7 +203,7 @@ export default function ActiveSession({ nav, config, onEnd }: Props) {
     captures.length === 0
       ? 100
       : Math.round(
-          ((onTaskCount + ambiguousCount * 0.33) / captures.length) * 100,
+          ((onTaskCount + ambiguousCount * 0.5) / captures.length) * 100,
         );
 
   const curvedScore = Math.round(Math.sqrt(focusScore / 100) * 100);
@@ -349,7 +373,7 @@ export default function ActiveSession({ nav, config, onEnd }: Props) {
             <div className={styles.inlineBarTrack}>
               <div
                 className={styles.focusBarFill}
-                style={{ width: `${curvedScore}%` }}
+                style={{ background: getGradeColor(grade), width: `${curvedScore}%` }}
               />
             </div>
           </div>
@@ -398,7 +422,7 @@ export default function ActiveSession({ nav, config, onEnd }: Props) {
           <div className={styles.focusBarTrack}>
             <div
               className={styles.focusBarFill}
-              style={{ width: `${curvedScore}%` }}
+              style={{ background: getGradeColor(grade), width: `${curvedScore}%` }}
             />
           </div>
           <div className={styles.focusBarTicks}>

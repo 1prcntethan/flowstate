@@ -10,7 +10,7 @@ import { systemPreferences, shell } from 'electron'
 import 'dotenv/config'
 import { DynamoDBClient } from '@aws-sdk/client-dynamodb'
 import { DynamoDBDocumentClient, GetCommand, PutCommand, UpdateCommand, QueryCommand } from '@aws-sdk/lib-dynamodb'
-
+import { powerMonitor } from 'electron'
 
 
 if (started) {
@@ -102,6 +102,10 @@ app.whenReady().then(() => {
     }
   })
 });
+
+ipcMain.handle('system:getIdleTime', () => {
+  return powerMonitor.getSystemIdleTime() // seconds since last input
+})
 
 const userPool = new CognitoUserPool({
   UserPoolId: 'us-west-1_iD3xkKD59',

@@ -29,4 +29,5 @@ contextBridge.exposeInMainWorld("electronAPI", {
     ipcRenderer.invoke("db:getRecentSessions", userId),
   getTodaySessions: (userId: string) =>
     ipcRenderer.invoke("db:getTodaySessions", userId),
+  getIdleTime: () => ipcRenderer.invoke("system:getIdleTime"),
 });
