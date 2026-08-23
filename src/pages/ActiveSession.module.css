@@ -301,7 +301,6 @@
 
 .focusBarFill {
   height: 100%;
-  background: var(--status-green);
   border-radius: 8px;
   transition: width 0.6s ease;
 }
