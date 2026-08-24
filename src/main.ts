@@ -235,13 +235,13 @@ ipcMain.handle('db:saveSession', async (_, { userId, result }: any) => {
   }))
 })
 
-ipcMain.handle('db:getRecentSessions', async (_, userId: string) => {
+ipcMain.handle('db:getRecentSessions', async (_, userId: string, length: number) => {
   const res = await db.send(new QueryCommand({
     TableName: 'flowstate-sessions',
     KeyConditionExpression: 'userId = :u',
     ExpressionAttributeValues: { ':u': userId },
     ScanIndexForward: false, // newest first
-    Limit: 5,
+    Limit: length,
   }))
   return res.Items ?? []
 })

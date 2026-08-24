@@ -28,3 +28,11 @@ export type UserCosmetics = {
   equippedTimerStyleId: string | null
   ownedItemIds: string[]
 }
+
+export type Session = {
+  sessionId: string;
+  subject: string;
+  durationMinutes: number;
+  focusScore: number;
+  pointsEarned: number;
+};

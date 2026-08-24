@@ -25,8 +25,8 @@ contextBridge.exposeInMainWorld("electronAPI", {
   updateUserStats: (payload: any) =>
     ipcRenderer.invoke("db:updateUserStats", payload),
   saveSession: (payload: any) => ipcRenderer.invoke("db:saveSession", payload),
-  getRecentSessions: (userId: string) =>
-    ipcRenderer.invoke("db:getRecentSessions", userId),
+  getRecentSessions: (userId: string, length: number) =>
+    ipcRenderer.invoke("db:getRecentSessions", userId, length),
   getTodaySessions: (userId: string) =>
     ipcRenderer.invoke("db:getTodaySessions", userId),
   getIdleTime: () => ipcRenderer.invoke("system:getIdleTime"),

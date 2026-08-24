@@ -26,7 +26,7 @@ declare interface Window {
     createUserProfile: (profile: any) => Promise<void>;
     updateUserStats: (payload: any) => Promise<void>;
     saveSession: (payload: any) => Promise<void>;
-    getRecentSessions: (userId: string) => Promise<any[]>;
+    getRecentSessions: (userId: string, length: number) => Promise<any[]>;
     getTodaySessions: (userId: string) => Promise<any[]>;
     getIdleTime: () => Promise<number>;
   };
