@@ -61,14 +61,6 @@
   color: var(--orange-cream);
 }
 
-.sessionItem {
-  border: 1px solid var(--orange-cream-50);
-  font-size: 18px;
-  padding: 12px;
-  border-radius: 12px;
-  font-family: var(--heading-text);
-  letter-spacing: 0.05em;
-}
 
 .socials {
   display: flex;

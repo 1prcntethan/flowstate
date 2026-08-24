@@ -2,18 +2,89 @@ import NavBarTop from "../components/NavBarTop";
 import NavBarBottom from "../components/NavBarBottom";
 import styles from "./Dashboard.module.css";
 import type { Page } from "../App";
-import type { User } from '../types'
+import type { User } from "../types";
 import DashboardStatCard from "../components/DashboardStatCard";
+import { useEffect, useState } from "react";
+import { SessionItem } from "../components/SessionItem";
+import type { Session } from "../types"
 
+type Props = {
+  nav: (p: Page) => void;
+  user: User;
+};
 
-type Props = { 
-  nav: (p: Page) => void
-  user: User
+function useRecentSessions(userId: string, limit = 5) {
+  const [sessions, setSessions] = useState<Session[]>([]);
+
+  useEffect(() => {
+    let cancelled = false;
+    (async () => {
+      const result = await window.electronAPI.getRecentSessions(userId, limit);
+      if (!cancelled) setSessions(result);
+    })();
+    return () => {
+      cancelled = true;
+    };
+  }, [userId, limit]);
+
+  return sessions;
 }
+
+function calcTodayStats(userId: string) {
+  const [stats, setStats] = useState({
+    focusPercentage: 0,
+    hoursStudied: 0,
+    coinsEarned: 0,
+  });
+
+  useEffect(() => {
+    let cancelled = false;
+    (async () => {
+      const sessions = await window.electronAPI.getTodaySessions(userId);
+      if (cancelled) return;
+
+      const totalMinutes = sessions.reduce(
+        (sum: number, s: any) => sum + (s.durationMinutes ?? 0),
+        0,
+      );
+      const weightedFocusSum = sessions.reduce(
+        (sum: number, s: any) =>
+          sum + (s.focusScore ?? 0) * (s.durationMinutes ?? 0),
+        0,
+      );
+      const coinsEarned = sessions.reduce(
+        (sum: number, s: any) => sum + (s.pointsEarned ?? 0),
+        0,
+      );
+
+      setStats({
+        focusPercentage:
+          totalMinutes > 0 ? Math.round(weightedFocusSum / totalMinutes) : 0,
+        hoursStudied: totalMinutes / 60,
+        coinsEarned,
+      });
+    })();
+    return () => {
+      cancelled = true;
+    };
+  }, [userId]);
+
+  return stats;
+}
+
 export default function Dashboard({ nav, user }: Props) {
+  const { focusPercentage, hoursStudied, coinsEarned } = calcTodayStats(
+    user.id,
+  );
+  const recentSessions = useRecentSessions(user.id, 5);
+
   return (
     <div className="page">
-      <NavBarTop currentCoins={user.coins} streak={user.streak} userName={user.name} />
+      <NavBarTop
+        currentCoins={user.coins}
+        streak={user.streak}
+        userName={user.name}
+      />
       <NavBarBottom nav={nav} />
       <div className={styles.dashboardContent}>
         <button
@@ -23,18 +94,31 @@ export default function Dashboard({ nav, user }: Props) {
           Start session
         </button>
         <div className={styles.dashboardCards}>
-          <DashboardStatCard statName="Focus Percentage" statValue="98%" />
-          <DashboardStatCard statName="Hours Studied Today" statValue="4 hrs" />
+          <DashboardStatCard
+            statName="Today's Focus Percentage"
+            statValue={`${focusPercentage}%`}
+          />
+          <DashboardStatCard
+            statName="Hours Studied Today"
+            statValue={`${hoursStudied.toFixed(1)} hrs`}
+          />
           <DashboardStatCard
             statName="Today's Earnings"
-            statValue="+200 coins"
+            statValue={`+${coinsEarned} coins`}
           />
         </div>
         <div className={styles.monthlyHeatmap}>Monthly Heatmap</div>
         <div className={styles.recentSessions}>
           <span>Recent Sessions</span>
-          <div className={styles.sessionItem}>Session 1</div>
-          <div className={styles.sessionItem}>Session 2</div>
+          {recentSessions.length === 0 ? (
+            <div className={styles.emptyState}>
+              No sessions yet — start one to see it here.
+            </div>
+          ) : (
+            recentSessions.map((s) => (
+              <SessionItem key={s.sessionId} session={s} />
+            ))
+          )}
         </div>
         <div className={styles.socials}>
           <div className={styles.weeklyLeaderboard}>
