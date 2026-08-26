@@ -1,4 +1,10 @@
 import re
+import requests
+import json
+
+OLLAMA_URL = "http://localhost:11434/api/generate"
+MODEL_NAME = "llama3.2:1b"
+
 
 OFF_TASK_KEYWORDS = [
     'youtube', 'netflix', 'twitter', 'instagram', 'tiktok',
@@ -14,7 +20,39 @@ ON_TASK_KEYWORDS = [
     'anki', 'zoom', '.pdf', 'onenote', 'obsidian'
 ]
 
-def classify_screen(window_title: str, ocr_text: str, subjects: list, todos: list) -> dict:
+def classify_screen(window_title: str, ocr_text: str, subjects: list[str], todos: list[dict]) -> dict:
+    ai_result = classify_with_ai(window_title, ocr_text, subjects, todos)
+    if ai_result is not None:
+        return ai_result
+    return classify_match(window_title, ocr_text, subjects, todos)
+
+def classify_with_ai(window_title: str, ocr_text: str, subjects: list[str], todos: list[dict]) -> dict | None:
+    todo_texts = [t.get('text', '') for t in todos]
+    prompt = (
+        f"Active window: {window_title}. "
+        f"Subjects: {', '.join(subjects)}. "
+        f"Todos: {', '.join(todo_texts)}. "
+        f"Screen text: \"{ocr_text[:500]}\". "
+        f"Classify the screen as on_task, off_task, or ambiguous "
+        f"relative to the subjects and todos. "
+        f'Respond as JSON: {{"label": "...", "confidence": 0.0}}'
+    )
+    try:
+        response = requests.post(
+            OLLAMA_URL,
+            json={"model": MODEL_NAME, "prompt": prompt, "stream": False, "format": "json"},
+            timeout=5,
+        )
+        response.raise_for_status()
+        parsed = json.loads(response.json()["response"])
+        if parsed.get("label") in ("on_task", "off_task", "ambiguous"):
+            return parsed
+        return None
+    except (requests.RequestException, KeyError, ValueError, json.JSONDecodeError):
+        return None
+
+
+def classify_match(window_title: str, ocr_text: str, subjects: list, todos: list) -> dict:
     combined = (window_title + ' ' + ocr_text).lower()
     combined = re.sub(r'\s+', ' ', combined)
 

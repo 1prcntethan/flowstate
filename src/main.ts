@@ -19,6 +19,8 @@ if (started) {
 
 let mainWindow: BrowserWindow | null = null;
 let pythonProcess: ChildProcess | null = null
+let ollamaProcess: ChildProcess | null = null;
+let aiReady = false;
 
 const store = new Store()
 
@@ -68,10 +70,58 @@ function stopPythonSidecar() {
   pythonProcess = null
 }
 
-app.whenReady().then(() => {
+function getOllamaBinaryPath(): string {
+  const platformBinary = process.platform === 'win32' ? 'ollama.exe' : 'ollama';
+  const platformDir = process.platform === 'win32' ? 'win' : 'mac';
+  const base = app.isPackaged
+    ? path.join(process.resourcesPath, 'ollama')
+    : path.join(__dirname, '..', '..', 'resources', 'ollama', platformDir); // two levels, matching the Python sidecar path
+  return path.join(base, platformBinary);
+}
+
+function getModelsDir(): string {
+  const base = app.isPackaged
+    ? path.join(process.resourcesPath, 'ollama', 'models')
+    : path.join(__dirname, '..', '..', 'resources', 'ollama', 'models');
+  return base;
+}
+
+export function spawnOllama(): void {
+  const binaryPath = getOllamaBinaryPath();
+  ollamaProcess = spawn(binaryPath, ['serve'], {
+    env: { ...process.env, OLLAMA_MODELS: getModelsDir() },
+  });
+
+  ollamaProcess.stdout?.on('data', (d) => console.log('[ollama]', d.toString()));
+  ollamaProcess.stderr?.on('data', (d) => console.error('[ollama:err]', d.toString()));
+  ollamaProcess.on('exit', (code) => console.log('[ollama] exited with', code));
+}
+
+export async function waitForOllamaReady(timeoutMs = 8000): Promise<boolean> {
+  const start = Date.now();
+  while (Date.now() - start < timeoutMs) {
+    try {
+      const res = await fetch('http://localhost:11434/api/tags');
+      if (res.ok) return true;
+    } catch {
+      // not ready yet, keep polling
+    }
+    await new Promise((r) => setTimeout(r, 300));
+  }
+  return false; // gave up — caller should fall back to keyword-only mode
+}
+
+export function killOllama(): void {
+  ollamaProcess?.kill();
+  ollamaProcess = null;
+}
+
+app.whenReady().then(async () => {
   Menu.setApplicationMenu(null);
   createWindow();
   startPythonSidecar();
+  spawnOllama();
+  
 
   ipcMain.handle("window:mini", () => {
     if (!mainWindow) return;
@@ -101,7 +151,12 @@ app.whenReady().then(() => {
       return { label: 'ambiguous', confidence: 0.5, reason: 'python unreachable' }
     }
   })
+
+  aiReady = await waitForOllamaReady();
+  console.log('[ollama] ready:', aiReady);
 });
+
+ipcMain.handle('ai:isReady', () => aiReady);
 
 ipcMain.handle('system:getIdleTime', () => {
   return powerMonitor.getSystemIdleTime() // seconds since last input
@@ -256,8 +311,9 @@ ipcMain.handle('db:getTodaySessions', async (_, userId: string) => {
   return res.Items ?? []
 })
 
-
-
+app.on('before-quit', () => {
+  killOllama();
+});
 
 
 app.on('before-quit', () => { stopPythonSidecar() }) 

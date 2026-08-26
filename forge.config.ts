@@ -9,6 +9,9 @@ import { FuseV1Options, FuseVersion } from '@electron/fuses';
 
 const config: ForgeConfig = {
   packagerConfig: {
+    extraResource: [
+      './resources/ollama',
+    ],
     asar: true,
   },
   rebuildConfig: {},
