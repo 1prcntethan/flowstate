@@ -302,11 +302,18 @@ ipcMain.handle('db:getRecentSessions', async (_, userId: string, length: number)
 })
 
 ipcMain.handle('db:getTodaySessions', async (_, userId: string) => {
-  const todayPrefix = `SESSION#${new Date().toISOString().split('T')[0]}`
+  const now = new Date()
+  const startOfLocalDay = new Date(now.getFullYear(), now.getMonth(), now.getDate(), 0, 0, 0, 0)
+  const startOfNextLocalDay = new Date(now.getFullYear(), now.getMonth(), now.getDate() + 1, 0, 0, 0, 0)
+
   const res = await db.send(new QueryCommand({
     TableName: 'flowstate-sessions',
-    KeyConditionExpression: 'userId = :u AND begins_with(sessionId, :d)',
-    ExpressionAttributeValues: { ':u': userId, ':d': todayPrefix },
+    KeyConditionExpression: 'userId = :u AND sessionId BETWEEN :start AND :end',
+    ExpressionAttributeValues: {
+      ':u': userId,
+      ':start': `SESSION#${startOfLocalDay.toISOString()}`,
+      ':end': `SESSION#${startOfNextLocalDay.toISOString()}`,
+    },
   }))
   return res.Items ?? []
 })

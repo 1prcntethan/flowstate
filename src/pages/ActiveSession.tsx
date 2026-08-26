@@ -27,11 +27,11 @@ function formatTime(seconds: number): string {
 }
 
 function getGrade(pct: number): string {
-  if (pct >= 95) return "S";
-  if (pct >= 85) return "A";
-  if (pct >= 75) return "B";
-  if (pct >= 65) return "C";
-  return "D";
+  if (pct >= 90) return "A";
+  if (pct >= 80) return "B";
+  if (pct >= 70) return "C";
+  if (pct >= 60) return "D";
+  return "F";
 }
 
 function getGradeColor(grade: string): string {

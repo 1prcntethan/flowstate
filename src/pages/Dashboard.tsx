@@ -30,7 +30,7 @@ function useRecentSessions(userId: string, limit = 5) {
   return sessions;
 }
 
-function calcTodayStats(userId: string) {
+function useTodayStats(userId: string) {
   const [stats, setStats] = useState({
     focusPercentage: 0,
     hoursStudied: 0,
@@ -73,7 +73,7 @@ function calcTodayStats(userId: string) {
 }
 
 export default function Dashboard({ nav, user }: Props) {
-  const { focusPercentage, hoursStudied, coinsEarned } = calcTodayStats(
+  const { focusPercentage, hoursStudied, coinsEarned } = useTodayStats(
     user.id,
   );
   const recentSessions = useRecentSessions(user.id, 5);
