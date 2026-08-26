@@ -3,4 +3,5 @@ mss
 pytesseract
 Pillow
 pygetwindow
+requests
 pyobjc-framework-Cocoa; sys_platform == 'darwin'
