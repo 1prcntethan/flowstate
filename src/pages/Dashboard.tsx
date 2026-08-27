@@ -112,7 +112,7 @@ export default function Dashboard({ nav, user }: Props) {
           <span>Recent Sessions</span>
           {recentSessions.length === 0 ? (
             <div className={styles.emptyState}>
-              No sessions yet — start one to see it here.
+              No sessions yet. Start your first session to see it here!
             </div>
           ) : (
             recentSessions.map((s) => (

@@ -40,6 +40,23 @@ function getGradeColor(grade: string): string {
   return "var(--status-red)";
 }
 
+const RAMP_START = 95;
+const RAMP_END = 99;
+const RAMP_START_MULT = 1.0;
+const RAMP_END_MULT = 1.3;
+const PERFECT_MULT = 1.5;
+
+function getFocusMultiplier(curvedScore: number): number {
+  if (curvedScore >= 100) return PERFECT_MULT;
+  if (curvedScore <= RAMP_START) return RAMP_START_MULT;
+  const clamped = Math.min(curvedScore, RAMP_END);
+  return (
+    RAMP_START_MULT +
+    ((clamped - RAMP_START) / (RAMP_END - RAMP_START)) *
+      (RAMP_END_MULT - RAMP_START_MULT)
+  );
+}
+
 export default function ActiveSession({ nav, config, onEnd }: Props) {
   const [timeLeft, setTimeLeft] = useState(config.durationMinutes * 60);
   const [todos, setTodos] = useState(config.todos);
@@ -57,6 +74,10 @@ export default function ActiveSession({ nav, config, onEnd }: Props) {
 
   const PAUSE_GRACE_MS = 120_000; // how long a pause gets benefit-of-the-doubt
   const CAPTURE_INTERVAL_MS = 5_000; // adjust tracking interval here (ms)
+  const BASE_RATE = 1; // points per minute at 100% focus, up to the threshold
+  const BONUS_MULTIPLIER = 1.3; // points per minute beyond the threshold
+  const BONUS_THRESHOLD_MIN = 45;
+  const POINT_SCALE = 10; // display multiplier — tune freely, applies uniformly everywhere
 
   const breakConfig = useMemo(() => {
     const d = config.durationMinutes;
@@ -118,7 +139,7 @@ export default function ActiveSession({ nav, config, onEnd }: Props) {
             text: `Idle ${idleSecs}s`,
           },
         ]);
-        return; 
+        return;
       }
 
       const result = await window.electronAPI.classify({
@@ -210,9 +231,17 @@ export default function ActiveSession({ nav, config, onEnd }: Props) {
   const grade = getGrade(curvedScore);
 
   const elapsedMinutes = (totalSeconds - timeLeft) / 60;
+  const focusMultiplier = getFocusMultiplier(curvedScore);
+  const basePoints =
+    elapsedMinutes <= BONUS_THRESHOLD_MIN
+      ? elapsedMinutes * BASE_RATE
+      : BONUS_THRESHOLD_MIN * BASE_RATE +
+        (elapsedMinutes - BONUS_THRESHOLD_MIN) * BASE_RATE * BONUS_MULTIPLIER;
   const pointsEarned = Math.max(
     0,
-    Math.round(elapsedMinutes * (curvedScore / 100) * 2),
+    Math.round(
+      basePoints * (curvedScore / 100) * focusMultiplier * POINT_SCALE,
+    ),
   );
 
   const lastLabel = captures[captures.length - 1]?.label ?? "on_task";
@@ -373,7 +402,10 @@ export default function ActiveSession({ nav, config, onEnd }: Props) {
             <div className={styles.inlineBarTrack}>
               <div
                 className={styles.focusBarFill}
-                style={{ background: getGradeColor(grade), width: `${curvedScore}%` }}
+                style={{
+                  background: getGradeColor(grade),
+                  width: `${curvedScore}%`,
+                }}
               />
             </div>
           </div>
@@ -422,7 +454,10 @@ export default function ActiveSession({ nav, config, onEnd }: Props) {
           <div className={styles.focusBarTrack}>
             <div
               className={styles.focusBarFill}
-              style={{ background: getGradeColor(grade), width: `${curvedScore}%` }}
+              style={{
+                background: getGradeColor(grade),
+                width: `${curvedScore}%`,
+              }}
             />
           </div>
           <div className={styles.focusBarTicks}>

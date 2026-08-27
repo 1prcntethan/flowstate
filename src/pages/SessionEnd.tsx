@@ -35,7 +35,7 @@ export default function SessionEnd({
   const completedCount = todos.filter((t) => t.completed).length;
   const incompleteCount = todos.length - completedCount;
   const incompletePenalty = incompleteCount * 10;
-  const focusPoints = pointsEarned + breakPenalty + incompletePenalty;
+  const focusPoints = pointsEarned + breakPenalty; //  + incompletePenalty
 
   const headline =
     focusScore >= 90

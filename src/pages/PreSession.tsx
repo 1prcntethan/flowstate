@@ -272,7 +272,7 @@ export default function PreSession({ nav, onStart, subjects, setSubjects }: Prop
               <div className={styles.toggleText}>
                 <span className={styles.toggleTitle}>Track my screen</span>
                 <span className={styles.toggleDesc}>
-                  Focus tracking + full points?????
+                  Focus tracking earns you coins based on your focus score.
                 </span>
               </div>
             </div>
