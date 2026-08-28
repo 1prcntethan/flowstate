@@ -68,7 +68,7 @@ export default function SessionEnd({
           <div className={styles.pointsBreakdown}>
             <span className={styles.pointsPos}>+ {focusPoints} focus</span>
             <span className={styles.pointsNeg}>-{breakPenalty} breaks</span>
-            <span className={styles.pointsNeg}>-{incompletePenalty} incomplete</span>
+            {/* <span className={styles.pointsNeg}>-{incompletePenalty} incomplete</span> */}
           </div>
         </div>
 
