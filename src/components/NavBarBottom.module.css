@@ -6,8 +6,8 @@
   align-items: center;
   padding: 0 24px;
   height: 68px;
-  border-top: 1px solid var(--orange-cream-50);
-  background: var(--dark-purple);
+  /* border-top: 1px solid var(--orange-cream-50); */
+  background: var(--darker-purple);
   color: var(--orange-cream);
   width: 100%;
 }
@@ -19,9 +19,13 @@
   gap: 5px;
   align-items: center;
   font-family: var(--body-text);
-  flex: 1; /* each item takes equal share of the nav width */
+  width: 100px;
   cursor: pointer;
+  transition: all 0.15s ease-in-out;
+}
 
+.item:hover {
+  transform: scale(1.05);
 }
 
 .icon {

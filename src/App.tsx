@@ -10,6 +10,7 @@ import { useTheme } from "./useTheme";
 import type { User, TodoItem } from "./types";
 import Onboarding from "./onboarding/Onboarding";
 import { useAuth } from "./auth/AuthContext";
+import styles from "./App.module.css";
 
 export type Page =
   | "dashboard"
@@ -41,8 +42,13 @@ const DEFAULT_SUBJECTS = [
 ];
 
 export default function App() {
-  const { user, updateCoins, authChecked, hasCompletedOnboarding, onboardingChecked } =
-    useAuth();
+  const {
+    user,
+    updateCoins,
+    authChecked,
+    hasCompletedOnboarding,
+    onboardingChecked,
+  } = useAuth();
   const { themeId, setThemeId } = useTheme();
   const [page, setPage] = useState<Page>("dashboard");
   const [subjects, setSubjects] = useState<string[]>(DEFAULT_SUBJECTS);
@@ -60,24 +66,23 @@ export default function App() {
 
     await updateCoins(result.pointsEarned);
 
-    window.electronAPI.saveSession({ userId: user!.id, result }).catch(err =>
-    console.error('Failed to save session:', err)
-  )
+    window.electronAPI
+      .saveSession({ userId: user!.id, result })
+      .catch((err) => console.error("Failed to save session:", err));
   };
-  
+
   if (!authChecked || !onboardingChecked) return null;
 
+  let content: React.ReactNode;
+
   if (!hasCompletedOnboarding) {
-    return <Onboarding />; // brand new device — starts at Welcome
-  }
-
-  if (!user) {
-    return <Onboarding startAt="auth" />; // seen this before, just needs to log in
-  }
-
-  if (page === "dashboard") return <Dashboard nav={nav} user={user} />;
-  if (page === "presession")
-    return (
+    content = <Onboarding />; // brand new device — starts at Welcome
+  } else if (!user) {
+    content = <Onboarding startAt="auth" />; // seen this before, just needs to log in
+  } else if (page === "dashboard") {
+    content = <Dashboard nav={nav} user={user} />;
+  } else if (page === "presession") {
+    content = (
       <PreSession
         nav={nav}
         onStart={setSessionConfig}
@@ -85,16 +90,16 @@ export default function App() {
         setSubjects={setSubjects}
       />
     );
-  if (page === "session")
-    return (
+  } else if (page === "session") {
+    content = (
       <ActiveSession
         nav={nav}
         config={sessionConfig!}
         onEnd={handleSessionEnd}
       />
     );
-  if (page === "sessionend")
-    return (
+  } else if (page === "sessionend") {
+    content = (
       <SessionEnd
         nav={nav}
         subject={sessionResult?.subject ?? ""}
@@ -109,8 +114,8 @@ export default function App() {
         streak={user.streak}
       />
     );
-  if (page === "settings")
-    return (
+  } else if (page === "settings") {
+    content = (
       <Settings
         nav={nav}
         user={user}
@@ -118,4 +123,16 @@ export default function App() {
         setSubjects={setSubjects}
       />
     );
+  }
+
+  return (
+    <div className={styles.appShell}>
+      <div className={styles.titlebar}>
+        <img src="./logo512dark.svg" alt="Flowstate" />
+      </div>
+      <div className={styles.pageContent}>
+        {content}
+      </div>
+    </div>
+  );
 }

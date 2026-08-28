@@ -69,6 +69,17 @@
   justify-self: center;
   display: flex;
 }
+input,
+textarea {
+  outline: none; /* kill the default ring */
+  border: 1px solid var(--orange-cream-50);
+  transition: border-color 0.15s ease, box-shadow 0.15s ease;
+}
+input:focus-visible,
+textarea:focus-visible {
+  border-color: var(--orange-cream-80); /* swap for whatever your Lantern theme's accent variable is */
+  box-shadow: 0 0 0 1px rgba(215, 112, 219, 0.25); /* soft glow, adjust color/opacity to taste */
+}
 .helper {
   font-size: 14px;
   color: var(--orange-cream-50);
@@ -80,7 +91,6 @@
 .error {
   color: #e38c8c;
   font-size: 0.82rem;
-  margin-bottom: 10px;
   font-family: var(--body-text);
   display: flex;
   justify-self: center;
@@ -101,8 +111,13 @@
   max-width: 450px;
   justify-self: center;
   justify-content: center;
-
+  transition: all 0.15s ease-in-out;
 }
+
+.primaryBtn:hover {
+  transform: scale(1.05);
+}
+
 .primaryBtn:disabled {
   opacity: 0.6;
 }
@@ -116,4 +131,8 @@
   margin-top: 14px;
   cursor: pointer;
   text-align: center;
+}
+
+.linkBtn:hover {
+  color: var(--orange-cream-70);
 }

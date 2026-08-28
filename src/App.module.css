@@ -1,0 +1,45 @@
+.appShell {
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.titlebar {
+  height: 32px;
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  padding-left: 12px;
+  background-color: var(--darker-purple);
+  -webkit-app-region: drag;
+}
+
+.titlebar img {
+  height: 18px;
+  -webkit-app-region: drag;
+}
+
+.pageContent {
+  flex: 1;
+  overflow-y: auto;
+  /* border-top: 1px solid var(--orange-cream-50); */
+}
+
+
+.pageContent::-webkit-scrollbar {
+  width: 4px;
+}
+
+.pageContent::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.pageContent::-webkit-scrollbar-thumb {
+  background: var(--orange-cream-20);
+  border-radius: 2px;
+}
+
+.pageContent::-webkit-scrollbar::-webkit-scrollbar-thumb:hover {
+  background: var(--orange-cream-50);
+}

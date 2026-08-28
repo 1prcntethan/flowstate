@@ -1,9 +1,86 @@
 
 .sessionItem {
+  display: flex;
+  flex-direction: row;
   border: 1px solid var(--orange-cream-50);
   font-size: 18px;
-  padding: 12px;
+  padding: 12px 16px;
   border-radius: 12px;
-  font-family: var(--heading-text);
+  height: 90px;
+  gap: 10px;
+}
+
+.sessionItemLeft {
+  display: flex;
+  flex-direction: column;
+  width: 25%;
+  height: 100%;
+  justify-content: space-between;
+}
+
+.focusScore {
+  color: var(--orange-cream-50);
+  font-size: 16px;
+}
+
+.sessionItemMid {
+  display: flex;
+  flex-direction: column;
+  width: 60%;
+  height: 100%;
+  justify-content: space-between;
+}
+
+.sessionSubject {
+  color: var(--orange-cream);
+  font-size: 16px;
+  margin-top: 6px;
+}
+
+.sessionDuration {
+  color: var(--orange-cream-50);
+  font-size: 16px;
+}
+
+.sessionItemRight {
+  display: flex;
+  flex-direction: column;
+  width: 15%;
+  height: 100%;
+  justify-content: space-between;
+  text-align: right;
+}
+
+.sessionCoins {
+  color: var(--status-amber);
+  font-size: 16px;
+}
+
+.sessionTime {
+  color: var(--orange-cream-50);
+  font-size: 14px;
+}
+
+.sessionGreen {
+  color: var(--status-green);
+  font-size: 26px;
+  font-family: var(--display-text);
   letter-spacing: 0.05em;
+  font-weight: 500;
+}
+
+.sessionAmber {
+  color: var(--status-amber);
+  font-size: 26px;
+  font-family: var(--display-text);
+  letter-spacing: 0.05em;
+  font-weight: 500;
+}
+
+.sessionRed {
+  color: var(--status-red);
+  font-size: 26px;
+  font-family: var(--display-text);
+  letter-spacing: 0.05em;
+  font-weight: 500;
 }

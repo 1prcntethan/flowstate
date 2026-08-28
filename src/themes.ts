@@ -5,6 +5,7 @@ export type Theme = {
   vars: {
     '--text-important': string
     '--dark-purple': string
+    '--darker-purple': string
     '--orange-cream': string
     '--orange-cream-10': string
     '--orange-cream-20': string
@@ -48,6 +49,7 @@ export const themes: Record<string, Theme> = {
     vars: {
       '--text-important':  'white',
       '--dark-purple':     'rgb(23, 11, 19)',
+      '--darker-purple':   'rgb(12, 6, 10)',
       '--orange-cream':    'rgb(243, 229, 216)',
       '--orange-cream-10': 'rgba(243,229,216,0.1)',
       '--orange-cream-20': 'rgba(243,229,216,0.2)',
