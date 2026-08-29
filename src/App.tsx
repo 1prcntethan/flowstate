@@ -61,14 +61,17 @@ export default function App() {
 
   const nav = (p: Page) => setPage(p);
   const handleSessionEnd = async (result: SessionResult) => {
+    console.log("attempt handle session end")
     setSessionResult(result);
     setPage("sessionend");
 
     await updateCoins(result.pointsEarned);
+    console.log("update coins success")
 
     window.electronAPI
       .saveSession({ userId: user!.id, result })
       .catch((err) => console.error("Failed to save session:", err));
+    console.log("save session attempted")
   };
 
   if (!authChecked || !onboardingChecked) return null;
