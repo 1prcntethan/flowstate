@@ -2,7 +2,15 @@ import { useRef, useState } from "react";
 import { useAuth } from "../auth/AuthContext";
 import styles from "./ProfileSetup.module.css";
 
-const SUBJECTS = ["Math", "Science", "CS", "English", "History", "Languages", "Other"];
+const SUBJECTS = [
+  "Math",
+  "Science",
+  "CS",
+  "English",
+  "History",
+  "Languages",
+  "Other",
+];
 
 type Props = { onFinish: () => void };
 
@@ -12,10 +20,12 @@ export default function ProfileSetup({ onFinish }: Props) {
   const [selected, setSelected] = useState<string[]>([]);
   const [photoPreview, setPhotoPreview] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const [isSaving, setIsSaving] = useState(false);
+  const [saveError, setSaveError] = useState<string | null>(null);
 
   const toggle = (s: string) =>
     setSelected((prev) =>
-      prev.includes(s) ? prev.filter((x) => x !== s) : [...prev, s]
+      prev.includes(s) ? prev.filter((x) => x !== s) : [...prev, s],
     );
 
   const handlePhotoClick = () => fileInputRef.current?.click();
@@ -31,18 +41,29 @@ export default function ProfileSetup({ onFinish }: Props) {
 
   const handleFinish = async () => {
     if (!user) return;
-    
-    await window.electronAPI.createUserProfile({
-      userId: user?.id,
-      username,
-      subjects: selected,
-      coins: 0,
-      streak: 0,
-      createdAt: new Date().toISOString(),
-    })
-    console.log("created user profile")
-    onFinish()
-  }
+
+    setIsSaving(true);
+    setSaveError(null);
+
+    try {
+      await window.electronAPI.createUserProfile({
+        userId: user.id,
+        username,
+        subjects: selected,
+        coins: 0,
+        streak: 0,
+        createdAt: new Date().toISOString(),
+      });
+      onFinish();
+    } catch (err) {
+      console.error("Failed to create user profile:", err);
+      setSaveError(
+        "Couldn't save your profile — check your connection and try again.",
+      );
+    } finally {
+      setIsSaving(false);
+    }
+  };
 
   // TODO: replace with a real uniqueness check against the users table
   const usernameStatus = username.trim().length >= 3 ? "available" : null;
@@ -63,7 +84,16 @@ export default function ProfileSetup({ onFinish }: Props) {
           {photoPreview ? (
             <img src={photoPreview} className={styles.photoPreview} alt="" />
           ) : (
-            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round">
+            <svg
+              width="22"
+              height="22"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="1.6"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            >
               <path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2Z" />
               <circle cx="12" cy="13" r="4" />
             </svg>
@@ -102,8 +132,13 @@ export default function ProfileSetup({ onFinish }: Props) {
         </p>
 
         {/* TODO: persist photo, username, and selected subjects once DynamoDB is wired up */}
-        <button className={styles.finishBtn} onClick={handleFinish} disabled={!usernameStatus}>
-          Go to dashboard →
+        {saveError && <p className={styles.errorText}>{saveError}</p>}
+        <button
+          className={styles.finishBtn}
+          onClick={handleFinish}
+          disabled={!usernameStatus || isSaving}
+        >
+          {isSaving ? "Saving..." : "Go to dashboard →"}
         </button>
       </div>
     </div>
