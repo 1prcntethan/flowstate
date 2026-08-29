@@ -21,9 +21,12 @@ ON_TASK_KEYWORDS = [
 ]
 
 def classify_screen(window_title: str, ocr_text: str, subjects: list[str], todos: list[dict]) -> dict:
+    print("running general screen classification")
     ai_result = classify_with_ai(window_title, ocr_text, subjects, todos)
     if ai_result is not None:
+        print("attempted AI classification")
         return ai_result
+    print("attempted text match classification")
     return classify_match(window_title, ocr_text, subjects, todos)
 
 def classify_with_ai(window_title: str, ocr_text: str, subjects: list[str], todos: list[dict]) -> dict | None:
@@ -47,6 +50,7 @@ def classify_with_ai(window_title: str, ocr_text: str, subjects: list[str], todo
         parsed = json.loads(response.json()["response"])
         if parsed.get("label") in ("on_task", "off_task", "ambiguous"):
             return parsed
+        print("AI classification failed")
         return None
     except (requests.RequestException, KeyError, ValueError, json.JSONDecodeError):
         return None

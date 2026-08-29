@@ -40,6 +40,7 @@ export default function ProfileSetup({ onFinish }: Props) {
       streak: 0,
       createdAt: new Date().toISOString(),
     })
+    console.log("created user profile")
     onFinish()
   }
 

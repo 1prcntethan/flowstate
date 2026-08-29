@@ -117,7 +117,7 @@ export default function ActiveSession({ nav, config, onEnd }: Props) {
           : 0;
         const cumulativePaused = totalPausedMsRef.current + pausedFor;
         const escalated = cumulativePaused > PAUSE_GRACE_MS; // one-time budget for the whole session
-
+        console.log("tracking paused")
         setCaptures((prev) => [
           ...prev,
           {
@@ -131,6 +131,7 @@ export default function ActiveSession({ nav, config, onEnd }: Props) {
 
       const idleSecs = await window.electronAPI.getIdleTime();
       if (idleSecs > 120) {
+        console.log("idle > 120 sec")
         setCaptures((prev) => [
           ...prev,
           {
@@ -146,6 +147,7 @@ export default function ActiveSession({ nav, config, onEnd }: Props) {
         subjects: [config.subject],
         todos: config.todos.map((t) => ({ text: t.text })),
       });
+      console.log("classify function run")
       setCaptures((prev) => [
         ...prev,
         { id: Date.now().toString(), label: result.label, text: result.reason },
@@ -291,6 +293,7 @@ export default function ActiveSession({ nav, config, onEnd }: Props) {
   const handleMiniMode = async () => {
     try {
       await window.electronAPI?.setMiniMode();
+      console.log("mini mode")
     } catch {}
     setIsMiniMode(true);
   };

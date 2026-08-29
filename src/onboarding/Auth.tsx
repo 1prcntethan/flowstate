@@ -45,6 +45,7 @@ export default function Auth({ onExistingAccount, onNewAccount }: Props) {
       await confirmSignUp(email, code);
       await login(email, password); // Cognito requires a real sign-in after confirmation
       onNewAccount();
+      console.log("signup and login and account creation complete")
     });
 
   const isSignup = mode === "signup-details";
