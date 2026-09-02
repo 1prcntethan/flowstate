@@ -306,3 +306,28 @@
 .shareBtn:hover {
   background: var(--orange-cream-10);
 }
+
+
+.sessionGreen {
+  color: var(--status-green);
+  font-size: 80px;
+  font-family: var(--display-text);
+  letter-spacing: 0.05em;
+  font-weight: 500;
+}
+
+.sessionAmber {
+  color: var(--status-amber);
+  font-size: 80px;
+  font-family: var(--display-text);
+  letter-spacing: 0.05em;
+  font-weight: 500;
+}
+
+.sessionRed {
+  color: var(--status-red);
+  font-size: 80px;
+  font-family: var(--display-text);
+  letter-spacing: 0.05em;
+  font-weight: 500;
+}
