@@ -30,6 +30,9 @@ let mainWindow: BrowserWindow | null = null;
 let pythonProcess: ChildProcess | null = null;
 let ollamaProcess: ChildProcess | null = null;
 let aiReady = false;
+let ollamaServerUp = false;
+let ollamaReadyPromise: Promise<boolean> = Promise.resolve(false);
+const MODEL_NAME = "llama3.2:1b";
 
 const store = new Store();
 
@@ -134,8 +137,26 @@ export async function waitForOllamaReady(timeoutMs = 8000): Promise<boolean> {
     }
     await new Promise((r) => setTimeout(r, 300));
   }
-  console.log("wait for ollama failed: switch to keywork matching")
+  console.log("wait for ollama failed: switch to keywork matching");
   return false; // gave up — caller should fall back to keyword-only mode
+}
+
+async function warmUpModel(): Promise<boolean> {
+  try {
+    const res = await fetch("http://localhost:11434/api/generate", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        model: MODEL_NAME,
+        prompt: "Reply with one word: ready",
+        stream: false,
+        keep_alive: "30m", // keeps the model loaded well past your longest break
+      }),
+    });
+    return res.ok;
+  } catch {
+    return false;
+  }
 }
 
 export function killOllama(): void {
@@ -146,59 +167,67 @@ export function killOllama(): void {
 app.whenReady().then(async () => {
   Menu.setApplicationMenu(null);
   createWindow();
-  console.log("attempting python sidecar start")
+  console.log("attempting python sidecar start");
   startPythonSidecar();
-  console.log("attempting ollama start")
+  console.log("attempting ollama start");
   spawnOllama();
-
-  ipcMain.handle("window:mini", () => {
-    if (!mainWindow) return;
-    mainWindow.setResizable(true);
-    mainWindow.setSize(300, 185);
-    mainWindow.setAlwaysOnTop(true);
-    mainWindow.setResizable(false);
-    console.log("size: mini")
-  });
-
-  ipcMain.handle("window:expand", () => {
-    if (!mainWindow) return;
-    mainWindow.setResizable(true);
-    mainWindow.setSize(960, 720);
-    mainWindow.setAlwaysOnTop(false);
-    mainWindow.setResizable(false);
-    console.log("size: default")
-  });
-
-  ipcMain.handle(
-    "session:classify",
-    async (_, payload: { subjects: string[]; todos: { text: string }[] }) => {
-      try {
-        const res = await fetch("http://localhost:5001/classify", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(payload),
-        });
-        return await res.json();
-      } catch {
-        console.log("classification failed")
-        return {
-          label: "ambiguous",
-          confidence: 0.5,
-          reason: "python unreachable",
-        };
-      }
-    },
-  );
-
-  aiReady = await waitForOllamaReady();
-  console.log("[ollama] ready:", aiReady);
+  ollamaReadyPromise = waitForOllamaReady();
+  ollamaServerUp = await ollamaReadyPromise;
+  console.log("[ollama] server up:", ollamaServerUp);
 });
 
 ipcMain.handle("ai:isReady", () => aiReady);
 
+ipcMain.handle("ai:warmup", async () => {
+  const serverUp = await ollamaReadyPromise; // resolves instantly if already done, waits if not
+  if (!serverUp) return false;
+  aiReady = await warmUpModel();
+  console.log("[ollama] model warm:", aiReady);
+  return aiReady;
+});
+
 ipcMain.handle("system:getIdleTime", () => {
   return powerMonitor.getSystemIdleTime(); // seconds since last input
 });
+
+ipcMain.handle("window:mini", () => {
+  if (!mainWindow) return;
+  mainWindow.setResizable(true);
+  mainWindow.setSize(300, 185);
+  mainWindow.setAlwaysOnTop(true);
+  mainWindow.setResizable(false);
+  console.log("size: mini");
+});
+
+ipcMain.handle("window:expand", () => {
+  if (!mainWindow) return;
+  mainWindow.setResizable(true);
+  mainWindow.setSize(960, 720);
+  mainWindow.setAlwaysOnTop(false);
+  mainWindow.setResizable(false);
+  console.log("size: default");
+});
+
+ipcMain.handle(
+  "session:classify",
+  async (_, payload: { subjects: string[]; todos: { text: string }[] }) => {
+    try {
+      const res = await fetch("http://localhost:5001/classify", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload),
+      });
+      return await res.json();
+    } catch {
+      console.log("classification failed");
+      return {
+        label: "ambiguous",
+        confidence: 0.5,
+        reason: "python unreachable",
+      };
+    }
+  },
+);
 
 const userPool = new CognitoUserPool({
   UserPoolId: "us-west-1_iD3xkKD59",
@@ -213,12 +242,12 @@ function storeTokens(tokens: object) {
     tokenPath,
     safeStorage.encryptString(JSON.stringify(tokens)),
   );
-  console.log("store tokens successful")
+  console.log("store tokens successful");
 }
 
 function loadTokens(): any | null {
   if (!fs.existsSync(tokenPath)) return null;
-  console.log("attempt load tokens")
+  console.log("attempt load tokens");
   return JSON.parse(safeStorage.decryptString(fs.readFileSync(tokenPath)));
 }
 

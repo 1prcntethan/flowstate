@@ -29,6 +29,7 @@ declare interface Window {
     getRecentSessions: (userId: string, length: number) => Promise<any[]>;
     getTodaySessions: (userId: string) => Promise<any[]>;
     getIdleTime: () => Promise<number>;
-    isReady: () => Promise<boolean>
+    isAiReady: () => Promise<boolean>;
+    warmUpAI: () => Promise<boolean>;
   };
 }

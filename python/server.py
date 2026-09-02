@@ -37,10 +37,10 @@ def take_screenshot() -> Image.Image:
 
 def ocr_image(img: Image.Image) -> str:
     text = pytesseract.image_to_string(img)
-    print("=" * 50)
-    print("OCR SCANNED TEXT:")
-    print(text, flush=True)
-    print("=" * 50)
+    # print("=" * 50)
+    # print("OCR SCANNED TEXT:")
+    # print(text, flush=True)
+    # print("=" * 50)
     return text
 
 @app.route('/classify', methods=['POST'])
@@ -50,7 +50,7 @@ def classify():
     todos = data.get('todos', [])
 
     window_title = get_active_window_title()
-    print(f"\nWINDOW TITLE: {window_title}", flush=True)
+    # print(f"\nWINDOW TITLE: {window_title}", flush=True)
 
     img = take_screenshot()
     ocr_text = ocr_image(img)

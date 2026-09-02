@@ -1,4 +1,5 @@
 import re
+from urllib import response
 import requests
 import json
 
@@ -37,8 +38,15 @@ def classify_with_ai(window_title: str, ocr_text: str, subjects: list[str], todo
         f"Todos: {', '.join(todo_texts)}. "
         f"Screen text: \"{ocr_text[:500]}\". "
         f"Classify the screen as on_task, off_task, or ambiguous "
-        f"relative to the subjects and todos. "
-        f'Respond as JSON: {{"label": "...", "confidence": 0.0}}'
+        f"relative to the subjects and todos, based off the screen text. "
+
+        f"Return ONLY valid JSON in exactly this format: "
+        f'{{"label":"on_task","confidence":0.0,"reason":"brief explanation"}} '
+
+        f"Rules: "
+        f"label must be exactly one of: on_task, off_task, ambiguous. "
+        f"confidence must be a number between 0 and 1. "
+        f"reason must always be a short explanation between 2-3 words."
     )
     try:
         response = requests.post(
@@ -47,13 +55,27 @@ def classify_with_ai(window_title: str, ocr_text: str, subjects: list[str], todo
             timeout=5,
         )
         response.raise_for_status()
-        parsed = json.loads(response.json()["response"])
+
+        response_json = response.json()
+        print(f"[Ollama] RAW RESPONSE: {response_json}", flush=True)
+
+        raw_text = response_json["response"]
+        print(f"[Ollama] MODEL TEXT: {raw_text!r}", flush=True)
+
+        parsed = json.loads(raw_text)
+        print(f"[Ollama] PARSED JSON: {parsed}", flush=True)
+
         if parsed.get("label") in ("on_task", "off_task", "ambiguous"):
+            print("[Ollama] AI classification successful", flush=True)
             return parsed
-        print("AI classification failed")
+
+        print(f"[Ollama] INVALID LABEL: {parsed.get('label')!r}", flush=True)
         return None
-    except (requests.RequestException, KeyError, ValueError, json.JSONDecodeError):
+    except Exception as e:
+        print(f"[Ollama ERROR] {type(e).__name__}: {e}", flush=True)
         return None
+    # except (requests.RequestException, KeyError, ValueError, json.JSONDecodeError):
+    #     return None
 
 
 def classify_match(window_title: str, ocr_text: str, subjects: list, todos: list) -> dict:

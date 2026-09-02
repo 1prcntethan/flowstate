@@ -1,4 +1,4 @@
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect } from "react";
 import { SessionConfig, TodoItem, BreakMode } from "../types";
 import type { Page } from "../App";
 import styles from "./PreSession.module.css";
@@ -98,6 +98,10 @@ export default function PreSession({
 
   const canStart =
     selectedSubjects.length > 0 && getFinalDuration() > 0 && todos.length > 0;
+
+  useEffect(() => {
+    window.electronAPI.warmUpAI(); // no await runs automatically
+  }, []);
 
   return (
     <div className={`page ${styles.preSessionPage}`}>

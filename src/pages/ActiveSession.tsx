@@ -73,7 +73,7 @@ export default function ActiveSession({ nav, config, onEnd }: Props) {
   const totalPausedMsRef = useRef(0);
 
   const PAUSE_GRACE_MS = 120_000; // how long a pause gets benefit-of-the-doubt
-  const CAPTURE_INTERVAL_MS = 5_000; // adjust tracking interval here (ms)
+  const CAPTURE_INTERVAL_MS = 10_000; // adjust tracking interval here (ms)
   const BASE_RATE = 1; // points per minute at 100% focus, up to the threshold
   const BONUS_MULTIPLIER = 1.3; // points per minute beyond the threshold
   const BONUS_THRESHOLD_MIN = 45;
@@ -117,7 +117,7 @@ export default function ActiveSession({ nav, config, onEnd }: Props) {
           : 0;
         const cumulativePaused = totalPausedMsRef.current + pausedFor;
         const escalated = cumulativePaused > PAUSE_GRACE_MS; // one-time budget for the whole session
-        console.log("tracking paused")
+        console.log("tracking paused");
         setCaptures((prev) => [
           ...prev,
           {
@@ -131,7 +131,7 @@ export default function ActiveSession({ nav, config, onEnd }: Props) {
 
       const idleSecs = await window.electronAPI.getIdleTime();
       if (idleSecs > 120) {
-        console.log("idle > 120 sec")
+        console.log("idle > 120 sec");
         setCaptures((prev) => [
           ...prev,
           {
@@ -143,11 +143,16 @@ export default function ActiveSession({ nav, config, onEnd }: Props) {
         return;
       }
 
+      const ready = await window.electronAPI.isAiReady();
+      if (!ready && elapsedMinutes * 60 < 90) {
+        return; // model still warming up so skip current tick, try again next interval
+      }
+
       const result = await window.electronAPI.classify({
         subjects: [config.subject],
         todos: config.todos.map((t) => ({ text: t.text })),
       });
-      console.log("classify function run")
+      console.log("classify function run");
       setCaptures((prev) => [
         ...prev,
         { id: Date.now().toString(), label: result.label, text: result.reason },
@@ -293,7 +298,7 @@ export default function ActiveSession({ nav, config, onEnd }: Props) {
   const handleMiniMode = async () => {
     try {
       await window.electronAPI?.setMiniMode();
-      console.log("mini mode")
+      console.log("mini mode");
     } catch {}
     setIsMiniMode(true);
   };
