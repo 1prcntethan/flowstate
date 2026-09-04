@@ -1,7 +1,7 @@
 import { app, BrowserWindow, ipcMain, Menu, safeStorage } from "electron";
 import path from "node:path";
 import started from "electron-squirrel-startup";
-import { spawn, exec, ChildProcess } from "child_process";
+import { spawn, exec, execSync, ChildProcess } from "child_process";
 import os from "node:os";
 import {
   CognitoUserPool,
@@ -93,6 +93,18 @@ function stopPythonSidecar() {
   pythonProcess = null;
 }
 
+function stopPythonSidecarSync() {
+  if (!pythonProcess || !pythonProcess.pid) return;
+  if (process.platform === "win32") {
+    try {
+      execSync(`taskkill /PID ${pythonProcess.pid} /T /F`, { stdio: "ignore" });
+    } catch {}
+  } else {
+    pythonProcess.kill("SIGTERM");
+  }
+  pythonProcess = null;
+}
+
 function getOllamaBinaryPath(): string {
   const platformBinary = process.platform === "win32" ? "ollama.exe" : "ollama";
   const platformDir = process.platform === "win32" ? "win" : "mac";
@@ -159,8 +171,35 @@ async function warmUpModel(): Promise<boolean> {
   }
 }
 
-export function killOllama(): void {
-  ollamaProcess?.kill();
+function killOllama(): void {
+  if (process.platform === "win32") {
+    exec("taskkill /IM ollama.exe /F", (err, stdout, stderr) => {
+      console.log(
+        "[ollama] kill ollama.exe:",
+        stdout?.trim() || stderr?.trim() || err?.message,
+      );
+    });
+    exec("taskkill /IM llama-server.exe /F", (err, stdout, stderr) => {
+      console.log(
+        "[ollama] kill llama-server.exe:",
+        stdout?.trim() || stderr?.trim() || err?.message,
+      );
+    });
+  } else {
+    ollamaProcess?.kill("SIGTERM");
+    exec("pkill -f llama-server"); // Mac: ollama's child isn't tracked via Node's handle either
+  }
+  ollamaProcess = null;
+}
+
+function killOllamaSync(): void {
+  if (process.platform === 'win32') {
+    try { execSync('taskkill /IM ollama.exe /F', { stdio: 'ignore' }); } catch {}
+    try { execSync('taskkill /IM llama-server.exe /F', { stdio: 'ignore' }); } catch {}
+  } else {
+    ollamaProcess?.kill('SIGTERM');
+    try { execSync('pkill -f llama-server'); } catch {}
+  }
   ollamaProcess = null;
 }
 
@@ -445,16 +484,15 @@ ipcMain.handle("db:getTodaySessions", async (_, userId: string) => {
 });
 
 app.on("before-quit", () => {
+  stopPythonSidecar();
   killOllama();
 });
 
-app.on("before-quit", () => {
-  stopPythonSidecar();
-});
 
 process.on("SIGINT", () => {
-  // catches Ctrl+C in terminal
-  stopPythonSidecar();
+  console.log("[shutdown] SIGINT received");
+  stopPythonSidecarSync();
+  killOllamaSync();
   app.quit();
   process.exit(0);
 });
