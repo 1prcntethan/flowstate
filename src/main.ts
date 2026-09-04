@@ -30,6 +30,9 @@ let mainWindow: BrowserWindow | null = null;
 let pythonProcess: ChildProcess | null = null;
 let ollamaProcess: ChildProcess | null = null;
 let aiReady = false;
+let ollamaServerUp = false;
+let ollamaReadyPromise: Promise<boolean> = Promise.resolve(false);
+const MODEL_NAME = "llama3.2:1b";
 
 const store = new Store();
 
@@ -38,7 +41,7 @@ const createWindow = () => {
     width: 960,
     height: 720,
     resizable: false,
-    icon: path.join(__dirname, '../public/logo512dark.ico'),
+    icon: path.join(__dirname, "../public/logo512dark.ico"),
     titleBarStyle: "hidden",
     titleBarOverlay: {
       color: "rgb(12, 6, 10)", // background of the button strip
@@ -70,7 +73,6 @@ function startPythonSidecar() {
     process.platform === "win32"
       ? `C:\\Users\\${os.userInfo().username}\\AppData\\Local\\Python\\pythoncore-3.14-64\\python.exe`
       : "/Library/Frameworks/Python.framework/Versions/3.11/bin/python3";
-
   const scriptPath = path.join(__dirname, "../../python/server.py");
   pythonProcess = spawn(pythonExe, ["-u", scriptPath]);
   pythonProcess.stdout?.on("data", (d) =>
@@ -94,6 +96,7 @@ function stopPythonSidecar() {
 function getOllamaBinaryPath(): string {
   const platformBinary = process.platform === "win32" ? "ollama.exe" : "ollama";
   const platformDir = process.platform === "win32" ? "win" : "mac";
+  console.log("attempting fetch ollama path");
   const base = app.isPackaged
     ? path.join(process.resourcesPath, "ollama")
     : path.join(__dirname, "..", "..", "resources", "ollama", platformDir); // two levels, matching the Python sidecar path
@@ -104,6 +107,7 @@ function getModelsDir(): string {
   const base = app.isPackaged
     ? path.join(process.resourcesPath, "ollama", "models")
     : path.join(__dirname, "..", "..", "resources", "ollama", "models");
+  console.log("attempting fetch ollama model dir.");
   return base;
 }
 
@@ -133,7 +137,26 @@ export async function waitForOllamaReady(timeoutMs = 8000): Promise<boolean> {
     }
     await new Promise((r) => setTimeout(r, 300));
   }
+  console.log("wait for ollama failed: switch to keywork matching");
   return false; // gave up — caller should fall back to keyword-only mode
+}
+
+async function warmUpModel(): Promise<boolean> {
+  try {
+    const res = await fetch("http://localhost:11434/api/generate", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        model: MODEL_NAME,
+        prompt: "Reply with one word: ready",
+        stream: false,
+        keep_alive: "30m", // keeps the model loaded well past your longest break
+      }),
+    });
+    return res.ok;
+  } catch {
+    return false;
+  }
 }
 
 export function killOllama(): void {
@@ -144,54 +167,67 @@ export function killOllama(): void {
 app.whenReady().then(async () => {
   Menu.setApplicationMenu(null);
   createWindow();
+  console.log("attempting python sidecar start");
   startPythonSidecar();
+  console.log("attempting ollama start");
   spawnOllama();
-
-  ipcMain.handle("window:mini", () => {
-    if (!mainWindow) return;
-    mainWindow.setResizable(true);
-    mainWindow.setSize(300, 185);
-    mainWindow.setAlwaysOnTop(true);
-    mainWindow.setResizable(false);
-  });
-
-  ipcMain.handle("window:expand", () => {
-    if (!mainWindow) return;
-    mainWindow.setResizable(true);
-    mainWindow.setSize(960, 720);
-    mainWindow.setAlwaysOnTop(false);
-    mainWindow.setResizable(false);
-  });
-
-  ipcMain.handle(
-    "session:classify",
-    async (_, payload: { subjects: string[]; todos: { text: string }[] }) => {
-      try {
-        const res = await fetch("http://localhost:5001/classify", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(payload),
-        });
-        return await res.json();
-      } catch {
-        return {
-          label: "ambiguous",
-          confidence: 0.5,
-          reason: "python unreachable",
-        };
-      }
-    },
-  );
-
-  aiReady = await waitForOllamaReady();
-  console.log("[ollama] ready:", aiReady);
+  ollamaReadyPromise = waitForOllamaReady();
+  ollamaServerUp = await ollamaReadyPromise;
+  console.log("[ollama] server up:", ollamaServerUp);
 });
 
 ipcMain.handle("ai:isReady", () => aiReady);
 
+ipcMain.handle("ai:warmup", async () => {
+  const serverUp = await ollamaReadyPromise; // resolves instantly if already done, waits if not
+  if (!serverUp) return false;
+  aiReady = await warmUpModel();
+  console.log("[ollama] model warm:", aiReady);
+  return aiReady;
+});
+
 ipcMain.handle("system:getIdleTime", () => {
   return powerMonitor.getSystemIdleTime(); // seconds since last input
 });
+
+ipcMain.handle("window:mini", () => {
+  if (!mainWindow) return;
+  mainWindow.setResizable(true);
+  mainWindow.setSize(300, 185);
+  mainWindow.setAlwaysOnTop(true);
+  mainWindow.setResizable(false);
+  console.log("size: mini");
+});
+
+ipcMain.handle("window:expand", () => {
+  if (!mainWindow) return;
+  mainWindow.setResizable(true);
+  mainWindow.setSize(960, 720);
+  mainWindow.setAlwaysOnTop(false);
+  mainWindow.setResizable(false);
+  console.log("size: default");
+});
+
+ipcMain.handle(
+  "session:classify",
+  async (_, payload: { subjects: string[]; todos: { text: string }[] }) => {
+    try {
+      const res = await fetch("http://localhost:5001/classify", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload),
+      });
+      return await res.json();
+    } catch {
+      console.log("classification failed");
+      return {
+        label: "ambiguous",
+        confidence: 0.5,
+        reason: "python unreachable",
+      };
+    }
+  },
+);
 
 const userPool = new CognitoUserPool({
   UserPoolId: "us-west-1_iD3xkKD59",
@@ -206,10 +242,12 @@ function storeTokens(tokens: object) {
     tokenPath,
     safeStorage.encryptString(JSON.stringify(tokens)),
   );
+  console.log("store tokens successful");
 }
 
 function loadTokens(): any | null {
   if (!fs.existsSync(tokenPath)) return null;
+  console.log("attempt load tokens");
   return JSON.parse(safeStorage.decryptString(fs.readFileSync(tokenPath)));
 }
 
@@ -247,6 +285,7 @@ ipcMain.handle(
   "auth:signUp",
   (_, { email, password }) =>
     new Promise((resolve, reject) => {
+      console.log("signup attempted");
       userPool.signUp(email, password, [], [], (err, result) => {
         if (err) reject(err.message);
         else resolve({ userSub: result!.userSub });
@@ -256,6 +295,7 @@ ipcMain.handle(
 
 ipcMain.handle("auth:confirmSignUp", (_, { email, code }) => {
   const user = new CognitoUser({ Username: email, Pool: userPool });
+  console.log("confirm signup attempted");
   return new Promise((resolve, reject) => {
     user.confirmRegistration(code, true, (err, result) => {
       if (err) reject(err.message);
@@ -278,6 +318,7 @@ ipcMain.handle("auth:signIn", (_, { email, password }) => {
           accessToken: session.getAccessToken().getJwtToken(),
           refreshToken: session.getRefreshToken().getToken(),
         });
+        console.log("[auth] Signed in:", email);
         resolve({ email });
       },
       onFailure: (err) => reject(err.message),
@@ -287,6 +328,7 @@ ipcMain.handle("auth:signIn", (_, { email, password }) => {
 
 ipcMain.handle("auth:getSession", () => {
   const tokens = loadTokens();
+  console.log("attempt get session tokens");
   if (!tokens) return null;
 
   const email = extractEmailFromIdToken(tokens.idToken);
@@ -302,16 +344,19 @@ function extractEmailFromIdToken(idToken: string): string {
 
 ipcMain.handle("auth:signOut", () => {
   if (fs.existsSync(tokenPath)) fs.unlinkSync(tokenPath);
+  console.log("signout complete");
 });
 
 ipcMain.handle("db:getUserProfile", async (_, userId: string) => {
   const res = await db.send(
     new GetCommand({ TableName: "flowstate-users", Key: { userId } }),
   );
+  console.log("attempted get user profile");
   return res.Item ?? null;
 });
 
 ipcMain.handle("db:createUserProfile", async (_, profile: any) => {
+  console.log("attempted create user profile");
   await db.send(
     new PutCommand({ TableName: "flowstate-users", Item: profile }),
   );
@@ -320,6 +365,7 @@ ipcMain.handle("db:createUserProfile", async (_, profile: any) => {
 ipcMain.handle(
   "db:updateUserStats",
   async (_, { userId, coinDelta, newStreak }: any) => {
+    console.log("attempted update user coins/streak");
     await db.send(
       new UpdateCommand({
         TableName: "flowstate-users",
@@ -332,6 +378,7 @@ ipcMain.handle(
 );
 
 ipcMain.handle("db:saveSession", async (_, { userId, result }: any) => {
+  console.log("attempted save session to db");
   await db.send(
     new PutCommand({
       TableName: "flowstate-sessions",
@@ -347,6 +394,7 @@ ipcMain.handle("db:saveSession", async (_, { userId, result }: any) => {
 ipcMain.handle(
   "db:getRecentSessions",
   async (_, userId: string, length: number) => {
+    console.log("attempted pull recent sessions from db");
     const res = await db.send(
       new QueryCommand({
         TableName: "flowstate-sessions",
@@ -380,7 +428,7 @@ ipcMain.handle("db:getTodaySessions", async (_, userId: string) => {
     0,
     0,
   );
-
+  console.log("attempted pull today sessions from db");
   const res = await db.send(
     new QueryCommand({
       TableName: "flowstate-sessions",

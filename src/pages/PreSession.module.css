@@ -23,7 +23,7 @@
 }
 
 .cancelButton:hover {
-  transform: scale(1.03);
+  color: var(--orange-cream);
 }
 
 .cancelX {

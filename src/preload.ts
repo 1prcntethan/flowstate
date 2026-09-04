@@ -30,5 +30,6 @@ contextBridge.exposeInMainWorld("electronAPI", {
   getTodaySessions: (userId: string) =>
     ipcRenderer.invoke("db:getTodaySessions", userId),
   getIdleTime: () => ipcRenderer.invoke("system:getIdleTime"),
-  isReady: () => ipcRenderer.invoke("ai:isReady"),
+  warmUpAI: () => ipcRenderer.invoke("ai:warmup"),
+  isAiReady: () => ipcRenderer.invoke("ai:isReady"),
 });

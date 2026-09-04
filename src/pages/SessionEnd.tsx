@@ -7,9 +7,9 @@ type Props = {
   nav: (p: Page) => void;
   subject: string;
   durationMinutes: number;
-  focusScore: number;       // 0–100 curved score
+  focusScore: number; // 0–100 curved score
   pointsEarned: number;
-  breakPenalty: number;     // points deducted for break overtime
+  breakPenalty: number; // points deducted for break overtime
   onTaskCount: number;
   totalCaptures: number;
   breakMinutes: number;
@@ -46,13 +46,42 @@ export default function SessionEnd({
           ? "Good effort!"
           : "Keep going!";
 
+  function returnGrade(score: number) {
+    if (score >= 97) {
+      return <span className={styles.sessionGreen}>A+</span>;
+    } else if (score >= 93) {
+      return <span className={styles.sessionGreen}>A</span>;
+    } else if (score >= 90) {
+      return <span className={styles.sessionGreen}>A-</span>;
+    } else if (score >= 87) {
+      return <span className={styles.sessionAmber}>B+</span>;
+    } else if (score >= 83) {
+      return <span className={styles.sessionAmber}>B</span>;
+    } else if (score >= 80) {
+      return <span className={styles.sessionAmber}>B-</span>;
+    } else if (score >= 77) {
+      return <span className={styles.sessionAmber}>C+</span>;
+    } else if (score >= 73) {
+      return <span className={styles.sessionAmber}>C</span>;
+    } else if (score >= 70) {
+      return <span className={styles.sessionAmber}>C-</span>;
+    } else if (score >= 67) {
+      return <span className={styles.sessionRed}>D+</span>;
+    } else if (score >= 63) {
+      return <span className={styles.sessionRed}>D</span>;
+    } else if (score >= 60) {
+      return <span className={styles.sessionRed}>D-</span>;
+    } else {
+      return <span className={styles.sessionRed}>F</span>;
+    }
+  }
+
   return (
     <div className={styles.page}>
       <div className={styles.scrollArea}>
-
         {/* ── Card graphic ── */}
         <div className={styles.cardWrap}>
-          <div className={styles.gradeCard} />
+          {returnGrade(focusScore)}
         </div>
 
         {/* ── Headline ── */}
@@ -113,9 +142,7 @@ export default function SessionEnd({
 
         {/* ── Streak ── */}
         {streak > 0 && (
-          <div className={styles.streakPill}>
-            🔥 {streak} Day streak!
-          </div>
+          <div className={styles.streakPill}>🔥 {streak} Day streak!</div>
         )}
 
         {/* ── Carry toggle ── */}
@@ -141,9 +168,21 @@ export default function SessionEnd({
           Back to dashboard
         </button>
         <button className={styles.shareBtn}>
-          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-            <circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/>
-            <line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/>
+          <svg
+            width="18"
+            height="18"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="2"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+          >
+            <circle cx="18" cy="5" r="3" />
+            <circle cx="6" cy="12" r="3" />
+            <circle cx="18" cy="19" r="3" />
+            <line x1="8.59" y1="13.51" x2="15.42" y2="17.49" />
+            <line x1="15.41" y1="6.51" x2="8.59" y2="10.49" />
           </svg>
           Share session
         </button>
