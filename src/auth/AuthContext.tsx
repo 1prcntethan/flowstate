@@ -12,44 +12,68 @@ type AuthContextValue = {
   authChecked: boolean;
   hasCompletedOnboarding: boolean;
   onboardingChecked: boolean;
+  isCompletingSignup: boolean;
   login: (email: string, password: string) => Promise<void>;
   signUp: (email: string, password: string) => Promise<{ userSub: string }>;
   confirmSignUp: (email: string, code: string) => Promise<void>;
   signOut: () => Promise<void>;
   completeOnboarding: () => Promise<void>;
   updateCoins: (delta: number) => Promise<void>;
+  updateSubjects: (update: React.SetStateAction<string[]>) => Promise<void>;
 };
 
 const AuthContext = createContext<AuthContextValue | null>(null);
+
+const DEFAULT_SUBJECTS = [
+  "Math",
+  "Science",
+  "CS",
+  "English",
+  "History",
+  "Language",
+];
+
+async function fetchUser(email: string): Promise<User> {
+  const normalized = email.trim().toLowerCase();
+  const { profile } = await window.electronAPI.getUserProfile(normalized);
+  return {
+    id: normalized,
+    name: profile?.username ?? normalized,
+    coins: profile?.coins ?? 0,
+    streak: profile?.streak ?? 0,
+    subjects: profile?.subjects ?? DEFAULT_SUBJECTS,
+  };
+}
 
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
   const [authChecked, setAuthChecked] = useState(false);
   const [hasCompletedOnboarding, setHasCompletedOnboarding] = useState(false);
   const [onboardingChecked, setOnboardingChecked] = useState(false);
+  const [isCompletingSignup, setIsCompletingSignup] = useState(false);
 
   useEffect(() => {
-    window.electronAPI.getSession().then(async (session) => {
+    (async () => {
+      const session = await window.electronAPI.getSession();
+
       if (session) {
-        const profile = await window.electronAPI.getUserProfile(session.email);
-        setUser({
-          id: session.email,
-          name: profile?.username ?? session.email,
-          coins: profile?.coins ?? 0,
-          streak: profile?.streak ?? 0,
-        });
+        setUser(await fetchUser(session.email));
+        const completed = await window.electronAPI.getOnboardingCompleted(
+          session.email,
+        );
+        setHasCompletedOnboarding(completed);
       }
+      // logged out / fresh device: no userId to key by, so just always show
+      // the full flow — simpler than a separate device-level bucket for now.
+
       setAuthChecked(true);
-    });
-    window.electronAPI.getOnboardingCompleted().then((completed) => {
-      setHasCompletedOnboarding(completed);
       setOnboardingChecked(true);
-    });
+    })();
   }, []);
 
   const login = async (email: string, password: string) => {
     await window.electronAPI.signIn(email, password);
-    setUser({ id: email, name: email, coins: 0, streak: 0 }); // ← updates React immediately
+    setUser(await fetchUser(email)); // real profile now, not a fake 0/0 placeholder
   };
 
   const signUp = (email: string, password: string) =>
@@ -57,6 +81,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const confirmSignUp = async (email: string, code: string) => {
     await window.electronAPI.confirmSignUp(email, code);
+    // handleVerify calls login() right after this, which flips `user` truthy —
+    // this keeps App.tsx from bailing to Dashboard before ProfileSetup runs.
+    setIsCompletingSignup(true);
   };
 
   const signOut = async () => {
@@ -65,25 +92,42 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   };
 
   const completeOnboarding = async () => {
-    await window.electronAPI.setOnboardingCompleted();
+    if (!user) return;
+    await window.electronAPI.setOnboardingCompleted(user.id);
     setHasCompletedOnboarding(true);
+    setIsCompletingSignup(false);
   };
 
   const updateCoins = async (delta: number) => {
     if (!user) return;
     const previousCoins = user.coins;
-
     setUser((prev) => (prev ? { ...prev, coins: prev.coins + delta } : prev));
 
-    try {
-      await window.electronAPI.updateUserStats({
-        userId: user.id,
-        coinDelta: delta,
-        newStreak: user.streak,
-      });
-    } catch (err) {
+    const { ok } = await window.electronAPI.updateUserStats({
+      userId: user.id,
+      coinDelta: delta,
+      newStreak: user.streak,
+    });
+    if (!ok) {
       setUser((prev) => (prev ? { ...prev, coins: previousCoins } : prev));
-      console.error("Failed to sync coins:", err);
+      console.error("Failed to sync coins");
+    }
+  };
+
+  const updateSubjects = async (
+    update: string[] | ((prev: string[]) => string[]),
+  ) => {
+    if (!user) return;
+    const next = typeof update === "function" ? update(user.subjects) : update;
+    setUser((prev) => (prev ? { ...prev, subjects: next } : prev)); // optimistic
+
+    const { ok } = await window.electronAPI.updateUserSubjects({
+      userId: user.id,
+      subjects: next,
+    });
+    if (!ok) {
+      setUser((prev) => (prev ? { ...prev, subjects: user.subjects } : prev)); // revert
+      console.error("Failed to sync subjects");
     }
   };
 
@@ -94,12 +138,14 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         authChecked,
         hasCompletedOnboarding,
         onboardingChecked,
+        isCompletingSignup,
         login,
         signUp,
         confirmSignUp,
         signOut,
         completeOnboarding,
         updateCoins,
+        updateSubjects,
       }}
     >
       {children}

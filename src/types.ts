@@ -19,6 +19,7 @@ export type User = {
   name: string
   coins: number
   streak: number
+  subjects: string[]
 }
 
 export type UserCosmetics = {

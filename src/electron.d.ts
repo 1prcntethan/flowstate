@@ -15,19 +15,29 @@ declare interface Window {
     signIn: (email: string, password: string) => Promise<{ email: string }>;
     getSession: () => Promise<{ email: string; hasSession: boolean } | null>;
     signOut: () => Promise<void>;
-    getOnboardingCompleted: () => Promise<boolean>;
-    setOnboardingCompleted: () => Promise<void>;
+    getOnboardingCompleted: (userId: string) => Promise<boolean>;
+    setOnboardingCompleted: (userId: string) => Promise<void>;
     getPlatform: () => Promise<NodeJS.Platform>;
     checkScreenAccess: () => Promise<
       "granted" | "denied" | "not-determined" | "restricted" | "unknown"
     >;
     openScreenSettings: () => Promise<void>;
-    getUserProfile: (userId: string) => Promise<any | null>;
-    createUserProfile: (profile: any) => Promise<void>;
-    updateUserStats: (payload: any) => Promise<void>;
-    saveSession: (payload: any) => Promise<void>;
-    getRecentSessions: (userId: string, length: number) => Promise<any[]>;
-    getTodaySessions: (userId: string) => Promise<any[]>;
+    getUserProfile: (
+      userId: string,
+    ) => Promise<{ ok: boolean; profile: any | null; error?: string }>;
+    createUserProfile: (
+      profile: any,
+    ) => Promise<{ ok: boolean; error?: string }>;
+    updateUserStats: (payload: any) => Promise<{ ok: boolean; error?: string }>;
+    saveSession: (payload: any) => Promise<{ ok: boolean; error?: string }>;
+    getRecentSessions: (
+      userId: string,
+      length: number,
+    ) => Promise<{ ok: boolean; sessions: any[]; error?: string }>;
+    getTodaySessions: (
+      userId: string,
+    ) => Promise<{ ok: boolean; sessions: any[]; error?: string }>;
+    updateUserSubjects: (payload: any) => Promise<{ ok: boolean; error?: string }>;
     getIdleTime: () => Promise<number>;
     isAiReady: () => Promise<boolean>;
     warmUpAI: () => Promise<boolean>;

@@ -12,8 +12,10 @@ contextBridge.exposeInMainWorld("electronAPI", {
     ipcRenderer.invoke("auth:signIn", { email, password }),
   getSession: () => ipcRenderer.invoke("auth:getSession"),
   signOut: () => ipcRenderer.invoke("auth:signOut"),
-  getOnboardingCompleted: () => ipcRenderer.invoke("onboarding:getCompleted"),
-  setOnboardingCompleted: () => ipcRenderer.invoke("onboarding:setCompleted"),
+  getOnboardingCompleted: (userId: string) =>
+    ipcRenderer.invoke("onboarding:getCompleted", userId),
+  setOnboardingCompleted: (userId: string) =>
+    ipcRenderer.invoke("onboarding:setCompleted", userId),
   getPlatform: () => ipcRenderer.invoke("permissions:getPlatform"),
   checkScreenAccess: () => ipcRenderer.invoke("permissions:checkScreenAccess"),
   openScreenSettings: () =>
@@ -29,6 +31,7 @@ contextBridge.exposeInMainWorld("electronAPI", {
     ipcRenderer.invoke("db:getRecentSessions", userId, length),
   getTodaySessions: (userId: string) =>
     ipcRenderer.invoke("db:getTodaySessions", userId),
+  updateUserSubjects: (payload: any) => ipcRenderer.invoke("db:updateUserSubjects", payload),
   getIdleTime: () => ipcRenderer.invoke("system:getIdleTime"),
   warmUpAI: () => ipcRenderer.invoke("ai:warmup"),
   isAiReady: () => ipcRenderer.invoke("ai:isReady"),

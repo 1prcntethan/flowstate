@@ -15,21 +15,16 @@ type Props = {
 
 function useRecentSessions(userId: string, limit = 5) {
   const [sessions, setSessions] = useState<Session[]>([]);
-
   useEffect(() => {
     let cancelled = false;
     (async () => {
-      const result = await window.electronAPI.getRecentSessions(userId, limit);
+      const { sessions: result } = await window.electronAPI.getRecentSessions(userId, limit);
       if (!cancelled) setSessions(result);
     })();
-    return () => {
-      cancelled = true;
-    };
+    return () => { cancelled = true; };
   }, [userId, limit]);
-
   return sessions;
 }
-
 function useTodayStats(userId: string) {
   const [stats, setStats] = useState({
     focusPercentage: 0,
@@ -40,19 +35,19 @@ function useTodayStats(userId: string) {
   useEffect(() => {
     let cancelled = false;
     (async () => {
-      const sessions = await window.electronAPI.getTodaySessions(userId);
+      const { sessions: result } = await window.electronAPI.getTodaySessions(userId);
       if (cancelled) return;
 
-      const totalMinutes = sessions.reduce(
+      const totalMinutes = result.reduce(
         (sum: number, s: any) => sum + (s.durationMinutes ?? 0),
         0,
       );
-      const weightedFocusSum = sessions.reduce(
+      const weightedFocusSum = result.reduce(
         (sum: number, s: any) =>
           sum + (s.focusScore ?? 0) * (s.durationMinutes ?? 0),
         0,
       );
-      const coinsEarned = sessions.reduce(
+      const coinsEarned = result.reduce(
         (sum: number, s: any) => sum + (s.pointsEarned ?? 0),
         0,
       );
