@@ -36,6 +36,8 @@ const MODEL_NAME = "llama3.2:1b";
 
 const store = new Store();
 
+const normalizeEmail = (email: string) => email.trim().toLowerCase();
+
 const createWindow = () => {
   mainWindow = new BrowserWindow({
     width: 960,
@@ -193,12 +195,18 @@ function killOllama(): void {
 }
 
 function killOllamaSync(): void {
-  if (process.platform === 'win32') {
-    try { execSync('taskkill /IM ollama.exe /F', { stdio: 'ignore' }); } catch {}
-    try { execSync('taskkill /IM llama-server.exe /F', { stdio: 'ignore' }); } catch {}
+  if (process.platform === "win32") {
+    try {
+      execSync("taskkill /IM ollama.exe /F", { stdio: "ignore" });
+    } catch {}
+    try {
+      execSync("taskkill /IM llama-server.exe /F", { stdio: "ignore" });
+    } catch {}
   } else {
-    ollamaProcess?.kill('SIGTERM');
-    try { execSync('pkill -f llama-server'); } catch {}
+    ollamaProcess?.kill("SIGTERM");
+    try {
+      execSync("pkill -f llama-server");
+    } catch {}
   }
   ollamaProcess = null;
 }
@@ -299,13 +307,13 @@ const dynamoClient = new DynamoDBClient({
 });
 const db = DynamoDBDocumentClient.from(dynamoClient);
 
-ipcMain.handle("onboarding:getCompleted", () => {
-  return store.get("onboardingCompleted", false);
-});
+ipcMain.handle("onboarding:getCompleted", (_, userId: string) =>
+  store.get(`onboardingCompleted:${userId}`, false),
+);
 
-ipcMain.handle("onboarding:setCompleted", () => {
-  store.set("onboardingCompleted", true);
-});
+ipcMain.handle("onboarding:setCompleted", (_, userId: string) =>
+  store.set(`onboardingCompleted:${userId}`, true),
+);
 
 ipcMain.handle("permissions:getPlatform", () => process.platform);
 
@@ -325,15 +333,24 @@ ipcMain.handle(
   (_, { email, password }) =>
     new Promise((resolve, reject) => {
       console.log("signup attempted");
-      userPool.signUp(email, password, [], [], (err, result) => {
-        if (err) reject(err.message);
-        else resolve({ userSub: result!.userSub });
-      });
+      userPool.signUp(
+        normalizeEmail(email),
+        password,
+        [],
+        [],
+        (err, result) => {
+          if (err) reject(err.message);
+          else resolve({ userSub: result!.userSub });
+        },
+      );
     }),
 );
 
 ipcMain.handle("auth:confirmSignUp", (_, { email, code }) => {
-  const user = new CognitoUser({ Username: email, Pool: userPool });
+  const user = new CognitoUser({
+    Username: normalizeEmail(email),
+    Pool: userPool,
+  });
   console.log("confirm signup attempted");
   return new Promise((resolve, reject) => {
     user.confirmRegistration(code, true, (err, result) => {
@@ -344,9 +361,10 @@ ipcMain.handle("auth:confirmSignUp", (_, { email, code }) => {
 });
 
 ipcMain.handle("auth:signIn", (_, { email, password }) => {
-  const user = new CognitoUser({ Username: email, Pool: userPool });
+  const normalized = normalizeEmail(email);
+  const user = new CognitoUser({ Username: normalized, Pool: userPool });
   const authDetails = new AuthenticationDetails({
-    Username: email,
+    Username: normalized,
     Password: password,
   });
   return new Promise((resolve, reject) => {
@@ -357,8 +375,8 @@ ipcMain.handle("auth:signIn", (_, { email, password }) => {
           accessToken: session.getAccessToken().getJwtToken(),
           refreshToken: session.getRefreshToken().getToken(),
         });
-        console.log("[auth] Signed in:", email);
-        resolve({ email });
+        console.log("[auth] Signed in:", normalized);
+        resolve({ normalized });
       },
       onFailure: (err) => reject(err.message),
     });
@@ -378,7 +396,7 @@ function extractEmailFromIdToken(idToken: string): string {
   const payload = JSON.parse(
     Buffer.from(idToken.split(".")[1], "base64").toString(),
   );
-  return payload.email;
+  return normalizeEmail(payload.email);
 }
 
 ipcMain.handle("auth:signOut", () => {
@@ -387,63 +405,92 @@ ipcMain.handle("auth:signOut", () => {
 });
 
 ipcMain.handle("db:getUserProfile", async (_, userId: string) => {
-  const res = await db.send(
-    new GetCommand({ TableName: "flowstate-users", Key: { userId } }),
-  );
-  console.log("attempted get user profile");
-  return res.Item ?? null;
+  try {
+    const res = await db.send(
+      new GetCommand({
+        TableName: "flowstate-users",
+        Key: { userId: normalizeEmail(userId) },
+      }),
+    );
+    return { ok: true, profile: res.Item ?? null };
+  } catch (err: any) {
+    console.error("[db] getUserProfile failed:", err);
+    return { ok: false, error: err.message ?? String(err) };
+  }
 });
 
 ipcMain.handle("db:createUserProfile", async (_, profile: any) => {
-  console.log("attempted create user profile");
-  await db.send(
-    new PutCommand({ TableName: "flowstate-users", Item: profile }),
-  );
+  try {
+    await db.send(
+      new PutCommand({
+        TableName: "flowstate-users",
+        Item: { ...profile, userId: normalizeEmail(profile.userId) },
+      }),
+    );
+    return { ok: true };
+  } catch (err: any) {
+    console.error("[db] createUserProfile failed:", err);
+    return { ok: false, error: err.message ?? String(err) };
+  }
 });
 
 ipcMain.handle(
   "db:updateUserStats",
   async (_, { userId, coinDelta, newStreak }: any) => {
-    console.log("attempted update user coins/streak");
-    await db.send(
-      new UpdateCommand({
-        TableName: "flowstate-users",
-        Key: { userId },
-        UpdateExpression: "ADD coins :c SET streak = :s",
-        ExpressionAttributeValues: { ":c": coinDelta, ":s": newStreak },
-      }),
-    );
+    try {
+      await db.send(
+        new UpdateCommand({
+          TableName: "flowstate-users",
+          Key: { userId: normalizeEmail(userId) },
+          UpdateExpression: "ADD coins :c SET streak = :s",
+          ExpressionAttributeValues: { ":c": coinDelta, ":s": newStreak },
+        }),
+      );
+      return { ok: true };
+    } catch (err: any) {
+      console.error("[db] updateUserStats failed:", err);
+      return { ok: false, error: err.message ?? String(err) };
+    }
   },
 );
 
 ipcMain.handle("db:saveSession", async (_, { userId, result }: any) => {
-  console.log("attempted save session to db");
-  await db.send(
-    new PutCommand({
-      TableName: "flowstate-sessions",
-      Item: {
-        userId,
-        sessionId: `SESSION#${new Date().toISOString()}`,
-        ...result,
-      },
-    }),
-  );
+  try {
+    await db.send(
+      new PutCommand({
+        TableName: "flowstate-sessions",
+        Item: {
+          userId: normalizeEmail(userId),
+          sessionId: `SESSION#${new Date().toISOString()}`,
+          ...result,
+        },
+      }),
+    );
+    return { ok: true };
+  } catch (err: any) {
+    console.error("[db] saveSession failed:", err);
+    return { ok: false, error: err.message ?? String(err) };
+  }
 });
 
 ipcMain.handle(
   "db:getRecentSessions",
   async (_, userId: string, length: number) => {
-    console.log("attempted pull recent sessions from db");
-    const res = await db.send(
-      new QueryCommand({
-        TableName: "flowstate-sessions",
-        KeyConditionExpression: "userId = :u",
-        ExpressionAttributeValues: { ":u": userId },
-        ScanIndexForward: false, // newest first
-        Limit: length,
-      }),
-    );
-    return res.Items ?? [];
+    try {
+      const res = await db.send(
+        new QueryCommand({
+          TableName: "flowstate-sessions",
+          KeyConditionExpression: "userId = :u",
+          ExpressionAttributeValues: { ":u": normalizeEmail(userId) },
+          ScanIndexForward: false,
+          Limit: length,
+        }),
+      );
+      return { ok: true, sessions: res.Items ?? [] };
+    } catch (err: any) {
+      console.error("[db] getRecentSessions failed:", err);
+      return { ok: false, error: err.message ?? String(err), sessions: [] };
+    }
   },
 );
 
@@ -467,27 +514,46 @@ ipcMain.handle("db:getTodaySessions", async (_, userId: string) => {
     0,
     0,
   );
-  console.log("attempted pull today sessions from db");
-  const res = await db.send(
-    new QueryCommand({
-      TableName: "flowstate-sessions",
-      KeyConditionExpression:
-        "userId = :u AND sessionId BETWEEN :start AND :end",
-      ExpressionAttributeValues: {
-        ":u": userId,
-        ":start": `SESSION#${startOfLocalDay.toISOString()}`,
-        ":end": `SESSION#${startOfNextLocalDay.toISOString()}`,
-      },
-    }),
-  );
-  return res.Items ?? [];
+  try {
+    const res = await db.send(
+      new QueryCommand({
+        TableName: "flowstate-sessions",
+        KeyConditionExpression:
+          "userId = :u AND sessionId BETWEEN :start AND :end",
+        ExpressionAttributeValues: {
+          ":u": normalizeEmail(userId),
+          ":start": `SESSION#${startOfLocalDay.toISOString()}`,
+          ":end": `SESSION#${startOfNextLocalDay.toISOString()}`,
+        },
+      }),
+    );
+    return { ok: true, sessions: res.Items ?? [] };
+  } catch (err: any) {
+    console.error("[db] getTodaySessions failed:", err);
+    return { ok: false, error: err.message ?? String(err), sessions: [] };
+  }
+});
+
+ipcMain.handle("db:updateUserSubjects", async (_, { userId, subjects }: any) => {
+  try {
+    await db.send(new UpdateCommand({
+      TableName: "flowstate-users",
+      Key: { userId: normalizeEmail(userId) },
+      UpdateExpression: "SET subjects = :s",
+      ExpressionAttributeValues: { ":s": subjects },
+    }));
+    console.log("db updated with new subjects")
+    return { ok: true };
+  } catch (err: any) {
+    console.error("[db] updateUserSubjects failed:", err);
+    return { ok: false, error: err.message ?? String(err) };
+  }
 });
 
 app.on("before-quit", () => {
   stopPythonSidecar();
   killOllama();
 });
-
 
 process.on("SIGINT", () => {
   console.log("[shutdown] SIGINT received");

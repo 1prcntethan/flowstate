@@ -135,7 +135,7 @@ export default function Settings({ nav, user, subjects, setSubjects }: Props) {
             </button>
             <div className={styles.profileInfo}>
               <span className={styles.username}>{user.name}</span>
-              <span className={styles.email}>email@example.com</span>
+              <span className={styles.email}>{user.id}</span>
               <button className={styles.linkBtn}>Edit username</button>
             </div>
             <button className={styles.signOutBtn} onClick={() => signOut()}>

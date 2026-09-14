@@ -8,8 +8,7 @@ const SUBJECTS = [
   "CS",
   "English",
   "History",
-  "Languages",
-  "Other",
+  "Language",
 ];
 
 type Props = { onFinish: () => void };
@@ -46,7 +45,7 @@ export default function ProfileSetup({ onFinish }: Props) {
     setSaveError(null);
 
     try {
-      await window.electronAPI.createUserProfile({
+      const { ok, error } = await window.electronAPI.createUserProfile({
         userId: user.id,
         username,
         subjects: selected,
@@ -54,6 +53,7 @@ export default function ProfileSetup({ onFinish }: Props) {
         streak: 0,
         createdAt: new Date().toISOString(),
       });
+      if (!ok) throw new Error(error);
       onFinish();
     } catch (err) {
       console.error("Failed to create user profile:", err);

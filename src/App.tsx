@@ -32,15 +32,6 @@ export type SessionResult = {
   todos: TodoItem[];
 };
 
-const DEFAULT_SUBJECTS = [
-  "Math",
-  "Science",
-  "CS",
-  "English",
-  "History",
-  "Language",
-];
-
 export default function App() {
   const {
     user,
@@ -48,10 +39,11 @@ export default function App() {
     authChecked,
     hasCompletedOnboarding,
     onboardingChecked,
+    isCompletingSignup,
+    updateSubjects,
   } = useAuth();
   const { themeId, setThemeId } = useTheme();
   const [page, setPage] = useState<Page>("dashboard");
-  const [subjects, setSubjects] = useState<string[]>(DEFAULT_SUBJECTS);
   const [sessionConfig, setSessionConfig] = useState<SessionConfig | null>(
     null,
   );
@@ -59,26 +51,30 @@ export default function App() {
     null,
   );
 
+  useEffect(() => {
+    if (!user) setPage("dashboard");
+  }, [user]);
+
   const nav = (p: Page) => setPage(p);
   const handleSessionEnd = async (result: SessionResult) => {
-    console.log("attempt handle session end")
+    console.log("attempt handle session end");
     setSessionResult(result);
     setPage("sessionend");
 
     await updateCoins(result.pointsEarned);
-    console.log("update coins success")
+    console.log("update coins success");
 
     window.electronAPI
       .saveSession({ userId: user!.id, result })
       .catch((err) => console.error("Failed to save session:", err));
-    console.log("save session attempted")
+    console.log("save session attempted");
   };
 
   if (!authChecked || !onboardingChecked) return null;
 
   let content: React.ReactNode;
 
-  if (!hasCompletedOnboarding) {
+  if (!hasCompletedOnboarding || isCompletingSignup) {
     content = <Onboarding />; // brand new device — starts at Welcome
   } else if (!user) {
     content = <Onboarding startAt="auth" />; // seen this before, just needs to log in
@@ -89,8 +85,8 @@ export default function App() {
       <PreSession
         nav={nav}
         onStart={setSessionConfig}
-        subjects={subjects}
-        setSubjects={setSubjects}
+        subjects={user.subjects}
+        setSubjects={updateSubjects}
       />
     );
   } else if (page === "session") {
@@ -122,8 +118,8 @@ export default function App() {
       <Settings
         nav={nav}
         user={user}
-        subjects={subjects}
-        setSubjects={setSubjects}
+        subjects={user.subjects}
+        setSubjects={updateSubjects}
       />
     );
   }
@@ -133,9 +129,7 @@ export default function App() {
       <div className={styles.titlebar}>
         <img src="./logo512dark.svg" alt="Flowstate" />
       </div>
-      <div className={styles.pageContent}>
-        {content}
-      </div>
+      <div className={styles.pageContent}>{content}</div>
     </div>
   );
 }

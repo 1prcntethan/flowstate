@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import Welcome from './Welcome'
 import Auth from './Auth'
 import Permissions from './Permissions'
@@ -59,16 +59,16 @@ export default function Onboarding({ startAt = 'welcome' }: Props) {
 }
 
 function PermissionsGate({ force, onNext }: { force: boolean; onNext: () => void }) {
-  const [platform, setPlatform] = useState<string | null>(null)
+  const [platform, setPlatform] = useState<string | null>(null);
 
-  useState(() => {
-    window.electronAPI.getPlatform().then(setPlatform)
-  })
+  useEffect(() => {
+    window.electronAPI.getPlatform().then(setPlatform);
+  }, []);
 
-  if (platform === null) return null
-  if (platform !== 'darwin' && !force) {
-    onNext()
-    return null
-  }
-  return <Permissions onNext={onNext} />
+  useEffect(() => {
+    if (platform && platform !== "darwin" && !force) onNext();
+  }, [platform, force]);
+
+  if (platform === null || (platform !== "darwin" && !force)) return null;
+  return <Permissions onNext={onNext} />;
 }
