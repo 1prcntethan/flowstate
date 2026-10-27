@@ -203,18 +203,18 @@ export default function ActiveSession({ nav, config, onEnd }: Props) {
   }, [timeLeft]);
 
   useEffect(() => {
-    // add off-task captures every 30s during break
+    // allotted break records nothing; overtime counts as ambiguous at the capture cadence
     if (!breakOvertime) return;
     const tick = setInterval(() => {
       setCaptures((prev) => [
         ...prev,
         {
           id: Date.now().toString(),
-          label: "off_task" as CaptureLabel,
+          label: "ambiguous",
           text: "Break overtime",
         },
       ]);
-    }, 30_000);
+    }, CAPTURE_INTERVAL_MS);
     return () => clearInterval(tick);
   }, [breakOvertime]);
 
