@@ -75,7 +75,7 @@ Left for later, on purpose:
 
 - Hardcoded Python and Tesseract paths, fixed Flask port `5001` with no request token, and capture of `monitors[1]` only
 - Ollama on port `11434`, and quit killing every `ollama.exe` / `llama-server` rather than the child this app spawned
-- Scoring bugs (elapsed time stuck in the tracking loop, an empty session scored as 100%, streaks never calculated). Coin multipliers stay as they are until scoring work is approved. Break-overtime behavior is unchanged here.
+- Server-side coins and streaks. The client scores a session locally and does not change coins or streak when no checks were recorded. Persisting streak from local days belongs in the API, not in this app.
 - Direct DynamoDB access with static IAM keys from `.env`. The client sends user id, coins, and streak. A later phase should move that behind API Gateway + Lambda and a Cognito authorizer.
 - Bundled Python (`python/dist` via PyInstaller), signed/notarized installers, and making sure `.env` cannot be packed into the app
 - Privacy-policy link, delete-account, and crash reporting that cannot include screen content

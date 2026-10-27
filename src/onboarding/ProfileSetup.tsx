@@ -1,5 +1,6 @@
 import { useRef, useState } from "react";
 import { useAuth } from "../auth/AuthContext";
+import { addSubject } from "../todos";
 import styles from "./ProfileSetup.module.css";
 
 const SUBJECTS = [
@@ -23,9 +24,11 @@ export default function ProfileSetup({ onFinish }: Props) {
   const [saveError, setSaveError] = useState<string | null>(null);
 
   const toggle = (s: string) =>
-    setSelected((prev) =>
-      prev.includes(s) ? prev.filter((x) => x !== s) : [...prev, s],
-    );
+    setSelected((prev) => {
+      if (prev.includes(s)) return prev.filter((x) => x !== s);
+      const result = addSubject(prev, s);
+      return result.ok ? result.subjects : prev;
+    });
 
   const handlePhotoClick = () => fileInputRef.current?.click();
 

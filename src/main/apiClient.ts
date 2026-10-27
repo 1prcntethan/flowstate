@@ -8,6 +8,7 @@ import {
   QueryCommand,
 } from "@aws-sdk/lib-dynamodb";
 import { normalizeEmail } from "./auth";
+import { todaySessionIdRange } from "../localDay";
 
 const dynamoClient = new DynamoDBClient({
   region: "us-west-1",
@@ -111,25 +112,7 @@ export async function getRecentSessions(userId: string, length: number) {
 }
 
 export async function getTodaySessions(userId: string) {
-  const now = new Date();
-  const startOfLocalDay = new Date(
-    now.getFullYear(),
-    now.getMonth(),
-    now.getDate(),
-    0,
-    0,
-    0,
-    0,
-  );
-  const startOfNextLocalDay = new Date(
-    now.getFullYear(),
-    now.getMonth(),
-    now.getDate() + 1,
-    0,
-    0,
-    0,
-    0,
-  );
+  const { start, end } = todaySessionIdRange(new Date());
   try {
     const res = await db.send(
       new QueryCommand({
@@ -138,8 +121,8 @@ export async function getTodaySessions(userId: string) {
           "userId = :u AND sessionId BETWEEN :start AND :end",
         ExpressionAttributeValues: {
           ":u": normalizeEmail(userId),
-          ":start": `SESSION#${startOfLocalDay.toISOString()}`,
-          ":end": `SESSION#${startOfNextLocalDay.toISOString()}`,
+          ":start": start,
+          ":end": end,
         },
       }),
     );
