@@ -102,7 +102,11 @@ export async function getRecentSessions(userId: string, length: number) {
     return { ok: true, sessions: res.Items ?? [] };
   } catch (err: any) {
     console.error("[db] getRecentSessions failed:", err);
-    return { ok: false, error: err.message ?? String(err), sessions: [] };
+    return {
+      ok: false,
+      error: err.message ?? String(err),
+      sessions: [] as any[],
+    };
   }
 }
 
@@ -142,7 +146,11 @@ export async function getTodaySessions(userId: string) {
     return { ok: true, sessions: res.Items ?? [] };
   } catch (err: any) {
     console.error("[db] getTodaySessions failed:", err);
-    return { ok: false, error: err.message ?? String(err), sessions: [] };
+    return {
+      ok: false,
+      error: err.message ?? String(err),
+      sessions: [] as any[],
+    };
   }
 }
 

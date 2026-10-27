@@ -34,7 +34,9 @@ export function stopPythonSidecarSync() {
   if (process.platform === "win32") {
     try {
       execSync(`taskkill /PID ${pythonProcess.pid} /T /F`, { stdio: "ignore" });
-    } catch {}
+    } catch {
+      // process already exited
+    }
   } else {
     pythonProcess.kill("SIGTERM");
   }

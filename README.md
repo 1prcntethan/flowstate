@@ -23,7 +23,7 @@ The main process still launches a machine-specific interpreter and Tesseract. Th
 - Windows: `%LOCALAPPDATA%\Python\pythoncore-3.14-64\python.exe` and `%LOCALAPPDATA%\Programs\Tesseract-OCR\tesseract.exe`
 - macOS: `/Library/Frameworks/Python.framework/Versions/3.11/bin/python3`, with `tesseract` on `PATH`
 
-For a dev build, place the Ollama binary at `resources/ollama/win/ollama.exe` or `resources/ollama/mac/ollama`. That directory is gitignored, including model weights.
+For a dev build, place the Ollama binary at `resources/ollama/win/ollama.exe` or `resources/ollama/mac/ollama`. That directory is gitignored, including model weights. Forge copies `resources/ollama` into the package, so the directory has to exist or `npm run package` fails.
 
 ## Env
 
@@ -42,7 +42,7 @@ Do not commit that file. The Cognito user-pool id and app client id currently li
 npm start            # Electron Forge + Vite dev server (DevTools open)
 npm test             # Vitest, one run
 npm run lint
-npm run typecheck    # tsc --noEmit
+npm run typecheck    # tsc --noEmit (strict)
 npm run package      # Forge package
 npm run make         # Forge installers
 ```

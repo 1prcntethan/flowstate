@@ -99,15 +99,21 @@ export function killOllamaSync(): void {
   if (process.platform === "win32") {
     try {
       execSync("taskkill /IM ollama.exe /F", { stdio: "ignore" });
-    } catch {}
+    } catch {
+      // process already exited
+    }
     try {
       execSync("taskkill /IM llama-server.exe /F", { stdio: "ignore" });
-    } catch {}
+    } catch {
+      // process already exited
+    }
   } else {
     ollamaProcess?.kill("SIGTERM");
     try {
       execSync("pkill -f llama-server");
-    } catch {}
+    } catch {
+      // process already exited
+    }
   }
   ollamaProcess = null;
 }
