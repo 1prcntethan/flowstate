@@ -5,8 +5,17 @@ import styles from "./ActiveSession.module.css";
 import BreakScreen from "./BreakScreen";
 import EndConfirmModal from "../components/EndConfirmModal";
 import MiniSession from "../components/MiniSession";
+import {
+  CAPTURE_INTERVAL_MS,
+  elapsedMinutes as elapsedMinutesFromTimer,
+  mostlyOnTask,
+  overtimeCheck,
+  scoreSession,
+  type CheckLabel,
+} from "../scoring";
+import { isTodoDone, todoTextForClassifier, toggleTodo, withOrder } from "../todos";
 
-type CaptureLabel = "on_task" | "off_task" | "ambiguous";
+type CaptureLabel = CheckLabel;
 
 type CaptureEntry = {
   id: string;
@@ -40,24 +49,7 @@ function getGradeColor(grade: string): string {
   return "var(--status-red)";
 }
 
-const RAMP_START = 95;
-const RAMP_END = 99;
-const RAMP_START_MULT = 1.0;
-const RAMP_END_MULT = 1.3;
-const PERFECT_MULT = 1.5;
-
-function getFocusMultiplier(curvedScore: number): number {
-  if (curvedScore >= 100) return PERFECT_MULT;
-  if (curvedScore <= RAMP_START) return RAMP_START_MULT;
-  const clamped = Math.min(curvedScore, RAMP_END);
-  return (
-    RAMP_START_MULT +
-    ((clamped - RAMP_START) / (RAMP_END - RAMP_START)) *
-      (RAMP_END_MULT - RAMP_START_MULT)
-  );
-}
-
-export default function ActiveSession({ nav, config, onEnd }: Props) {
+export default function ActiveSession({ config, onEnd }: Props) {
   const [timeLeft, setTimeLeft] = useState(config.durationMinutes * 60);
   const [todos, setTodos] = useState(config.todos);
   const [trackingPaused, setTrackingPaused] = useState(false);
@@ -69,15 +61,15 @@ export default function ActiveSession({ nav, config, onEnd }: Props) {
   const [showEndConfirm, setShowEndConfirm] = useState(false);
   const [isMiniMode, setIsMiniMode] = useState(false);
   const [captures, setCaptures] = useState<CaptureEntry[]>([]);
+  const [usingFallback, setUsingFallback] = useState(false);
   const pauseStartedAtRef = useRef<number | null>(null);
   const totalPausedMsRef = useRef(0);
+  const timeLeftRef = useRef(timeLeft);
+  const todosRef = useRef(todos);
+  timeLeftRef.current = timeLeft;
+  todosRef.current = todos;
 
   const PAUSE_GRACE_MS = 120_000; // how long a pause gets benefit-of-the-doubt
-  const CAPTURE_INTERVAL_MS = 10_000; // adjust tracking interval here (ms)
-  const BASE_RATE = 1; // points per minute at 100% focus, up to the threshold
-  const BONUS_MULTIPLIER = 1.3; // points per minute beyond the threshold
-  const BONUS_THRESHOLD_MIN = 45;
-  const POINT_SCALE = 10; // display multiplier — tune freely, applies uniformly everywhere
 
   const breakConfig = useMemo(() => {
     const d = config.durationMinutes;
@@ -144,13 +136,19 @@ export default function ActiveSession({ nav, config, onEnd }: Props) {
       }
 
       const ready = await window.electronAPI.isAiReady();
-      if (!ready && elapsedMinutes * 60 < 90) {
-        return; // model still warming up so skip current tick, try again next interval
-      }
+      setUsingFallback(!ready);
+      // Latest timer value on this tick. Coins use the same helper during render.
+      const elapsedNow = elapsedMinutesFromTimer(
+        totalSeconds,
+        timeLeftRef.current,
+      );
+      if (Number.isNaN(elapsedNow)) return;
 
       const result = await window.electronAPI.classify({
         subjects: [config.subject],
-        todos: config.todos.map((t) => ({ text: t.text })),
+        todos: todosRef.current
+          .map((t) => ({ text: todoTextForClassifier(t.text) }))
+          .filter((t) => t.text.length > 0),
       });
       console.log("classify function run");
       setCaptures((prev) => [
@@ -161,6 +159,21 @@ export default function ActiveSession({ nav, config, onEnd }: Props) {
 
     return () => clearInterval(loop);
   }, [trackingPaused, onBreak]);
+
+  useEffect(() => {
+    let cancelled = false;
+    const check = () => {
+      window.electronAPI.isAiReady().then((ready) => {
+        if (!cancelled) setUsingFallback(!ready);
+      });
+    };
+    check();
+    const id = setInterval(check, CAPTURE_INTERVAL_MS);
+    return () => {
+      cancelled = true;
+      clearInterval(id);
+    };
+  }, []);
 
   useEffect(() => {
     if (trackingPaused) {
@@ -203,18 +216,19 @@ export default function ActiveSession({ nav, config, onEnd }: Props) {
   }, [timeLeft]);
 
   useEffect(() => {
-    // add off-task captures every 30s during break
+    // allotted break records nothing; overtime counts as ambiguous at the capture cadence
     if (!breakOvertime) return;
     const tick = setInterval(() => {
+      const check = overtimeCheck();
       setCaptures((prev) => [
         ...prev,
         {
           id: Date.now().toString(),
-          label: "off_task" as CaptureLabel,
-          text: "Break overtime",
+          label: check.label,
+          text: check.text,
         },
       ]);
-    }, 30_000);
+    }, CAPTURE_INTERVAL_MS);
     return () => clearInterval(tick);
   }, [breakOvertime]);
 
@@ -224,44 +238,24 @@ export default function ActiveSession({ nav, config, onEnd }: Props) {
     setScrolled((prev) => (prev ? top > 0 : top > 1));
   };
 
-  // Focus score derived from captures
+  const elapsedMinutes = elapsedMinutesFromTimer(totalSeconds, timeLeft);
+  const scored = scoreSession(captures, elapsedMinutes);
+  const curvedScore = scored.noData ? 0 : scored.curvedScore;
+  const pointsEarned = scored.pointsEarned;
+  const grade = scored.noData ? "" : getGrade(scored.curvedScore);
   const onTaskCount = captures.filter((c) => c.label === "on_task").length;
-  const ambiguousCount = captures.filter((c) => c.label === "ambiguous").length;
-  const focusScore =
-    captures.length === 0
-      ? 100
-      : Math.round(
-          ((onTaskCount + ambiguousCount * 0.5) / captures.length) * 100,
-        );
+  const taskStatus = mostlyOnTask(captures);
+  const statusLabel =
+    taskStatus === null ? "No checks yet" : taskStatus ? "On task" : "Off task";
+  const statusClass =
+    taskStatus === null ? "" : taskStatus ? styles.statusOn : styles.statusOff;
 
-  const curvedScore = Math.round(Math.sqrt(focusScore / 100) * 100);
-  const grade = getGrade(curvedScore);
-
-  const elapsedMinutes = (totalSeconds - timeLeft) / 60;
-  const focusMultiplier = getFocusMultiplier(curvedScore);
-  const basePoints =
-    elapsedMinutes <= BONUS_THRESHOLD_MIN
-      ? elapsedMinutes * BASE_RATE
-      : BONUS_THRESHOLD_MIN * BASE_RATE +
-        (elapsedMinutes - BONUS_THRESHOLD_MIN) * BASE_RATE * BONUS_MULTIPLIER;
-  const pointsEarned = Math.max(
-    0,
-    Math.round(
-      basePoints * (curvedScore / 100) * focusMultiplier * POINT_SCALE,
-    ),
-  );
-
-  const lastLabel = captures[captures.length - 1]?.label ?? "on_task";
-  const isOnTask = lastLabel !== "off_task";
-
-  const toggleTodo = (id: string) => {
-    setTodos((prev) =>
-      prev.map((t) => (t.id === id ? { ...t, completed: !t.completed } : t)),
-    );
+  const toggleTodoDone = (id: string) => {
+    setTodos((prev) => toggleTodo(prev, id, new Date().toISOString()));
   };
 
   const startBreak = useCallback(() => {
-    window.electronAPI?.setExpandMode?.().catch?.(() => {});
+    window.electronAPI?.setExpandMode?.().catch?.(() => undefined);
     setIsMiniMode(false);
     setOnBreak(true);
     setBreakElapsed(0);
@@ -276,22 +270,28 @@ export default function ActiveSession({ nav, config, onEnd }: Props) {
   const handleExpand = async () => {
     try {
       await window.electronAPI?.setExpandMode();
-    } catch {}
+    } catch {
+      // window may already be expanded
+    }
     setIsMiniMode(false);
   };
 
   const handleEnd = async () => {
     await handleExpand();
+    const ordered = withOrder(todos);
     onEnd({
       subject: config.subject,
       durationMinutes: Math.round(elapsedMinutes),
-      focusScore: curvedScore,
+      noData: scored.noData,
+      focusScore: scored.noData ? null : scored.curvedScore,
       pointsEarned,
-      breakPenalty: 0, // wire up if you track break overtime penalty
+      breakPenalty: scored.breakPenalty,
       onTaskCount,
       totalCaptures: captures.length,
-      breakMinutes: Math.round(/* track total break seconds */ 0 / 60),
-      todos,
+      breakMinutes: 0,
+      todos: ordered,
+      todosTotal: ordered.length,
+      todosCompleted: ordered.filter((t) => isTodoDone(t)).length,
     });
   };
 
@@ -299,7 +299,9 @@ export default function ActiveSession({ nav, config, onEnd }: Props) {
     try {
       await window.electronAPI?.setMiniMode();
       console.log("mini mode");
-    } catch {}
+    } catch {
+      // stay in the current window size
+    }
     setIsMiniMode(true);
   };
 
@@ -309,7 +311,7 @@ export default function ActiveSession({ nav, config, onEnd }: Props) {
         <MiniSession
           timeLeft={timeLeft}
           pointsEarned={pointsEarned}
-          isOnTask={isOnTask}
+          isOnTask={taskStatus}
           trackingPaused={trackingPaused}
           onExpand={handleExpand}
           onBreak={startBreak}
@@ -337,9 +339,9 @@ export default function ActiveSession({ nav, config, onEnd }: Props) {
           breakElapsed={breakElapsed}
           breakLimitSecs={breakConfig?.breakSecs ?? 300}
           isOvertime={breakOvertime}
-          focusScore={curvedScore}
+          focusScore={scored.noData ? null : curvedScore}
           pointsEarned={pointsEarned}
-          completedTodos={todos.filter((t) => t.completed).length}
+          completedTodos={todos.filter((t) => isTodoDone(t)).length}
           totalTodos={todos.length}
           onResume={endBreak}
           onEnd={() => setShowEndConfirm(true)} // ← was handleEnd(), now shows confirm
@@ -371,10 +373,10 @@ export default function ActiveSession({ nav, config, onEnd }: Props) {
           <img src="/logo512.svg" className={styles.pageLogo} />
           {/* Badge slides in when collapsed */}
           <div
-            className={`${styles.headerBadge} ${scrolled ? styles.headerBadgeVisible : ""} ${isOnTask ? styles.statusOn : styles.statusOff}`}
+            className={`${styles.headerBadge} ${scrolled ? styles.headerBadgeVisible : ""} ${statusClass}`}
           >
             <span className={styles.statusDot} />
-            {isOnTask ? "On task" : "Off task"}
+            {statusLabel}
           </div>
         </div>
         <div className={styles.headerButtons}>
@@ -411,17 +413,17 @@ export default function ActiveSession({ nav, config, onEnd }: Props) {
               <div
                 className={styles.focusBarFill}
                 style={{
-                  background: getGradeColor(grade),
-                  width: `${curvedScore}%`,
+                  background: grade ? getGradeColor(grade) : "var(--orange-cream-20)",
+                  width: `${scored.noData ? 0 : curvedScore}%`,
                 }}
               />
             </div>
           </div>
           <span
             className={`${styles.inlineGrade} ${scrolled ? styles.inlineGradeVisible : ""}`}
-            style={{ color: getGradeColor(grade) }}
+            style={{ color: grade ? getGradeColor(grade) : "var(--orange-cream-20)" }}
           >
-            On track for {grade}
+            {scored.noData ? "No checks yet" : `On track for ${grade}`}
           </span>
         </div>
 
@@ -432,10 +434,10 @@ export default function ActiveSession({ nav, config, onEnd }: Props) {
           {onBreak ? "on break" : "remaining"}
         </span>
         <div
-          className={`${styles.statusBadge} ${scrolled ? styles.colHide : ""} ${isOnTask ? styles.statusOn : styles.statusOff}`}
+          className={`${styles.statusBadge} ${scrolled ? styles.colHide : ""} ${statusClass}`}
         >
           <span className={styles.statusDot} />
-          {isOnTask ? "On task" : "Off task"}
+          {statusLabel}
         </div>
 
         {/* Subtitle — always visible, position shifts */}
@@ -444,6 +446,7 @@ export default function ActiveSession({ nav, config, onEnd }: Props) {
         >
           Studying {config.subject || "—"} ·{" "}
           <span className={styles.pointsEarned}>+{pointsEarned} points</span>
+          {usingFallback ? " · Keyword fallback while the model warms up" : ""}
         </span>
 
         {/* Full focus bar — collapses away */}
@@ -454,17 +457,21 @@ export default function ActiveSession({ nav, config, onEnd }: Props) {
             <span className={styles.focusLabel}>Focus score</span>
             <span
               className={styles.gradeLabel}
-              style={{ color: getGradeColor(grade) }}
+              style={{ color: grade ? getGradeColor(grade) : "var(--orange-cream-20)" }}
             >
-              {curvedScore >= 85 ? `On track for ${grade}` : `Grade: ${grade}`}
+              {scored.noData
+                ? "No checks yet"
+                : curvedScore >= 85
+                  ? `On track for ${grade}`
+                  : `Grade: ${grade}`}
             </span>
           </div>
           <div className={styles.focusBarTrack}>
             <div
               className={styles.focusBarFill}
               style={{
-                background: getGradeColor(grade),
-                width: `${curvedScore}%`,
+                background: grade ? getGradeColor(grade) : "var(--orange-cream-20)",
+                width: `${scored.noData ? 0 : curvedScore}%`,
               }}
             />
           </div>
@@ -489,11 +496,11 @@ export default function ActiveSession({ nav, config, onEnd }: Props) {
             {todos.map((t) => (
               <button
                 key={t.id}
-                className={`${styles.taskItem} ${t.completed ? styles.taskDone : ""}`}
-                onClick={() => toggleTodo(t.id)}
+                className={`${styles.taskItem} ${isTodoDone(t) ? styles.taskDone : ""}`}
+                onClick={() => toggleTodoDone(t.id)}
               >
                 <span
-                  className={`${styles.taskCircle} ${t.completed ? styles.taskCircleDone : ""}`}
+                  className={`${styles.taskCircle} ${isTodoDone(t) ? styles.taskCircleDone : ""}`}
                 />
                 <span className={styles.taskText}>{t.text}</span>
               </button>

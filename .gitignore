@@ -91,6 +91,16 @@ typings/
 # Electron-Forge
 out/
 
-.env
+# Vite/tsc build output. Not used at dev runtime (Forge serves .vite/).
+dist/
 
+# Python bytecode and PyInstaller output
+__pycache__/
+*.pyc
+python/dist/
+
+# Bundled Ollama runtime and downloaded model weights
 resources/ollama/
+*.gguf
+
+.env

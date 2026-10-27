@@ -21,7 +21,7 @@ type Props = {
   breakElapsed: number
   breakLimitSecs: number
   isOvertime: boolean
-  focusScore: number
+  focusScore: number | null
   pointsEarned: number
   completedTodos: number
   totalTodos: number
@@ -60,7 +60,7 @@ export default function BreakScreen({
         <div className={styles.statsRow}>
           <div className={styles.statCard}>
             <span className={styles.statValue} style={{ color: "var(--status-green)" }}>
-              {focusScore}%
+              {focusScore === null ? "—" : `${focusScore}%`}
             </span>
             <span className={styles.statLabel}>Focus</span>
           </div>

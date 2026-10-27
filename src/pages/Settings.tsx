@@ -1,6 +1,7 @@
 import { useState } from "react";
 import type { Page } from "../App";
 import type { User } from "../types";
+import { addSubject, listIssueMessage } from "../todos";
 import styles from "./Settings.module.css";
 import { useAuth } from "../auth/AuthContext";
 
@@ -44,6 +45,7 @@ export default function Settings({ nav, user, subjects, setSubjects }: Props) {
 
   const [showSubjectInput, setShowSubjectInput] = useState(false);
   const [subjectInput, setSubjectInput] = useState("");
+  const [subjectError, setSubjectError] = useState<string | null>(null);
 
   const removeSubject = (s: string) =>
     setSubjects((prev) => prev.filter((x) => x !== s));
@@ -58,12 +60,18 @@ export default function Settings({ nav, user, subjects, setSubjects }: Props) {
       ?.scrollIntoView({ behavior: "smooth", block: "start" });
   };
 
-  const addSubject = () => {
-    const trimmed = subjectInput.trim();
-    if (!trimmed || subjects.includes(trimmed)) return;
-    setSubjects((prev) => [...prev, trimmed]);
+  const handleAddSubject = () => {
+    const result = addSubject(subjects, subjectInput);
+    if (!result.ok) {
+      if (result.reason !== "duplicate") {
+        setSubjectError(listIssueMessage(result.reason, "subject"));
+      }
+      return;
+    }
+    setSubjects(result.subjects);
     setSubjectInput("");
     setShowSubjectInput(false);
+    setSubjectError(null);
   };
 
   return (
@@ -174,11 +182,13 @@ export default function Settings({ nav, user, subjects, setSubjects }: Props) {
                 placeholder="Subject name..."
                 value={subjectInput}
                 onChange={(e) => setSubjectInput(e.target.value)}
-                onKeyDown={(e) => e.key === "Enter" && addSubject()}
+                onKeyDown={(e) => e.key === "Enter" && handleAddSubject()}
+                maxLength={100}
               />
-              <button onClick={addSubject}>Add</button>
+              <button onClick={handleAddSubject}>Add</button>
             </div>
           )}
+          {subjectError && <p className={styles.modalText}>{subjectError}</p>}
         </section>
 
         {/* TRACKING
@@ -385,15 +395,10 @@ export default function Settings({ nav, user, subjects, setSubjects }: Props) {
                 Stored locally on your computer
               </h3>
               <p className={styles.modalText}>
-                <strong>Screenshots</strong> — screenshots taken during study
-                sessions are saved only on your device. They are never uploaded,
-                transmitted, or accessible by anyone else.
-              </p>
-              <p className={styles.modalText}>
-                <strong>Session details</strong> — information about what you
-                were doing during a session (e.g. the specific YouTube video you
-                watched, websites visited, or apps used) stays on your machine.
-                We don&rsquo;t collect or store this data on our servers.
+                <strong>Screenshots and screen text</strong> — a screenshot is
+                held only long enough to read text for a focus check, then
+                discarded. It is never saved on your device, never logged, and
+                never uploaded. Text read from the screen is not stored either.
               </p>
             </section>
 
@@ -402,10 +407,14 @@ export default function Settings({ nav, user, subjects, setSubjects }: Props) {
                 Stored in our database
               </h3>
               <p className={styles.modalText}>
-                <strong>Quantitative data only</strong> — we record high-level
-                metrics like total focus time, focus percentage, and whether you
-                were on-task or off-task during a given interval. No personal
-                content, no URLs, and no app details.
+                <strong>Focus numbers</strong> — focus time, focus percentage,
+                and whether each recorded check was on-task, off-task, or
+                ambiguous. No URLs and no app names.
+              </p>
+              <p className={styles.modalText}>
+                <strong>Todos</strong> — the task text you type for a session
+                (up to 10), whether each task is done, and how many were
+                completed. This is text you entered, not text from your screen.
               </p>
             </section>
 
@@ -414,10 +423,9 @@ export default function Settings({ nav, user, subjects, setSubjects }: Props) {
                 What this means for you
               </h3>
               <p className={styles.modalText}>
-                You have full privacy over your study activity. Your screenshots
-                and browsing context never leave your computer. The only data we
-                ever see are the numbers that help you track your productivity
-                over time.
+                Screenshots and text read from your screen never leave your
+                computer and are not kept after each check. Todo text you type
+                is saved with the session so you can see what you planned.
               </p>
             </section>
           </div>

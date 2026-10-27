@@ -1,10 +1,8 @@
-export type BreakMode = 'pomodoro' | 'manual'
+import type { TodoItem } from "./todos";
 
-export type TodoItem = {
-  id: string
-  text: string
-  completed: boolean
-}
+export type { TodoItem };
+
+export type BreakMode = 'pomodoro' | 'manual'
 
 export type SessionConfig = {
   subject: string

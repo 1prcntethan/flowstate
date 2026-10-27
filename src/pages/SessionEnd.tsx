@@ -1,13 +1,15 @@
 import { useState } from "react";
 import type { Page } from "../App";
 import type { TodoItem } from "../types";
+import { isTodoDone } from "../todos";
 import styles from "./SessionEnd.module.css";
 
 type Props = {
   nav: (p: Page) => void;
   subject: string;
   durationMinutes: number;
-  focusScore: number; // 0–100 curved score
+  noData: boolean;
+  focusScore: number | null; // curved score, or null when no checks were recorded
   pointsEarned: number;
   breakPenalty: number; // points deducted for break overtime
   onTaskCount: number;
@@ -21,6 +23,7 @@ export default function SessionEnd({
   nav,
   subject,
   durationMinutes,
+  noData,
   focusScore,
   pointsEarned,
   breakPenalty,
@@ -32,19 +35,20 @@ export default function SessionEnd({
 }: Props) {
   const [carryIncomplete, setCarryIncomplete] = useState(false);
 
-  const completedCount = todos.filter((t) => t.completed).length;
+  const completedCount = todos.filter((t) => isTodoDone(t)).length;
   const incompleteCount = todos.length - completedCount;
-  const incompletePenalty = incompleteCount * 10;
-  const focusPoints = pointsEarned + breakPenalty; //  + incompletePenalty
+  const focusPoints = pointsEarned + breakPenalty;
 
   const headline =
-    focusScore >= 90
-      ? "Amazing session!"
-      : focusScore >= 75
-        ? "Great session!"
-        : focusScore >= 60
-          ? "Good effort!"
-          : "Keep going!";
+    noData || focusScore === null
+      ? "No data"
+      : focusScore >= 90
+        ? "Amazing session!"
+        : focusScore >= 75
+          ? "Great session!"
+          : focusScore >= 60
+            ? "Good effort!"
+            : "Keep going!";
 
   function returnGrade(score: number) {
     if (score >= 97) {
@@ -81,13 +85,19 @@ export default function SessionEnd({
       <div className={styles.scrollArea}>
         {/* ── Card graphic ── */}
         <div className={styles.cardWrap}>
-          {returnGrade(focusScore)}
+          {noData || focusScore === null ? (
+            <span className={styles.sessionAmber}>—</span>
+          ) : (
+            returnGrade(focusScore)
+          )}
         </div>
 
         {/* ── Headline ── */}
         <h1 className={styles.headline}>{headline}</h1>
         <p className={styles.subline}>
-          {subject}—{durationMinutes} minutes
+          {noData
+            ? "No focus checks were recorded, so this session does not change your score, coins, or streak."
+            : `${subject}—${durationMinutes} minutes`}
         </p>
 
         {/* ── Points ── */}
@@ -108,7 +118,9 @@ export default function SessionEnd({
             <span className={styles.statLabel}>Duration</span>
           </div>
           <div className={styles.statCard}>
-            <span className={styles.statValue}>{focusScore}%</span>
+            <span className={styles.statValue}>
+              {noData || focusScore === null ? "—" : `${focusScore}%`}
+            </span>
             <span className={styles.statLabel}>Focus</span>
           </div>
           <div className={styles.statCard}>
@@ -129,10 +141,10 @@ export default function SessionEnd({
           {todos.map((t) => (
             <div key={t.id} className={styles.taskRow}>
               <span
-                className={`${styles.taskDot} ${t.completed ? styles.taskDotDone : styles.taskDotMiss}`}
+                className={`${styles.taskDot} ${isTodoDone(t) ? styles.taskDotDone : styles.taskDotMiss}`}
               />
               <span
-                className={`${styles.taskText} ${t.completed ? styles.taskTextDone : ""}`}
+                className={`${styles.taskText} ${isTodoDone(t) ? styles.taskTextDone : ""}`}
               >
                 {t.text}
               </span>
