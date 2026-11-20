@@ -1,7 +1,7 @@
-flask
-mss
-pytesseract
-Pillow
-pygetwindow
-requests
-pyobjc-framework-Cocoa; sys_platform == 'darwin'
+# Python 3.12 (3.11 is also supported). Do not run the sidecar on 3.14.
+# Versions are pinned. Do not add packages here without asking.
+flask==3.1.3
+mss==10.2.0
+Pillow==13.0.0
+pytesseract==0.3.13
+requests==2.34.2
