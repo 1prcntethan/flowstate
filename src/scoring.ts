@@ -118,3 +118,105 @@ export function mostlyOnTask(checks: readonly { label: CheckLabel }[]): boolean 
 export function overtimeCheck(): { label: "ambiguous"; text: string } {
   return { label: "ambiguous", text: "Break overtime" };
 }
+
+/**
+ * The session clock runs during a break, allotted or overtime, and the
+ * session ends at zero either way. Tests and ActiveSession both read this.
+ */
+export const SESSION_CLOCK_PAUSES_ON_BREAK = false;
+
+export type CaptureGate = "study" | "allotted-break" | "overtime";
+
+/**
+ * Study records screen checks. Allotted break records nothing.
+ * Overtime is strict: the second the limit is reached is still allotted.
+ * A break with no limit never becomes overtime.
+ */
+export function captureGate(
+  onBreak: boolean,
+  breakElapsedSeconds: number,
+  breakLimitSeconds: number | null,
+): CaptureGate {
+  if (!onBreak) return "study";
+  if (breakLimitSeconds !== null && breakElapsedSeconds > breakLimitSeconds) {
+    return "overtime";
+  }
+  return "allotted-break";
+}
+
+export type SessionClock = {
+  timeLeftSeconds: number;
+  onBreak: boolean;
+  breakElapsedSeconds: number;
+  breakLimitSeconds: number | null;
+  checks?: readonly { label: CheckLabel }[];
+};
+
+export type SessionClockResult = {
+  timeLeftSeconds: number;
+  breakElapsedSeconds: number;
+  ended: boolean;
+  checks: { label: CheckLabel; text?: string }[];
+  breakPenalty: 0;
+};
+
+/**
+ * Advance the session by whole seconds.
+ * The clock moves while `SESSION_CLOCK_PAUSES_ON_BREAK` is false.
+ * Allotted break appends no checks. Continuous overtime appends one
+ * ambiguous check per full capture interval, starting a full interval
+ * after overtime begins. Ending the session drops a partial interval.
+ */
+export function advanceSessionClock(start: SessionClock, seconds: number): SessionClockResult {
+  let timeLeft = start.timeLeftSeconds;
+  let breakElapsed = start.breakElapsedSeconds;
+  const checks: { label: CheckLabel; text?: string }[] = [...(start.checks ?? [])];
+  if (timeLeft <= 0 || seconds <= 0) {
+    return {
+      timeLeftSeconds: timeLeft,
+      breakElapsedSeconds: breakElapsed,
+      ended: timeLeft <= 0,
+      checks,
+      breakPenalty: 0,
+    };
+  }
+
+  let inOvertime =
+    captureGate(start.onBreak, breakElapsed, start.breakLimitSeconds) === "overtime";
+  let msUntilOvertimeCheck = CAPTURE_INTERVAL_MS;
+  let ended = false;
+
+  for (let step = 0; step < seconds && !ended; step += 1) {
+    if (!(SESSION_CLOCK_PAUSES_ON_BREAK && start.onBreak)) {
+      timeLeft -= 1;
+    }
+    if (start.onBreak) breakElapsed += 1;
+
+    const nowOvertime =
+      captureGate(start.onBreak, breakElapsed, start.breakLimitSeconds) === "overtime";
+    if (nowOvertime) {
+      if (!inOvertime) {
+        inOvertime = true;
+        msUntilOvertimeCheck = CAPTURE_INTERVAL_MS;
+      } else {
+        msUntilOvertimeCheck -= 1000;
+        if (msUntilOvertimeCheck <= 0) {
+          checks.push(overtimeCheck());
+          msUntilOvertimeCheck += CAPTURE_INTERVAL_MS;
+        }
+      }
+    } else {
+      inOvertime = false;
+    }
+
+    if (timeLeft <= 0) ended = true;
+  }
+
+  return {
+    timeLeftSeconds: timeLeft,
+    breakElapsedSeconds: breakElapsed,
+    ended,
+    checks,
+    breakPenalty: 0,
+  };
+}
