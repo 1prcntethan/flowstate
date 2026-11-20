@@ -35,4 +35,18 @@ contextBridge.exposeInMainWorld("electronAPI", {
   getIdleTime: () => ipcRenderer.invoke("system:getIdleTime"),
   warmUpAI: () => ipcRenderer.invoke("ai:warmup"),
   isAiReady: () => ipcRenderer.invoke("ai:isReady"),
+  getModelStatus: () => ipcRenderer.invoke("model:getStatus"),
+  retryModelDownload: () => ipcRenderer.invoke("model:retry"),
+  onModelProgress: (callback: (status: unknown) => void) => {
+    const listener = (_event: unknown, status: unknown) => callback(status);
+    ipcRenderer.on("model:progress", listener);
+    return () => ipcRenderer.removeListener("model:progress", listener);
+  },
+  getSidecarStatus: () => ipcRenderer.invoke("sidecar:getStatus"),
+  retrySidecar: () => ipcRenderer.invoke("sidecar:retry"),
+  onSidecarStatus: (callback: (status: unknown) => void) => {
+    const listener = (_event: unknown, status: unknown) => callback(status);
+    ipcRenderer.on("sidecar:status", listener);
+    return () => ipcRenderer.removeListener("sidecar:status", listener);
+  },
 });

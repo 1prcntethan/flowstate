@@ -23,9 +23,11 @@ The sidecar resolves Tesseract from `FLOWSTATE_RESOURCES_DIR/tesseract/` when th
 - Windows bundle: `tesseract/tesseract.exe` and `tesseract/tessdata/`
 - macOS bundle: `tesseract/tesseract` and `tesseract/tessdata/`
 
-`FLOWSTATE_TESSERACT_CMD` can point at a binary directly. No user-specific path is hardcoded. The Tesseract binaries themselves are not in git; dev machines use a system install. Electron still launches a machine-specific Python until the next step wires the sidecar.
+`FLOWSTATE_TESSERACT_CMD` can point at a binary directly. No user-specific path is hardcoded. The Tesseract binaries themselves are not in git; dev machines use a system install. Electron generates a per-launch sidecar token in the main process and does not send it to the renderer. Dev launches Python 3.12 or 3.11 from `PATH` (`py -3.12` / `py -3.11` / `python` on Windows, `python3.12` / `python3.11` / `python3` on macOS and Linux). `FLOWSTATE_PYTHON` can point at a specific interpreter. A packaged build uses `resources/sidecar/flowstate-sidecar` when that PyInstaller binary exists.
 
-For a dev build, place the Ollama binary at `resources/ollama/win/ollama.exe` or `resources/ollama/mac/ollama`. That directory is gitignored, including model weights. `npm run package` copies `resources/ollama` only when that directory exists, so CI and a machine without the binary still package. The packaged app has no Ollama until the directory is present.
+For a dev build, place the Ollama binary at `resources/ollama/win/ollama.exe` or `resources/ollama/mac/ollama`. That directory is gitignored, including model weights. If it is missing in dev, Electron runs `ollama` from `PATH`. A packaged app looks under `process.resourcesPath/ollama` and does not fall back to a system install. `npm run package` copies `resources/ollama` only when that directory exists, so CI still packages without it.
+
+Electron picks a free `127.0.0.1` port, starts only that Ollama process with `OLLAMA_HOST`, and on quit kills that process tree. It does not kill other Ollama processes on the machine. The first run downloads the model (`llama3.2:1b` unless `FLOWSTATE_OLLAMA_MODEL` is set) with Ollama's streaming pull, which resumes a partial download, and shows progress in the app. Checks keep using keyword fallback until the model is warm.
 
 ## Env
 
@@ -58,6 +60,7 @@ Packaged builds do not open DevTools. `npm start` does, because Forge sets the V
 
 - Ubuntu: `npm run lint`, `npm run typecheck`, `npm test`
 - Ubuntu: Python 3.12 `unittest` for the sidecar (`python -m unittest discover -s python -p "test_*.py" -v`)
+- Vitest also covers sidecar ready-line parsing, bearer auth, one crash restart, and Ollama pull progress
 - Windows and macOS: `npm run package`
 
 The package job does not need `resources/ollama` or a `.env` file. `npm run lint` exits 0 with the current warnings; it fails on errors.
@@ -77,26 +80,26 @@ The renderer is React. `App.tsx` switches pages with `useState` (no router). The
 | Module | Role |
 | --- | --- |
 | `src/main/windows.ts` | BrowserWindow, mini/expand, DevTools in dev only |
-| `src/main/sidecar.ts` | Python process spawn and kill |
-| `src/main/ollama.ts` | Ollama spawn, ready check, warmup, kill |
-| `src/main/tracker.ts` | Idle time. Still posts to `http://localhost:5001/classify` until the next step reads the sidecar port and token |
+| `src/main/sidecar.ts` | Spawn Python 3.12/3.11 or the packaged sidecar, read the ready line, health-check with the bearer token, restart once |
+| `src/main/ollama.ts` | One Ollama child on its own `127.0.0.1` port, model pull progress, kill that pid only |
+| `src/main/tracker.ts` | Idle time and `POST http://127.0.0.1:<port>/classify` with the bearer token |
 | `src/main/auth.ts` | Cognito sign-up/in/out and OS-encrypted tokens |
 | `src/main/apiClient.ts` | DynamoDB reads and writes (`flowstate-users`, `flowstate-sessions`) |
 | `src/main/store.ts` | `electron-store` (onboarding flag) |
 
 Python (`python/server.py`, `python/classifier.py`) is capture → OCR → classify. Nothing else. It does not read the active window. Screenshots stay in memory and are closed after OCR.
 
-Run the sidecar directly:
+Electron starts the sidecar itself. To run it by hand:
 
 ```bash
-FLOWSTATE_SIDECAR_TOKEN=dev python python/server.py
+FLOWSTATE_SIDECAR_TOKEN=dev OLLAMA_HOST=127.0.0.1:11434 python3 python/server.py
 ```
 
-Stdout is one JSON object per line. The ready line is `{"event":"ready","host":"127.0.0.1","port":<port>}`. Every request, including `GET /health` and `POST /classify`, needs `Authorization: Bearer <FLOWSTATE_SIDECAR_TOKEN>`. A missing token refuses to start. `FLOWSTATE_SIDECAR_PORT` can pin a port; otherwise the OS picks a free one. Ollama is read per check from `FLOWSTATE_OLLAMA_URL` or `OLLAMA_HOST` (default `127.0.0.1:11434`).
+Stdout is one JSON object per line. The ready line is `{"event":"ready","host":"127.0.0.1","port":<port>}`. Every request, including `GET /health` and `POST /classify`, needs `Authorization: Bearer <FLOWSTATE_SIDECAR_TOKEN>`. A missing token refuses to start. `FLOWSTATE_SIDECAR_PORT` can pin a port; otherwise the OS picks a free one. Ollama is read per check from `FLOWSTATE_OLLAMA_URL` or `OLLAMA_HOST`. Electron sets `OLLAMA_HOST` to the child it spawned.
 
 `POST /classify` body is `{"subjects":["..."],"todos":[{"text":"..."}]}`. The response keeps `label`, `confidence`, and `reason`, and adds `source` (`ollama` or `fallback`) and `fallbackStage` (`null`, `domain`, `subject`, `todo`, or `none`). `reason` is a short fixed string, not screen text and not the model reply.
 
-Tests in `tests/` cover scoring math, break overtime (including the session clock expiring during a break), local-day streaks, and todo validation. `python/test_*.py` covers classifier fallback order, the untrusted OCR prompt, multi-monitor capture, Tesseract paths, and token auth.
+Tests in `tests/` cover scoring math, break overtime (including the session clock expiring during a break), local-day streaks, todo validation, sidecar lifecycle, and Ollama pull progress. `python/test_*.py` covers classifier fallback order, the untrusted OCR prompt, multi-monitor capture, Tesseract paths, and token auth.
 
 Packaging stays on Electron Forge (`forge.config.ts`). This phase does not switch to electron-builder.
 
@@ -104,8 +107,6 @@ Packaging stays on Electron Forge (`forge.config.ts`). This phase does not switc
 
 Left for later, on purpose:
 
-- Electron still spawns a machine-specific Python, still posts to `http://localhost:5001/classify` with no token, and still does not read the sidecar ready line. The sidecar itself is already token-protected on `127.0.0.1`
-- Ollama on port `11434` inside Electron, and quit killing every `ollama.exe` / `llama-server` rather than the child this app spawned. The sidecar already honors `OLLAMA_HOST` when that process is given the variable
 - Server-side coins and streaks. The client scores a session locally and does not change coins or streak when no checks were recorded. Persisting streak from local days belongs in the API, not in this app.
 - Direct DynamoDB access with static IAM keys from `.env`. The client sends user id, coins, and streak. A later phase should move that behind API Gateway + Lambda and a Cognito authorizer.
 - Bundled Python (`python/dist` via PyInstaller), signed/notarized installers, and making sure `.env` cannot be packed into the app

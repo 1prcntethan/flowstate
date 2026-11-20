@@ -63,7 +63,8 @@ export default function ActiveSession({ config, onEnd }: Props) {
   const [showEndConfirm, setShowEndConfirm] = useState(false);
   const [isMiniMode, setIsMiniMode] = useState(false);
   const [captures, setCaptures] = useState<CaptureEntry[]>([]);
-  const [usingFallback, setUsingFallback] = useState(false);
+  const [modelReady, setModelReady] = useState(false);
+  const [lastFellBack, setLastFellBack] = useState(false);
   const pauseStartedAtRef = useRef<number | null>(null);
   const totalPausedMsRef = useRef(0);
   const timeLeftRef = useRef(timeLeft);
@@ -144,7 +145,7 @@ export default function ActiveSession({ config, onEnd }: Props) {
       }
 
       const ready = await window.electronAPI.isAiReady();
-      setUsingFallback(!ready);
+      setModelReady(ready);
       // Latest timer value on this tick. Coins use the same helper during render.
       const elapsedNow = elapsedMinutesFromTimer(
         totalSeconds,
@@ -159,6 +160,7 @@ export default function ActiveSession({ config, onEnd }: Props) {
           .filter((t) => t.text.length > 0),
       });
       console.log("classify function run");
+      setLastFellBack(result.source !== "ollama");
       setCaptures((prev) => [
         ...prev,
         { id: Date.now().toString(), label: result.label, text: result.reason },
@@ -172,7 +174,7 @@ export default function ActiveSession({ config, onEnd }: Props) {
     let cancelled = false;
     const check = () => {
       window.electronAPI.isAiReady().then((ready) => {
-        if (!cancelled) setUsingFallback(!ready);
+        if (!cancelled) setModelReady(ready);
       });
     };
     check();
@@ -248,6 +250,7 @@ export default function ActiveSession({ config, onEnd }: Props) {
     setScrolled((prev) => (prev ? top > 0 : top > 1));
   };
 
+  const usingFallback = !modelReady || lastFellBack;
   const elapsedMinutes = elapsedMinutesFromTimer(totalSeconds, timeLeft);
   const scored = scoreSession(captures, elapsedMinutes);
   const curvedScore = scored.noData ? 0 : scored.curvedScore;
@@ -457,7 +460,7 @@ export default function ActiveSession({ config, onEnd }: Props) {
         >
           Studying {config.subject || "—"} ·{" "}
           <span className={styles.pointsEarned}>+{pointsEarned} points</span>
-          {usingFallback ? " · Keyword fallback while the model warms up" : ""}
+          {usingFallback ? " · Keyword fallback" : ""}
         </span>
 
         {/* Full focus bar — collapses away */}

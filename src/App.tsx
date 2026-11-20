@@ -11,6 +11,7 @@ import type { User, TodoItem } from "./types";
 import Onboarding from "./onboarding/Onboarding";
 import { useAuth } from "./auth/AuthContext";
 import styles from "./App.module.css";
+import ModelStatusBanner from "./components/ModelStatusBanner";
 
 export type Page =
   | "dashboard"
@@ -135,6 +136,7 @@ export default function App() {
       <div className={styles.titlebar}>
         <img src="./logo512dark.svg" alt="Flowstate" />
       </div>
+      <ModelStatusBanner />
       <div className={styles.pageContent}>{content}</div>
     </div>
   );

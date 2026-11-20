@@ -1,26 +1,33 @@
 import { powerMonitor } from "electron";
+import { getSidecarEndpoint } from "./sidecar";
+import {
+  classifyRequest,
+  normalizeClassifyResult,
+  unreachableClassify,
+  type ClassifyResult,
+} from "./sidecarLifecycle";
 
 export function getSystemIdleTime() {
-  return powerMonitor.getSystemIdleTime(); // seconds since last input
+  return powerMonitor.getSystemIdleTime();
 }
 
 export async function classifySession(payload: {
   subjects: string[];
   todos: { text: string }[];
-}) {
+}): Promise<ClassifyResult> {
+  const endpoint = getSidecarEndpoint();
+  if (!endpoint) return unreachableClassify();
+  const request = classifyRequest(endpoint.port, endpoint.token, payload);
   try {
-    const res = await fetch("http://localhost:5001/classify", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(payload),
+    const response = await fetch(request.url, {
+      method: request.method,
+      headers: request.headers,
+      body: request.body,
     });
-    return await res.json();
+    if (!response.ok) return unreachableClassify();
+    return normalizeClassifyResult(await response.json());
   } catch {
-    console.log("classification failed");
-    return {
-      label: "ambiguous",
-      confidence: 0.5,
-      reason: "python unreachable",
-    };
+    console.log(JSON.stringify({ event: "classification_failed" }));
+    return unreachableClassify();
   }
 }

@@ -1,139 +1,265 @@
 import { app } from "electron";
-import { spawn, exec, execSync, ChildProcess } from "child_process";
+import { spawn, type ChildProcess } from "node:child_process";
+import fs from "node:fs";
 import path from "node:path";
+import {
+  allocateLoopbackPort,
+  applyPullLine,
+  initialModelStatus,
+  modelIsInstalled,
+  ollamaHostFor,
+  ollamaServeEnv,
+  pullRequest,
+  pushPullText,
+  resolveOllamaCommand,
+  retryModelStatus,
+  tagsRequest,
+  targetModel,
+  unavailableModelStatus,
+  type ModelStatus,
+} from "./ollamaLifecycle";
+import { killProcessTree } from "./processTree";
+import { sendToRenderers } from "./statusBus";
 
-let ollamaProcess: ChildProcess | null = null;
-let aiReady = false;
-let ollamaServerUp = false;
-let ollamaReadyPromise: Promise<boolean> = Promise.resolve(false);
-const MODEL_NAME = "llama3.2:1b";
+let child: ChildProcess | null = null;
+let host = "127.0.0.1:9";
+let status: ModelStatus = initialModelStatus();
+let job: Promise<void> | null = null;
 
-function getOllamaBinaryPath(): string {
-  const platformBinary = process.platform === "win32" ? "ollama.exe" : "ollama";
-  const platformDir = process.platform === "win32" ? "win" : "mac";
-  console.log("attempting fetch ollama path");
-  const base = app.isPackaged
-    ? path.join(process.resourcesPath, "ollama")
-    : path.join(__dirname, "..", "..", "resources", "ollama", platformDir); // two levels, matching the Python sidecar path
-  return path.join(base, platformBinary);
+export function getOllamaHost(): string {
+  return host;
 }
 
-function getModelsDir(): string {
-  const base = app.isPackaged
-    ? path.join(process.resourcesPath, "ollama", "models")
-    : path.join(__dirname, "..", "..", "resources", "ollama", "models");
-  console.log("attempting fetch ollama model dir.");
-  return base;
-}
-
-export function spawnOllama(): void {
-  const binaryPath = getOllamaBinaryPath();
-  ollamaProcess = spawn(binaryPath, ["serve"], {
-    env: { ...process.env, OLLAMA_MODELS: getModelsDir() },
-  });
-
-  ollamaProcess.stdout?.on("data", (d) =>
-    console.log("[ollama]", d.toString()),
-  );
-  ollamaProcess.stderr?.on("data", (d) =>
-    console.error("[ollama:err]", d.toString()),
-  );
-  ollamaProcess.on("exit", (code) => console.log("[ollama] exited with", code));
-}
-
-export async function waitForOllamaReady(timeoutMs = 8000): Promise<boolean> {
-  const start = Date.now();
-  while (Date.now() - start < timeoutMs) {
-    try {
-      const res = await fetch("http://localhost:11434/api/tags");
-      if (res.ok) return true;
-    } catch {
-      // not ready yet, keep polling
-    }
-    await new Promise((r) => setTimeout(r, 300));
-  }
-  console.log("wait for ollama failed: switch to keywork matching");
-  return false; // gave up — caller should fall back to keyword-only mode
-}
-
-async function warmUpModel(): Promise<boolean> {
-  try {
-    const res = await fetch("http://localhost:11434/api/generate", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        model: MODEL_NAME,
-        prompt: "Reply with one word: ready",
-        stream: false,
-        keep_alive: "30m", // keeps the model loaded well past your longest break
-      }),
-    });
-    return res.ok;
-  } catch {
-    return false;
-  }
-}
-
-export function killOllama(): void {
-  if (process.platform === "win32") {
-    exec("taskkill /IM ollama.exe /F", (err, stdout, stderr) => {
-      console.log(
-        "[ollama] kill ollama.exe:",
-        stdout?.trim() || stderr?.trim() || err?.message,
-      );
-    });
-    exec("taskkill /IM llama-server.exe /F", (err, stdout, stderr) => {
-      console.log(
-        "[ollama] kill llama-server.exe:",
-        stdout?.trim() || stderr?.trim() || err?.message,
-      );
-    });
-  } else {
-    ollamaProcess?.kill("SIGTERM");
-    exec("pkill -f llama-server"); // Mac: ollama's child isn't tracked via Node's handle either
-  }
-  ollamaProcess = null;
-}
-
-export function killOllamaSync(): void {
-  if (process.platform === "win32") {
-    try {
-      execSync("taskkill /IM ollama.exe /F", { stdio: "ignore" });
-    } catch {
-      // process already exited
-    }
-    try {
-      execSync("taskkill /IM llama-server.exe /F", { stdio: "ignore" });
-    } catch {
-      // process already exited
-    }
-  } else {
-    ollamaProcess?.kill("SIGTERM");
-    try {
-      execSync("pkill -f llama-server");
-    } catch {
-      // process already exited
-    }
-  }
-  ollamaProcess = null;
-}
-
-export async function beginOllama(): Promise<void> {
-  console.log("attempting ollama start");
-  spawnOllama();
-  ollamaReadyPromise = waitForOllamaReady();
-  ollamaServerUp = await ollamaReadyPromise;
-  console.log("[ollama] server up:", ollamaServerUp);
+export function getModelStatus(): ModelStatus {
+  return status;
 }
 
 export function isAiReady(): boolean {
-  return aiReady;
+  return status.state === "ready";
+}
+
+function publish(next: ModelStatus): void {
+  status = next;
+  sendToRenderers("model:progress", status);
+}
+
+function modelsDir(): string {
+  return app.isPackaged
+    ? path.join(process.resourcesPath, "ollama", "models")
+    : path.join(app.getAppPath(), "resources", "ollama", "models");
+}
+
+export async function beginOllama(): Promise<void> {
+  try {
+    host = ollamaHostFor(await allocateLoopbackPort());
+  } catch {
+    host = "127.0.0.1:9";
+    publish(unavailableModelStatus("Could not open a local port for the model."));
+    return;
+  }
+
+  const resolved = resolveOllamaCommand({
+    platform: process.platform,
+    isPackaged: app.isPackaged,
+    resourcesPath: process.resourcesPath,
+    devOllamaDir: path.join(app.getAppPath(), "resources", "ollama"),
+    exists: (filePath) => fs.existsSync(filePath),
+  });
+  if ("error" in resolved) {
+    publish(unavailableModelStatus(resolved.error));
+    return;
+  }
+
+  try {
+    child = spawn(resolved.command, ["serve"], {
+      env: ollamaServeEnv(process.env, host, modelsDir()),
+      detached: process.platform !== "win32",
+      windowsHide: true,
+      stdio: ["ignore", "ignore", "ignore"],
+    });
+  } catch {
+    publish(unavailableModelStatus("The local model runtime could not be started."));
+    return;
+  }
+
+  if (process.platform !== "win32") child.unref();
+  child.on("error", () => {
+    publish(unavailableModelStatus("The local model runtime could not be started."));
+  });
+  child.on("exit", (code) => {
+    console.log(JSON.stringify({ event: "ollama_exit", code: code ?? null }));
+  });
+  void startModelJob();
+}
+
+export function killOllama(): void {
+  const pid = child?.pid;
+  child = null;
+  if (!pid) return;
+  killProcessTree(process.platform, pid);
+}
+
+export function killOllamaSync(): void {
+  killOllama();
+}
+
+export async function retryModelDownload(): Promise<ModelStatus> {
+  publish(retryModelStatus());
+  await startModelJob();
+  return status;
 }
 
 export async function warmupAi(): Promise<boolean> {
-  const serverUp = await ollamaReadyPromise; // resolves instantly if already done, waits if not
-  if (!serverUp) return false;
-  aiReady = await warmUpModel();
-  console.log("[ollama] model warm:", aiReady);
-  return aiReady;
+  if (status.state === "ready") return true;
+  if (status.state === "error" || status.state === "unavailable") return false;
+  await startModelJob();
+  return isAiReady();
+}
+
+function startModelJob(): Promise<void> {
+  if (job) return job;
+  job = ensureModel().finally(() => {
+    job = null;
+  });
+  return job;
+}
+
+async function ensureModel(): Promise<void> {
+  publish({ ...initialModelStatus(), statusText: "Checking the local model" });
+  const up = await waitForTags(8000);
+  if (!up) {
+    publish(unavailableModelStatus("The local model server did not start."));
+    return;
+  }
+  let tags: unknown = null;
+  try {
+    const response = await fetch(tagsRequest(host));
+    if (response.ok) tags = await response.json();
+  } catch {
+    tags = null;
+  }
+  if (modelIsInstalled(tags, targetModel())) {
+    await warm();
+    return;
+  }
+  await runPull();
+}
+
+async function waitForTags(timeoutMs: number): Promise<boolean> {
+  const start = Date.now();
+  while (Date.now() - start < timeoutMs) {
+    try {
+      const response = await fetch(tagsRequest(host));
+      if (response.ok) return true;
+    } catch {
+      // server still booting
+    }
+    await new Promise((resolve) => setTimeout(resolve, 300));
+  }
+  return false;
+}
+
+async function runPull(): Promise<void> {
+  publish({
+    state: "downloading",
+    percent: 0,
+    completedBytes: 0,
+    totalBytes: null,
+    statusText: "Downloading the model",
+    error: null,
+  });
+  const request = pullRequest(host, targetModel());
+  let response: Response;
+  try {
+    response = await fetch(request.url, {
+      method: request.method,
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(request.body),
+    });
+  } catch {
+    publish(downloadError("Model download failed"));
+    return;
+  }
+  if (!response.ok || !response.body) {
+    publish(downloadError("Model download failed"));
+    return;
+  }
+
+  const reader = response.body.getReader();
+  const decoder = new TextDecoder();
+  let buffer = "";
+  let current = status;
+  let finished = false;
+  while (!finished) {
+    const next = await reader.read();
+    finished = next.done;
+    if (finished || !next.value) continue;
+    const pushed = pushPullText(buffer, decoder.decode(next.value, { stream: true }), current);
+    buffer = pushed.buffer;
+    current = pushed.status;
+    publish(current);
+    if (current.state === "error") return;
+  }
+  if (buffer.trim()) {
+    current = applyPullLine(current, buffer);
+    publish(current);
+  }
+  if (current.state === "warming") {
+    await warm();
+    return;
+  }
+  if (current.state !== "error") publish(downloadError("Model download stopped", current));
+}
+
+function downloadError(message: string, current: ModelStatus = status): ModelStatus {
+  return {
+    state: "error",
+    percent: current.percent,
+    completedBytes: current.completedBytes,
+    totalBytes: current.totalBytes,
+    statusText: message,
+    error: message,
+  };
+}
+
+async function warm(): Promise<void> {
+  publish({
+    state: "warming",
+    percent: 100,
+    completedBytes: status.completedBytes,
+    totalBytes: status.totalBytes,
+    statusText: "Warming up the model",
+    error: null,
+  });
+  try {
+    const response = await fetch(`http://${host}/api/generate`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        model: targetModel(),
+        prompt: "Reply with one word: ready",
+        stream: false,
+        options: { temperature: 0 },
+        keep_alive: "30m",
+      }),
+    });
+    if (!response.ok) throw new Error("warm");
+    publish({
+      state: "ready",
+      percent: 100,
+      completedBytes: status.completedBytes,
+      totalBytes: status.totalBytes,
+      statusText: "Model ready",
+      error: null,
+    });
+  } catch {
+    publish({
+      state: "error",
+      percent: status.percent,
+      completedBytes: status.completedBytes,
+      totalBytes: status.totalBytes,
+      statusText: "The model did not warm up",
+      error: "The model did not warm up",
+    });
+  }
 }
