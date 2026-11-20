@@ -1,7 +1,8 @@
 import { ipcMain, systemPreferences, shell } from "electron";
 import { store } from "./store";
 import { setMiniWindow, setExpandWindow } from "./windows";
-import { isAiReady, warmupAi } from "./ollama";
+import { getModelStatus, isAiReady, retryModelDownload, warmupAi } from "./ollama";
+import { getSidecarStatus, retrySidecar } from "./sidecar";
 import { getSystemIdleTime, classifySession } from "./tracker";
 import { signUp, confirmSignUp, signIn, getSession, signOut } from "./auth";
 import {
@@ -18,6 +19,14 @@ export function registerIpc() {
   ipcMain.handle("ai:isReady", () => isAiReady());
 
   ipcMain.handle("ai:warmup", () => warmupAi());
+
+  ipcMain.handle("model:getStatus", () => getModelStatus());
+
+  ipcMain.handle("model:retry", () => retryModelDownload());
+
+  ipcMain.handle("sidecar:getStatus", () => getSidecarStatus());
+
+  ipcMain.handle("sidecar:retry", () => retrySidecar());
 
   ipcMain.handle("system:getIdleTime", () => getSystemIdleTime());
 

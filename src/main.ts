@@ -2,12 +2,8 @@ import { app, BrowserWindow, Menu } from "electron";
 import started from "electron-squirrel-startup";
 import "dotenv/config";
 import { createWindow } from "./main/windows";
-import {
-  startPythonSidecar,
-  stopPythonSidecar,
-  stopPythonSidecarSync,
-} from "./main/sidecar";
-import { beginOllama, killOllama, killOllamaSync } from "./main/ollama";
+import { startPythonSidecar, stopPythonSidecarSync } from "./main/sidecar";
+import { beginOllama, killOllamaSync } from "./main/ollama";
 import { registerIpc } from "./main/ipc";
 
 if (started) {
@@ -19,14 +15,13 @@ registerIpc();
 app.whenReady().then(async () => {
   Menu.setApplicationMenu(null);
   createWindow();
-  console.log("attempting python sidecar start");
-  startPythonSidecar();
   await beginOllama();
+  await startPythonSidecar();
 });
 
 app.on("before-quit", () => {
-  stopPythonSidecar();
-  killOllama();
+  stopPythonSidecarSync();
+  killOllamaSync();
 });
 
 process.on("SIGINT", () => {
