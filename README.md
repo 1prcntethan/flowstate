@@ -6,7 +6,7 @@ Screenshots and raw OCR text stay on the machine. Do not add code that stores, l
 
 ## Setup
 
-Install Node.js (the version you use for Electron 42) and Python.
+Install Node.js 22 (CI uses 22) and Python.
 
 ```bash
 npm install
@@ -23,7 +23,7 @@ The main process still launches a machine-specific interpreter and Tesseract. Th
 - Windows: `%LOCALAPPDATA%\Python\pythoncore-3.14-64\python.exe` and `%LOCALAPPDATA%\Programs\Tesseract-OCR\tesseract.exe`
 - macOS: `/Library/Frameworks/Python.framework/Versions/3.11/bin/python3`, with `tesseract` on `PATH`
 
-For a dev build, place the Ollama binary at `resources/ollama/win/ollama.exe` or `resources/ollama/mac/ollama`. That directory is gitignored, including model weights. Forge copies `resources/ollama` into the package, so the directory has to exist or `npm run package` fails.
+For a dev build, place the Ollama binary at `resources/ollama/win/ollama.exe` or `resources/ollama/mac/ollama`. That directory is gitignored, including model weights. `npm run package` copies `resources/ollama` only when that directory exists, so CI and a machine without the binary still package. The packaged app has no Ollama until the directory is present.
 
 ## Env
 
@@ -49,6 +49,21 @@ npm run make         # Forge installers
 
 Packaged builds do not open DevTools. `npm start` does, because Forge sets the Vite dev-server URL.
 
+## CI
+
+`.github/workflows/ci.yml` runs on every push and pull request.
+
+- Ubuntu: `npm run lint`, `npm run typecheck`, `npm test`
+- Windows and macOS: `npm run package`
+
+The package job does not need `resources/ollama` or a `.env` file. `npm run lint` exits 0 with the current warnings; it fails on errors.
+
+## Scoring
+
+A recorded check weighs on-task 1, ambiguous 0.5, or off-task 0. Focus percent is that weighted share, then the existing square-root curve. Coins come from the curved score and the session clock. There is no break coin penalty. `INCOMPLETE_TODO_COIN_PENALTY` stays 0 until that penalty is decided.
+
+Allotted break time records no checks, so it is not in the focus denominator. Break overtime inserts an ambiguous check each capture interval. The session clock keeps running during a break and the session ends at zero, including mid-break. Coins are then calculated from the score as usual. Zero recorded checks is no data: no score, no coins, and no streak change.
+
 ## Architecture
 
 The renderer is React. `App.tsx` switches pages with `useState` (no router). The renderer talks to the main process only through `src/preload.ts` → `window.electronAPI`. Channel types are in `src/electron.d.ts`.
@@ -66,6 +81,8 @@ The renderer is React. `App.tsx` switches pages with `useState` (no router). The
 | `src/main/store.ts` | `electron-store` (onboarding flag) |
 
 Python (`python/server.py`, `python/classifier.py`) is capture → OCR → classify. Nothing else.
+
+Tests in `tests/` cover scoring math, break overtime (including the session clock expiring during a break), local-day streaks, and todo validation. Classifier fallback order is not covered yet.
 
 Packaging stays on Electron Forge (`forge.config.ts`). This phase does not switch to electron-builder.
 

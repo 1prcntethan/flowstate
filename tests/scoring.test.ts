@@ -3,6 +3,9 @@ import {
   CAPTURE_INTERVAL_MS,
   CHECK_WEIGHT,
   INCOMPLETE_TODO_COIN_PENALTY,
+  SESSION_CLOCK_PAUSES_ON_BREAK,
+  advanceSessionClock,
+  captureGate,
   curveScore,
   elapsedMinutes,
   focusPercent,
@@ -80,6 +83,164 @@ describe("coins", () => {
   it("reads elapsed from the current timer, not a stale zero", () => {
     expect(elapsedMinutes(25 * 60, 20 * 60)).toBe(5);
     expect(elapsedMinutes(25 * 60, 25 * 60)).toBe(0);
+  });
+});
+
+describe("break clock", () => {
+  const captureSeconds = CAPTURE_INTERVAL_MS / 1000;
+
+  it("does not pause the session clock for a break", () => {
+    expect(SESSION_CLOCK_PAUSES_ON_BREAK).toBe(false);
+    expect(captureGate(false, 0, 300)).toBe("study");
+    expect(captureGate(true, 300, 300)).toBe("allotted-break");
+    expect(captureGate(true, 301, 300)).toBe("overtime");
+    expect(captureGate(true, 999, null)).toBe("allotted-break");
+  });
+
+  it("keeps the session clock running through allotted break and records nothing", () => {
+    const studied = [{ label: "on_task" as const }, { label: "off_task" as const }];
+    const stepped = advanceSessionClock(
+      {
+        timeLeftSeconds: 50,
+        onBreak: true,
+        breakElapsedSeconds: 0,
+        breakLimitSeconds: 300,
+        checks: studied,
+      },
+      10,
+    );
+    expect(stepped.timeLeftSeconds).toBe(40);
+    expect(stepped.breakElapsedSeconds).toBe(10);
+    expect(stepped.ended).toBe(false);
+    expect(stepped.checks).toEqual(studied);
+    expect(stepped.breakPenalty).toBe(0);
+    expect(scoreSession(stepped.checks, 10)).toEqual(scoreSession(studied, 10));
+  });
+
+  it("ends the session when the clock hits zero during an allotted break", () => {
+    const total = 25 * 60;
+    const studied = [{ label: "on_task" as const }, { label: "on_task" as const }];
+    const stepped = advanceSessionClock(
+      {
+        timeLeftSeconds: total,
+        onBreak: true,
+        breakElapsedSeconds: 0,
+        breakLimitSeconds: 30 * 60,
+        checks: studied,
+      },
+      total + 10,
+    );
+    expect(stepped.ended).toBe(true);
+    expect(stepped.timeLeftSeconds).toBe(0);
+    expect(stepped.breakElapsedSeconds).toBe(total);
+    expect(stepped.checks).toEqual(studied);
+    expect(stepped.breakPenalty).toBe(0);
+    const scored = scoreSession(stepped.checks, elapsedMinutes(total, stepped.timeLeftSeconds));
+    expect(scored.noData).toBe(false);
+    if (!scored.noData) {
+      expect(scored.curvedScore).toBe(100);
+      expect(scored.breakPenalty).toBe(0);
+      expect(scored.pointsEarned).toBe(pointsFromScore(100, 25));
+    }
+  });
+
+  it("inserts ambiguous checks on the capture interval once a break is overtime", () => {
+    const limit = 5;
+    const before = advanceSessionClock(
+      {
+        timeLeftSeconds: 600,
+        onBreak: true,
+        breakElapsedSeconds: 0,
+        breakLimitSeconds: limit,
+      },
+      limit + captureSeconds,
+    );
+    expect(before.checks).toEqual([]);
+
+    const first = advanceSessionClock(
+      {
+        timeLeftSeconds: 600,
+        onBreak: true,
+        breakElapsedSeconds: 0,
+        breakLimitSeconds: limit,
+      },
+      limit + captureSeconds + 1,
+    );
+    expect(first.checks.map((check) => check.label)).toEqual(["ambiguous"]);
+    expect(first.breakPenalty).toBe(0);
+
+    const second = advanceSessionClock(
+      {
+        timeLeftSeconds: 600,
+        onBreak: true,
+        breakElapsedSeconds: 0,
+        breakLimitSeconds: limit,
+      },
+      limit + captureSeconds * 2 + 1,
+    );
+    expect(second.checks.map((check) => check.label)).toEqual(["ambiguous", "ambiguous"]);
+  });
+
+  it("lets overtime checks drag the score down without a break coin penalty", () => {
+    const studied = [{ label: "on_task" as const }, { label: "on_task" as const }];
+    const stepped = advanceSessionClock(
+      {
+        timeLeftSeconds: 600,
+        onBreak: true,
+        breakElapsedSeconds: 6,
+        breakLimitSeconds: 5,
+        checks: studied,
+      },
+      captureSeconds * 2,
+    );
+    expect(stepped.checks.filter((check) => check.label === "ambiguous")).toHaveLength(2);
+    const clean = scoreSession(studied, 10);
+    const dragged = scoreSession(stepped.checks, 10);
+    expect(clean.noData).toBe(false);
+    expect(dragged.noData).toBe(false);
+    if (!clean.noData && !dragged.noData) {
+      expect(dragged.focusPercent).toBe(75);
+      expect(dragged.curvedScore).toBeLessThan(clean.curvedScore);
+      expect(dragged.breakPenalty).toBe(0);
+      expect(dragged.pointsEarned).toBeGreaterThan(0);
+    }
+  });
+
+  it("drops a partial overtime interval when the session expires mid-break", () => {
+    const studied = [{ label: "on_task" as const }];
+    const stepped = advanceSessionClock(
+      {
+        timeLeftSeconds: 12,
+        onBreak: true,
+        breakElapsedSeconds: 6,
+        breakLimitSeconds: 5,
+        checks: studied,
+      },
+      30,
+    );
+    expect(stepped.ended).toBe(true);
+    expect(stepped.timeLeftSeconds).toBe(0);
+    expect(stepped.checks.filter((check) => check.label === "ambiguous")).toHaveLength(1);
+    expect(stepped.breakPenalty).toBe(0);
+    const scored = scoreSession(stepped.checks, 12 / 60);
+    expect(scored.breakPenalty).toBe(0);
+    expect(scored.noData).toBe(false);
+  });
+
+  it("does not insert break checks or advance break time while studying", () => {
+    const stepped = advanceSessionClock(
+      {
+        timeLeftSeconds: 30,
+        onBreak: false,
+        breakElapsedSeconds: 4,
+        breakLimitSeconds: 5,
+      },
+      10,
+    );
+    expect(stepped.timeLeftSeconds).toBe(20);
+    expect(stepped.breakElapsedSeconds).toBe(4);
+    expect(stepped.checks).toEqual([]);
+    expect(stepped.ended).toBe(false);
   });
 });
 

@@ -6,11 +6,16 @@ import { MakerRpm } from "@electron-forge/maker-rpm";
 import { VitePlugin } from "@electron-forge/plugin-vite";
 import { FusesPlugin } from "@electron-forge/plugin-fuses";
 import { FuseV1Options, FuseVersion } from "@electron/fuses";
+import fs from "node:fs";
+
+// Gitignored local runtime. Packaging still succeeds when it is absent (CI).
+const ollamaDir = "./resources/ollama";
+const extraResource = fs.existsSync(ollamaDir) ? [ollamaDir] : [];
 
 const config: ForgeConfig = {
   packagerConfig: {
     icon: "./public/logo512",
-    extraResource: ["./resources/ollama"],
+    extraResource,
     asar: true,
   },
   rebuildConfig: {},

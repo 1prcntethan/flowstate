@@ -11,7 +11,7 @@ type Props = {
   noData: boolean;
   focusScore: number | null; // curved score, or null when no checks were recorded
   pointsEarned: number;
-  breakPenalty: number; // points deducted for break overtime
+  breakPenalty: number; // always 0; overtime is scored as ambiguous checks
   onTaskCount: number;
   totalCaptures: number;
   breakMinutes: number;

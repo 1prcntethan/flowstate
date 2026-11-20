@@ -7,6 +7,8 @@ import EndConfirmModal from "../components/EndConfirmModal";
 import MiniSession from "../components/MiniSession";
 import {
   CAPTURE_INTERVAL_MS,
+  SESSION_CLOCK_PAUSES_ON_BREAK,
+  captureGate,
   elapsedMinutes as elapsedMinutesFromTimer,
   mostlyOnTask,
   overtimeCheck,
@@ -86,8 +88,12 @@ export default function ActiveSession({ config, onEnd }: Props) {
 
   const totalSeconds = config.durationMinutes * 60;
   const studySinceLastBreak = timeLeftAtLastBreakEnd.current - timeLeft;
-  const breakOvertime =
-    onBreak && !!breakConfig && breakElapsed > breakConfig.breakSecs;
+  const gate = captureGate(
+    onBreak,
+    breakElapsed,
+    breakConfig ? breakConfig.breakSecs : null,
+  );
+  const breakOvertime = gate === "overtime";
   const breakAvailable =
     !!breakConfig &&
     !onBreak &&
@@ -100,6 +106,8 @@ export default function ActiveSession({ config, onEnd }: Props) {
     !breakAvailable || !breakConfig || config.breakMode === "pomodoro";
 
   useEffect(() => {
+    // Screen capture stays off for the whole break. Allotted time records
+    // nothing; overtime inserts ambiguous checks in the effect below.
     if (!config.trackingEnabled || onBreak) return;
 
     const loop = setInterval(async () => {
@@ -185,14 +193,16 @@ export default function ActiveSession({ config, onEnd }: Props) {
   }, [trackingPaused]);
 
   useEffect(() => {
-    if (onBreak && !breakOvertime) return;
     if (timeLeft <= 0) {
       handleEnd();
       return;
     }
+    // Allotted breaks used to return here, which froze the session clock
+    // until overtime. The clock runs through the break and can end it.
+    if (SESSION_CLOCK_PAUSES_ON_BREAK && onBreak) return;
     const tick = setInterval(() => setTimeLeft((t) => t - 1), 1000);
     return () => clearInterval(tick);
-  }, [timeLeft, onBreak, breakOvertime]);
+  }, [timeLeft, onBreak]);
 
   useEffect(() => {
     //break elapsed counts up
@@ -338,6 +348,7 @@ export default function ActiveSession({ config, onEnd }: Props) {
         <BreakScreen
           breakElapsed={breakElapsed}
           breakLimitSecs={breakConfig?.breakSecs ?? 300}
+          sessionSecondsLeft={timeLeft}
           isOvertime={breakOvertime}
           focusScore={scored.noData ? null : curvedScore}
           pointsEarned={pointsEarned}
