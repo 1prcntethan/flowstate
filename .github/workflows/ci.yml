@@ -47,4 +47,14 @@ jobs:
           cache: npm
       - run: npm ci
       - name: Package without gitignored resources/ollama
-        run: npm run package
+        shell: bash
+        run: |
+          set -uo pipefail
+          for attempt in 1 2 3; do
+            if npm run package; then
+              exit 0
+            fi
+            echo "npm run package failed on attempt ${attempt}; retrying after a network reset"
+            sleep $((attempt * 10))
+          done
+          exit 1
