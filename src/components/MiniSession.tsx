@@ -3,7 +3,7 @@ import styles from "./MiniSession.module.css";
 type Props = {
   timeLeft: number;
   pointsEarned: number;
-  isOnTask: boolean;
+  isOnTask: boolean | null;
   trackingPaused: boolean;
   onExpand: () => void;
   onBreak: () => void;        // add this
@@ -35,7 +35,7 @@ export default function MiniSession({
           <span className={styles.points}>+{pointsEarned} points</span>
         </div>
         <span
-          className={`${styles.dot} ${isOnTask ? styles.dotOn : styles.dotOff}`}
+          className={`${styles.dot} ${isOnTask === null ? "" : isOnTask ? styles.dotOn : styles.dotOff}`}
         />
       </div>
 

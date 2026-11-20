@@ -23,13 +23,16 @@ export type Page =
 export type SessionResult = {
   subject: string;
   durationMinutes: number;
-  focusScore: number;
+  noData: boolean;
+  focusScore: number | null;
   pointsEarned: number;
   breakPenalty: number;
   onTaskCount: number;
   totalCaptures: number;
   breakMinutes: number;
   todos: TodoItem[];
+  todosTotal: number;
+  todosCompleted: number;
 };
 
 export default function App() {
@@ -60,6 +63,8 @@ export default function App() {
     console.log("attempt handle session end");
     setSessionResult(result);
     setPage("sessionend");
+
+    if (result.noData) return;
 
     await updateCoins(result.pointsEarned);
     console.log("update coins success");
@@ -103,7 +108,8 @@ export default function App() {
         nav={nav}
         subject={sessionResult?.subject ?? ""}
         durationMinutes={sessionResult?.durationMinutes ?? 0}
-        focusScore={sessionResult?.focusScore ?? 0}
+        noData={sessionResult?.noData ?? false}
+        focusScore={sessionResult?.focusScore ?? null}
         pointsEarned={sessionResult?.pointsEarned ?? 0}
         breakPenalty={sessionResult?.breakPenalty ?? 0}
         onTaskCount={sessionResult?.onTaskCount ?? 0}

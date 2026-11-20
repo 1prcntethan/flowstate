@@ -20,8 +20,9 @@ function formatTime(seconds: number): string {
 type Props = {
   breakElapsed: number
   breakLimitSecs: number
+  sessionSecondsLeft: number
   isOvertime: boolean
-  focusScore: number
+  focusScore: number | null
   pointsEarned: number
   completedTodos: number
   totalTodos: number
@@ -30,7 +31,7 @@ type Props = {
 }
 
 export default function BreakScreen({
-  breakElapsed, breakLimitSecs, isOvertime,
+  breakElapsed, breakLimitSecs, sessionSecondsLeft, isOvertime,
   focusScore, pointsEarned, completedTodos, totalTodos,
   onResume, onEnd,
 }: Props) {
@@ -49,18 +50,21 @@ export default function BreakScreen({
               ? `overtime · limit was ${formatTime(breakLimitSecs)}`
               : "break elapsed"}
           </span>
+          <span className={styles.timerSub}>
+            Session {formatTime(sessionSecondsLeft)} left
+          </span>
         </div>
 
         {isOvertime && (
           <div className={styles.overtimeBanner}>
-            Break overtime—points & tracking paused
+            Break overtime — ambiguous checks are counting
           </div>
         )}
 
         <div className={styles.statsRow}>
           <div className={styles.statCard}>
             <span className={styles.statValue} style={{ color: "var(--status-green)" }}>
-              {focusScore}%
+              {focusScore === null ? "—" : `${focusScore}%`}
             </span>
             <span className={styles.statLabel}>Focus</span>
           </div>

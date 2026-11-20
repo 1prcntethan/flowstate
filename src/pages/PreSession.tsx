@@ -1,5 +1,6 @@
 import { useState, useRef, useEffect } from "react";
-import { SessionConfig, TodoItem, BreakMode } from "../types";
+import { SessionConfig, BreakMode } from "../types";
+import { addSubject, addTodo, listIssueMessage, withOrder, type TodoItem } from "../todos";
 import type { Page } from "../App";
 import styles from "./PreSession.module.css";
 
@@ -27,6 +28,7 @@ export default function PreSession({
   const [breakMode, setBreakMode] = useState<BreakMode>("manual");
   const [todos, setTodos] = useState<TodoItem[]>([]);
   const [todoInput, setTodoInput] = useState("");
+  const [listError, setListError] = useState<string | null>(null);
   const [trackingEnabled, setTracking] = useState(true);
 
   // drag state
@@ -34,13 +36,18 @@ export default function PreSession({
   const dragOverItem = useRef<number | null>(null);
 
   // --- subject ---
-  const addSubject = () => {
-    const trimmed = subjectInput.trim();
-    if (!trimmed || subjects.includes(trimmed)) return;
-    setSubjects([...subjects, trimmed]);
-    setSelectedSubjects((prev) => [...prev, trimmed]);
+  const handleAddSubject = () => {
+    const result = addSubject(subjects, subjectInput);
+    if (!result.ok) {
+      if (result.reason !== "duplicate") setListError(listIssueMessage(result.reason, "subject"));
+      return;
+    }
+    const added = result.subjects[result.subjects.length - 1];
+    setSubjects(result.subjects);
+    if (added) setSelectedSubjects((prev) => [...prev, added]);
     setSubjectInput("");
     setShowSubjectInput(false);
+    setListError(null);
   };
 
   const toggleSubject = (s: string) => {
@@ -50,13 +57,15 @@ export default function PreSession({
   };
 
   // --- todos ---
-  const addTodo = () => {
-    if (!todoInput.trim()) return;
-    setTodos([
-      ...todos,
-      { id: Date.now().toString(), text: todoInput.trim(), completed: false },
-    ]);
+  const handleAddTodo = () => {
+    const result = addTodo(todos, todoInput);
+    if (!result.ok) {
+      if (result.reason !== "duplicate") setListError(listIssueMessage(result.reason, "task"));
+      return;
+    }
+    setTodos(result.todos);
     setTodoInput("");
+    setListError(null);
   };
 
   const removeTodo = (id: string) => setTodos(todos.filter((t) => t.id !== id));
@@ -72,8 +81,9 @@ export default function PreSession({
     if (dragItem.current === null || dragOverItem.current === null) return;
     const updated = [...todos];
     const dragged = updated.splice(dragItem.current, 1)[0];
+    if (!dragged) return;
     updated.splice(dragOverItem.current, 0, dragged);
-    setTodos(updated);
+    setTodos(withOrder(updated));
     dragItem.current = null;
     dragOverItem.current = null;
   };
@@ -89,7 +99,7 @@ export default function PreSession({
       subject: selectedSubjects.join(", "),
       durationMinutes: getFinalDuration(),
       breakMode,
-      todos,
+      todos: withOrder(todos),
       trackingEnabled,
     };
     onStart(config);
@@ -161,9 +171,10 @@ export default function PreSession({
                 placeholder="Subject name..."
                 value={subjectInput}
                 onChange={(e) => setSubjectInput(e.target.value)}
-                onKeyDown={(e) => e.key === "Enter" && addSubject()}
+                onKeyDown={(e) => e.key === "Enter" && handleAddSubject()}
+                maxLength={100}
               />
-              <button onClick={addSubject}>Add</button>
+              <button onClick={handleAddSubject}>Add</button>
             </div>
           )}
         </div>
@@ -258,9 +269,10 @@ export default function PreSession({
               placeholder="Add a task..."
               value={todoInput}
               onChange={(e) => setTodoInput(e.target.value)}
-              onKeyDown={(e) => e.key === "Enter" && addTodo()}
+              onKeyDown={(e) => e.key === "Enter" && handleAddTodo()}
+              maxLength={100}
             />
-            <button onClick={addTodo}>
+            <button onClick={handleAddTodo}>
               <img src="/AddTaskPlus.svg" alt="+" />
             </button>
           </div>
@@ -309,6 +321,7 @@ export default function PreSession({
         </div>
 
         {/* START */}
+        {listError && <span className={styles.breakText}>{listError}</span>}
         <button
           className={styles.startButton}
           onClick={handleStart}
