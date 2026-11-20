@@ -50,6 +50,7 @@ npm run typecheck    # tsc --noEmit (strict)
 npm run package      # Forge package
 npm run make         # Forge installers
 python -m unittest discover -s python -p "test_*.py" -v
+python3 python/eval/run_eval.py --fallback-only
 ```
 
 Packaged builds do not open DevTools. `npm start` does, because Forge sets the Vite dev-server URL.
@@ -99,7 +100,19 @@ Stdout is one JSON object per line. The ready line is `{"event":"ready","host":"
 
 `POST /classify` body is `{"subjects":["..."],"todos":[{"text":"..."}]}`. The response keeps `label`, `confidence`, and `reason`, and adds `source` (`ollama` or `fallback`) and `fallbackStage` (`null`, `domain`, `subject`, `todo`, or `none`). `reason` is a short fixed string, not screen text and not the model reply.
 
-Tests in `tests/` cover scoring math, break overtime (including the session clock expiring during a break), local-day streaks, todo validation, sidecar lifecycle, and Ollama pull progress. `python/test_*.py` covers classifier fallback order, the untrusted OCR prompt, multi-monitor capture, Tesseract paths, and token auth.
+Tests in `tests/` cover scoring math, break overtime (including the session clock expiring during a break), local-day streaks, todo validation, sidecar lifecycle, and Ollama pull progress. `python/test_*.py` covers classifier fallback order, the untrusted OCR prompt, multi-monitor capture, Tesseract paths, token auth, and the eval harness.
+
+## Classifier eval
+
+`python/eval/dataset.json` is 126 synthetic OCR-style checks (no personal screen content). `python/eval/run_eval.py` calls `classify_screen` in `python/classifier.py`. The default model stays `llama3.2:1b` until you compare candidates locally. CI runs `--fallback-only` through the unit tests and does not need Ollama.
+
+```bash
+python3 python/eval/run_eval.py --fallback-only
+python3 python/eval/run_eval.py --models llama3.2:1b --ollama-host 127.0.0.1:11434
+python3 python/eval/run_eval.py --models llama3.2:1b qwen2.5:0.5b --ollama-host 127.0.0.1:11434 --out /tmp/flowstate-eval.json
+```
+
+The report prints accuracy, a confusion matrix, per-category accuracy, prompt-injection resistance, fallback rate, and latency (mean, p50, p95, max). `--out` writes the same numbers as JSON.
 
 Packaging stays on Electron Forge (`forge.config.ts`). This phase does not switch to electron-builder.
 
